@@ -1,0 +1,83 @@
+
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+
+
+export default function Login() {
+  const [userType, setUserType] = useState("")
+  const navigate = useNavigate()
+
+  const handleSelectChange = (e) => {
+    setUserType(e.target.value)
+  }
+
+  const handleContinue = () => {
+    if (userType) {
+      switch (userType.toLowerCase()) {
+        case 'viewer':
+          navigate('/viewer/ViewerLogin');
+          break;
+        case 'faculty':
+          navigate('/faculty/FacultyLogin');
+          break;
+        case 'management':
+          navigate('/management/ManagementLogin');
+          break;
+        case 'admin':
+          navigate('/admin/AdminLogin');
+          break;
+        case 'student':
+          navigate('/student/StudentLogin');
+          break;
+        default:
+          console.error('Unknown user type');
+      }
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-20 h-20 bg-purple-700 rounded-full flex items-center justify-center mb-4">
+            <img src="/placeholder.svg" alt="Logo" width={40} height={40} className="invert" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">Internship Showcase Platform</h1>
+          <p className="text-purple-200 text-center mt-2">Please select your user type to continue</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="userType" className="block text-sm font-medium text-purple-200">
+              I am a:
+            </label>
+            <select
+              id="userType"
+              value={userType}
+              onChange={handleSelectChange}
+              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-purple-500 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="" disabled>
+                Select user type
+              </option>
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Admin">Admin</option>
+              <option value="Management">Management</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleContinue}
+            disabled={!userType}
+            className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
