@@ -3,34 +3,13 @@ const Internship = require('../models/Internship');
 // POST: Create a new internship
 const createInternship = async (req, res, next) => {
   try {
-    const internship = new Internship({
-      title: req.body.title,
-      company: req.body.company,
-      description: req.body.description,
-      requirements: req.body.requirements,
-      positions: req.body.positions,
-      location: req.body.location,
-      stipend: req.body.stipend,
-      duration: req.body.duration,
-      deadline: req.body.deadline,
-      contact: req.body.contact,
-      sdgs: req.body.sdgs,
-      pos: req.body.pos,
-      peos: req.body.peos
-    });
-
+    console.log('Request Body:', req.body); // Debugging
+    const internship = new Internship(req.body);
     const savedInternship = await internship.save();
-    
-    res.status(201).json({
-      success: true,
-      data: savedInternship
-    });
-  } catch (error) {
-    console.error('Error in createInternship:', error);
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    res.status(201).json({ message: 'Internship created successfully', data: savedInternship });
+  } catch (err) {
+    console.error('Error in createInternship:', err.message); // Debugging
+    next(err);
   }
 };
 
@@ -38,17 +17,47 @@ const createInternship = async (req, res, next) => {
 const getAllInternships = async (req, res, next) => {
   try {
     const internships = await Internship.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      data: internships
-    });
-  } catch (error) {
-    console.error('Error in getAllInternships:', error);
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    console.log("Found internships:", internships); // Debug log
+    res.status(200).json(internships); // Send internships array directly
+  } catch (err) {
+    console.error('Error in getAllInternships:', err.message);
+    next(err);
   }
 };
 
-module.exports = { createInternship, getAllInternships };
+// PUT: Update an internship by ID
+const updateInternship = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    console.log(`Updating Internship ID: ${id}`); // Debugging
+    const updatedInternship = await Internship.findByIdAndUpdate(id, req.body, {
+      new: true, // Return the updated document
+      runValidators: true, // Validate before updating
+    });
+    if (!updatedInternship) {
+      return res.status(404).json({ error: 'Internship not found' });
+    }
+    res.status(200).json({ message: 'Internship updated successfully', data: updatedInternship });
+  } catch (err) {
+    console.error('Error in updateInternship:', err.message); // Debugging
+    next(err);
+  }
+};
+
+// DELETE: Remove an internship by ID
+const deleteInternship = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    console.log(`Deleting Internship ID: ${id}`); // Debugging
+    const deletedInternship = await Internship.findByIdAndDelete(id);
+    if (!deletedInternship) {
+      return res.status(404).json({ error: 'Internship not found' });
+    }
+    res.status(200).json({ message: 'Internship deleted successfully', data: deletedInternship });
+  } catch (err) {
+    console.error('Error in deleteInternship:', err.message); // Debugging
+    next(err);
+  }
+};
+
+module.exports = { createInternship, getAllInternships, updateInternship, deleteInternship };

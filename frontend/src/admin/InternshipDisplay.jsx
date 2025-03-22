@@ -1,6 +1,6 @@
 import React from "react";
 
-const InternshipDisplay = ({ internship }) => {
+const InternshipDisplay = ({ internship, onDelete, onEdit }) => {
   // Helper function to format arrays for display
   const formatArrayToString = (array) => {
     if (!array || array.length === 0) return "None";
@@ -82,9 +82,20 @@ const InternshipDisplay = ({ internship }) => {
         </div>
       </div>
 
-      {/* <button className="w-full bg-blue-500 text-white p-2 rounded mt-4">
-        Apply Now
-      </button> */}
+      <div className="flex justify-between">
+        <button
+          onClick={() => onEdit(internship)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => onDelete(internship._id)}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 };
