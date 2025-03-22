@@ -1,8 +1,5 @@
-
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-
 
 export default function Login() {
   const [userType, setUserType] = useState("")
@@ -25,7 +22,7 @@ export default function Login() {
           navigate('/management/ManagementLogin');
           break;
         case 'admin':
-          navigate('/admin/AdminLogin');
+          navigate('/admin/AdminDashboard');
           break;
         case 'student':
           navigate('/student/StudentLogin');

@@ -7,6 +7,7 @@ import FacultyLogin from './faculty/FacultyLogin'
 import ManagementLogin from './management/ManagementLogin'
 import AdminLogin from './admin/AdminLogin'
 import StudentLogin from './student/StudentLogin'
+import AdminDashboard from './admin/AdminDashboard'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
         <Route path="/admin/AdminLogin" element={<AdminLogin />} />
         <Route path="/student/StudentLogin" element={<StudentLogin />} />
+        <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
       </Routes>
     </Router>
   )
