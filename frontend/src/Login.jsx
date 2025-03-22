@@ -25,7 +25,7 @@ export default function Login() {
           navigate('/admin/AdminDashboard');
           break;
         case 'student':
-          navigate('/student/StudentLogin');
+          navigate('/student/StudentDashboard');
           break;
         default:
           console.error('Unknown user type');
