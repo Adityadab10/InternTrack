@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InternshipForm from "./InternshipForm";
 import InternshipDisplay from "./InternshipDisplay";
+import AdminStats from "./AdminStats";
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
@@ -125,74 +126,97 @@ const AdminDashboard = () => {
       {error && <div className="p-4 bg-red-100 text-red-700 rounded mb-4">{error}</div>}
 
       {!showForm && !loading && !error && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-4">Internship Listings</h2>
-          {internships.length === 0 ? (
-            <p className="text-gray-600">No internships found. Create one to get started!</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {internships.map((internship) => (
-                <div
-                  key={internship._id}
-                  className="p-4 border rounded-lg shadow-sm hover:shadow-md cursor-pointer bg-white"
-                  onClick={() => setSelectedInternship(internship)}
-                >
-                  <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
-                  <p className="text-gray-700">{internship.company}</p>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Location:</span> {internship.location}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Duration:</span> {internship.duration}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Stipend:</span> ₹{internship.stipend}
-                    </p>
+        <div className="space-y-8">
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-4">Internship Listings</h2>
+            {internships.length === 0 ? (
+              <p className="text-gray-600">No internships found. Create one to get started!</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {internships.map((internship) => (
+                  <div
+                    key={internship._id}
+                    className="p-4 border rounded-lg shadow-sm hover:shadow-md cursor-pointer bg-white"
+                    onClick={() => setSelectedInternship(internship)}
+                  >
+                    <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
+                    <p className="text-gray-700">{internship.company}</p>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Location:</span> {internship.location}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Duration:</span> {internship.duration}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium">Stipend:</span> ₹{internship.stipend}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex justify-between items-center">
+                      <span className="text-xs text-gray-500">
+                        Deadline: {new Date(internship.deadline).toLocaleDateString()}
+                      </span>
+                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {internship.positions} position{internship.positions !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          internship.status === "Pending Approval"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {internship.status}
+                      </span>
+                    </div>
+                    <div className="flex justify-between mt-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditInternship(internship);
+                        }}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteInternship(internship._id);
+                        }}
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-3 flex justify-between items-center">
-                    <span className="text-xs text-gray-500">
-                      Deadline: {new Date(internship.deadline).toLocaleDateString()}
-                    </span>
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {internship.positions} position{internship.positions !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        internship.status === "Pending Approval"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {internship.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mt-4">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditInternship(internship);
-                      }}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteInternship(internship._id);
-                      }}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="border-t pt-8">
+            <AdminStats />
+          </div>
+        </div>
+      )}
+
+      {selectedInternship && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Internship Details</h2>
+              <button 
+                onClick={() => setSelectedInternship(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
             </div>
-          )}
+            <InternshipDisplay internship={selectedInternship} />
+          </div>
         </div>
       )}
     </div>

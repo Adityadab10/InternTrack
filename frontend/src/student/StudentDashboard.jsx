@@ -12,12 +12,12 @@ const StudentDashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // First fetch applied internships
-      const appliedResponse = await fetch(`/api/applied-internships/${studentId}`);
+      // First fetch applied internships for this student
+      const appliedResponse = await fetch(`/api/applications/student/${studentId}`);
       if (!appliedResponse.ok) {
         throw new Error("Failed to fetch applied internships");
       }
-      const appliedData = await appliedResponse.json();
+      const myApplications = await appliedResponse.json();
 
       // Fetch all internships
       const internshipsResponse = await fetch("/api/internships");
@@ -26,23 +26,16 @@ const StudentDashboard = () => {
       }
       const allInternships = await internshipsResponse.json();
 
-      // Set applied internships
-      const appliedDetails = await Promise.all(
-        appliedData.map(async (application) => {
-          const matchingInternship = allInternships.find(
-            internship => internship._id === application.internshipId
-          );
-          return matchingInternship || null;
-        })
+      // Set applied internships using the application data
+      const validAppliedInternships = allInternships.filter(internship => 
+        myApplications.some(app => app.internshipTitle === internship.title)
       );
-      
-      const validAppliedInternships = appliedDetails.filter(item => item !== null);
       setAppliedInternships(validAppliedInternships);
 
       // Filter out applied internships from available internships
       const availableInternships = allInternships.filter(
-        internship => !validAppliedInternships.some(
-          applied => applied._id === internship._id
+        internship => !myApplications.some(
+          app => app.internshipTitle === internship.title
         )
       );
       setInternships(availableInternships);
@@ -63,12 +56,19 @@ const StudentDashboard = () => {
 
   const handleApply = async (internshipId) => {
     try {
-      const response = await fetch("/api/applied-internships", {
+      const response = await fetch("/api/applications", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, internshipId }),
+        headers: { 
+          "Content-Type": "application/json" 
+        },
+        body: JSON.stringify({ 
+          studentId: studentId,
+          internshipId: internshipId,
+          internshipTitle: internships.find(i => i._id === internshipId).title,
+          company: internships.find(i => i._id === internshipId).company
+        }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to apply for internship");
       }
@@ -77,7 +77,7 @@ const StudentDashboard = () => {
       const appliedInternship = internships.find((i) => i._id === internshipId);
       setAppliedInternships(prev => [...prev, appliedInternship]);
       setInternships(prev => prev.filter((i) => i._id !== internshipId));
-      
+
       alert("Applied successfully!");
     } catch (err) {
       console.error("Error applying for internship:", err);

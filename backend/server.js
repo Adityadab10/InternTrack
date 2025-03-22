@@ -6,6 +6,7 @@ const internshipRoutes = require('./routes/internshipRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const cors = require("cors");
 const appliedInternshipRoutes = require("./routes/appliedInternshipRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 
 dotenv.config();
 connectDB(); // Connect to MongoDB
@@ -20,6 +21,7 @@ app.use(cors());
 // Routes
 app.use('/api/internships', internshipRoutes);
 app.use("/api/applied-internships", appliedInternshipRoutes);
+app.use("/api", applicationRoutes); // Add the /api prefix to the application routes
 
 // Error Handling Middleware
 app.use(errorHandler);
