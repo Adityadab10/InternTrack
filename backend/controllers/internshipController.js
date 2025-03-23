@@ -18,7 +18,7 @@ const getAllInternships = async (req, res, next) => {
   try {
     const internships = await Internship.find().sort({ createdAt: -1 });
     console.log("Found internships:", internships); // Debug log
-    res.status(200).json(internships); // Send internships array directly
+    res.status(200).json(internships);
   } catch (err) {
     console.error('Error in getAllInternships:', err.message);
     next(err);

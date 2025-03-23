@@ -33,10 +33,39 @@ router.get('/applications', async (req, res) => {
   }
 });
 
+// GET applications by student ID
+router.get('/applications/student/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    console.log("Fetching applications for student:", studentId); // Debug log
+
+    const applications = await Application.find({ studentId })
+      .populate('internshipId')
+      .sort({ appliedAt: -1 });
+
+    console.log("Found applications:", applications); // Debug log
+
+    const applicationStats = applications.map(app => ({
+      applicationId: app._id,
+      internshipId: app.internshipId?._id,
+      internshipTitle: app.internshipTitle,
+      company: app.company,
+      status: app.status,
+      appliedAt: app.appliedAt
+    }));
+
+    res.json(applicationStats);
+  } catch (error) {
+    console.error('Error fetching student applications:', error);
+    res.status(500).json({ error: 'Failed to fetch applications' });
+  }
+});
+
 // POST new application
 router.post('/applications', async (req, res) => {
   try {
     const { studentId, internshipId, internshipTitle, company } = req.body;
+    console.log("Creating application:", { studentId, internshipId, internshipTitle, company }); // Debug log
     
     // Check if application already exists
     const existingApplication = await Application.findOne({ 
@@ -58,36 +87,13 @@ router.post('/applications', async (req, res) => {
       studentName: `Student ${studentId}` // You can modify this based on your user system
     });
 
-    await application.save();
-    res.status(201).json(application);
+    const savedApplication = await application.save();
+    console.log("Saved application:", savedApplication); // Debug log
+
+    res.status(201).json(savedApplication);
   } catch (error) {
     console.error('Error creating application:', error);
     res.status(500).json({ error: 'Failed to create application' });
-  }
-});
-
-// GET applications by student ID
-router.get('/applications/student/:studentId', async (req, res) => {
-  try {
-    const { studentId } = req.params;
-    const applications = await Application.find({ studentId })
-      .populate('internshipId')
-      .sort({ appliedAt: -1 });
-
-    const applicationStats = applications.map(app => ({
-      applicationId: app._id,
-      internshipTitle: app.internshipTitle,
-      company: app.company,
-      candidateName: app.studentName || app.studentId,
-      candidateId: app.studentId,
-      status: app.status,
-      appliedAt: app.appliedAt
-    }));
-
-    res.json(applicationStats);
-  } catch (error) {
-    console.error('Error fetching student applications:', error);
-    res.status(500).json({ error: 'Failed to fetch applications' });
   }
 });
 

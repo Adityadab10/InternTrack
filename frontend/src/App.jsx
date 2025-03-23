@@ -9,6 +9,7 @@ import AdminLogin from './admin/AdminLogin'
 import StudentLogin from './student/StudentLogin'
 import AdminDashboard from './admin/AdminDashboard'
 import StudentDashboard from './student/StudentDashboard'
+import StudentProfileForm from './student/StudentProfileForm'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/student/StudentLogin" element={<StudentLogin />} />
         <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/student/StudentDashboard" element={<StudentDashboard />} />
+        <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
       </Routes>
     </Router>
   )

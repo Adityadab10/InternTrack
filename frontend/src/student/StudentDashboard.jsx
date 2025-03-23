@@ -1,76 +1,87 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const StudentDashboard = () => {
+  const location = useLocation();
   const [internships, setInternships] = useState([]);
   const [appliedInternships, setAppliedInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const studentId = "Adidab"; // Replace with actual student ID
+  // Get studentId from location state, localStorage, or use "guest"
+  const studentId = location.state?.studentId || localStorage.getItem("studentId") || "guest";
 
-  // Combined fetch function
+  // Store studentId in localStorage for persistence
+  useEffect(() => {
+    if (location.state?.studentId) {
+      localStorage.setItem("studentId", location.state.studentId);
+    }
+  }, [location.state?.studentId]);
+
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // First fetch applied internships for this student
-      const appliedResponse = await fetch(`/api/applications/student/${studentId}`);
-      if (!appliedResponse.ok) {
-        throw new Error("Failed to fetch applied internships");
+      // Add full URL with the API endpoint
+      const response = await fetch('http://localhost:5000/api/internships', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const myApplications = await appliedResponse.json();
 
-      // Fetch all internships
-      const internshipsResponse = await fetch("/api/internships");
-      if (!internshipsResponse.ok) {
-        throw new Error("Failed to fetch internships");
-      }
-      const allInternships = await internshipsResponse.json();
-
-      // Set applied internships using the application data
-      const validAppliedInternships = allInternships.filter(internship => 
-        myApplications.some(app => app.internshipTitle === internship.title)
-      );
-      setAppliedInternships(validAppliedInternships);
-
-      // Filter out applied internships from available internships
-      const availableInternships = allInternships.filter(
-        internship => !myApplications.some(
-          app => app.internshipTitle === internship.title
-        )
-      );
-      setInternships(availableInternships);
-
+      const data = await response.json();
+      console.log("Fetched internships:", data);
+      
+      setInternships(data);
+      setAppliedInternships([]);
       setError(null);
+
     } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load data. Please try again.");
+      console.error("Error fetching internships:", err);
+      setError("Failed to load internships. Please check if the server is running.");
+      setInternships([]);
+      setAppliedInternships([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Single useEffect to fetch all data
   useEffect(() => {
     fetchAllData();
-  }, []); // Empty dependency array means this runs once on mount
+  }, [studentId]);
+
+  // Add a retry function for better user experience
+  const handleRetry = () => {
+    fetchAllData();
+  };
 
   const handleApply = async (internshipId) => {
     try {
-      const response = await fetch("/api/applications", {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || "";
+      const internship = internships.find(i => i._id === internshipId);
+      
+      const response = await fetch(`/api/applications`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json" 
         },
+        credentials: "include",
         body: JSON.stringify({ 
-          studentId: studentId,
-          internshipId: internshipId,
-          internshipTitle: internships.find(i => i._id === internshipId).title,
-          company: internships.find(i => i._id === internshipId).company
+          studentId,
+          internshipId,
+          internshipTitle: internship.title,
+          company: internship.company
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to apply for internship");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to apply for internship");
       }
 
       // Update local state
@@ -81,16 +92,28 @@ const StudentDashboard = () => {
       alert("Applied successfully!");
     } catch (err) {
       console.error("Error applying for internship:", err);
-      alert("Failed to apply. Please try again.");
+      alert(err.message || "Failed to apply. Please try again.");
     }
   };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
+      <p className="text-sm text-gray-600 mb-4">Logged in as: {studentId}</p>
 
       {loading && <p className="text-gray-600">Loading internships...</p>}
-      {error && <div className="p-4 bg-red-100 text-red-700 rounded mb-4">{error}</div>}
+      
+      {error && (
+        <div className="p-4 bg-red-100 text-red-700 rounded mb-4">
+          {error}
+          <button 
+            onClick={handleRetry}
+            className="ml-4 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {!loading && !error && (
         <>

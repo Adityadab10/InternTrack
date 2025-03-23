@@ -2,31 +2,49 @@ const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
-const internshipRoutes = require('./routes/internshipRoutes');
-const errorHandler = require('./middleware/errorHandler');
 const cors = require("cors");
-const appliedInternshipRoutes = require("./routes/appliedInternshipRoutes");
+const path = require('path');
+const fs = require('fs');
+
+// Import routes
+const internshipRoutes = require('./routes/internshipRoutes');
 const applicationRoutes = require("./routes/applicationRoutes");
+const studentProfileRoutes = require("./routes/studentProfileRoutes");
 
 dotenv.config();
-connectDB(); // Connect to MongoDB
+connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 // Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json());
 app.use(bodyParser.json());
-app.use(cors());
+app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use('/api/internships', internshipRoutes);
-app.use("/api/applied-internships", appliedInternshipRoutes);
-app.use("/api", applicationRoutes); // Add the /api prefix to the application routes
+app.use("/api", applicationRoutes);
+app.use("/api", studentProfileRoutes);
 
-// Error Handling Middleware
-app.use(errorHandler);
+// Error Handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message });
+});
 
-// Start Server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
