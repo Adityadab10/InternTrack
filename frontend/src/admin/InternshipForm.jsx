@@ -17,7 +17,26 @@ const InternshipForm = ({ onSuccess }) => {
     peos: [],
   });
 
-  const sdgOptions = ["No Poverty", "Zero Hunger", "Quality Education", "Clean Water"];
+  const sdgOptions = [
+    "1. No Poverty",
+    "2. Zero Hunger",
+    "3. Good Health and Well-being",
+    "4. Quality Education",
+    "5. Gender Equality",
+    "6. Clean Water and Sanitation",
+    "7. Affordable and Clean Energy",
+    "8. Decent Work and Economic Growth",
+    "9. Industry, Innovation, and Infrastructure",
+    "10. Reduced Inequalities",
+    "11. Sustainable Cities and Communities",
+    "12. Responsible Consumption and Production",
+    "13. Climate Action",
+    "14. Life Below Water",
+    "15. Life on Land",
+    "16. Peace, Justice, and Strong Institutions",
+    "17. Partnerships for the Goals"
+  ];
+  
   const poOptions = ["Engineering Knowledge", "Problem Analysis", "Design Solutions"];
   const peoOptions = ["Leadership Skills", "Problem Solving", "Communication Skills"];
 
@@ -162,52 +181,58 @@ const InternshipForm = ({ onSuccess }) => {
         className="w-full p-2 mb-4 border rounded"
       />
 
-      <label>SDGs:</label>
-      <select
-        multiple
-        name="sdgs"
-        value={formData.sdgs}
-        onChange={(e) => handleMultiSelect(e, "sdgs")}
-        className="w-full p-2 mb-4 border rounded"
-      >
-        {sdgOptions.map((sdg, index) => (
-          <option key={index} value={sdg}>
-            {sdg}
-          </option>
-        ))}
-      </select>
+      <div className="mb-4">
+        <label className="block mb-2 font-medium">SDGs (hold Ctrl/Cmd to select multiple):</label>
+        <select
+          multiple
+          name="sdgs"
+          value={formData.sdgs}
+          onChange={(e) => handleMultiSelect(e, "sdgs")}
+          className="w-full p-2 border rounded h-48"
+        >
+          {sdgOptions.map((sdg, index) => (
+            <option key={index} value={sdg}>
+              {sdg}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <label>POs:</label>
-      <select
-        multiple
-        name="pos"
-        value={formData.pos}
-        onChange={(e) => handleMultiSelect(e, "pos")}
-        className="w-full p-2 mb-4 border rounded"
-      >
-        {poOptions.map((po, index) => (
-          <option key={index} value={po}>
-            {po}
-          </option>
-        ))}
-      </select>
+      <div className="mb-4">
+        <label className="block mb-2 font-medium">POs (hold Ctrl/Cmd to select multiple):</label>
+        <select
+          multiple
+          name="pos"
+          value={formData.pos}
+          onChange={(e) => handleMultiSelect(e, "pos")}
+          className="w-full p-2 border rounded"
+        >
+          {poOptions.map((po, index) => (
+            <option key={index} value={po}>
+              {po}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <label>PEOs:</label>
-      <select
-        multiple
-        name="peos"
-        value={formData.peos}
-        onChange={(e) => handleMultiSelect(e, "peos")}
-        className="w-full p-2 mb-4 border rounded"
-      >
-        {peoOptions.map((peo, index) => (
-          <option key={index} value={peo}>
-            {peo}
-          </option>
-        ))}
-      </select>
+      <div className="mb-4">
+        <label className="block mb-2 font-medium">PEOs (hold Ctrl/Cmd to select multiple):</label>
+        <select
+          multiple
+          name="peos"
+          value={formData.peos}
+          onChange={(e) => handleMultiSelect(e, "peos")}
+          className="w-full p-2 border rounded"
+        >
+          {peoOptions.map((peo, index) => (
+            <option key={index} value={peo}>
+              {peo}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
         Submit Internship
       </button>
     </form>
