@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
+import ProfileContent from './ProfileContent';
 
 const StudentDashboard = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const StudentDashboard = () => {
   const [appliedInternships, setAppliedInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('explore');
 
   // Use user.email for studentId
   const studentId = user?.email;
@@ -131,103 +133,165 @@ const StudentDashboard = () => {
     navigate('/login');
   };
 
-  return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h1 className="text-2xl font-bold">Student Dashboard</h1>
-          <p className="text-sm text-gray-600">
-            Logged in as: <span className="font-medium">{user?.name || 'Unknown'}</span>
-            <span className="text-gray-400 ml-2">({user?.email})</span>
-          </p>
-        </div>
-        <button 
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
-      </div>
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'explore':
+        return (
+          <>
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold mb-4">Available Internships</h2>
+              {internships.length === 0 ? (
+                <p className="text-gray-600">No internships available at the moment.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {internships.map((internship) => (
+                    <div key={internship._id} className="p-4 border rounded-lg shadow-sm bg-white hover:shadow-md">
+                      <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
+                      <p className="text-gray-700">{internship.company}</p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Location:</span> {internship.location || "Remote"}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Duration:</span> {internship.duration}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Stipend:</span> ₹{internship.stipend || "Unpaid"}
+                        </p>
+                      </div>
+                      <div className="mt-3">
+                        <button
+                          onClick={() => handleApply(internship._id)}
+                          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-      {loading && <p className="text-gray-600">Loading internships...</p>}
-      
-      {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded mb-4">
-          {error}
-          <button 
-            onClick={handleRetry}
-            className="ml-4 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">Applied Internships</h2>
+              {appliedInternships.length === 0 ? (
+                <p className="text-gray-600">No internships applied yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {appliedInternships.map((internship) => (
+                    <div key={internship._id} className="p-4 border rounded-lg shadow-sm bg-gray-100 hover:shadow-md">
+                      <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
+                      <p className="text-gray-700">{internship.company}</p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Location:</span> {internship.location || "Remote"}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Duration:</span> {internship.duration}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">Stipend:</span> ₹{internship.stipend || "Unpaid"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        );
+      case 'profile':
+        return <ProfileContent />;
+      case 'tasks':
+        return <div>Assigned Tasks</div>;
+      case 'certificates':
+        return <div>Certificates</div>;
+      case 'settings':
+        return <div>Settings</div>;
+      default:
+        return <div>Select an option</div>;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-md">
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-semibold">Student Portal</h2>
+          <p className="text-sm text-gray-600">{user?.name || 'Student'}</p>
+        </div>
+        <nav className="mt-4">
+          <button
+            onClick={() => setActiveTab('explore')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'explore' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
           >
-            Retry
+            🔍 Explore Internships
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'profile' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            👤 Profile
+          </button>
+          <button
+            onClick={() => setActiveTab('tasks')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'tasks' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            📋 Tasks
+          </button>
+          <button
+            onClick={() => setActiveTab('certificates')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'certificates' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            🎓 Certificates
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'settings' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            ⚙️ Settings
+          </button>
+        </nav>
+        <div className="absolute bottom-0 w-64 p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded"
+          >
+            🚪 Logout
           </button>
         </div>
-      )}
+      </div>
 
-      {!loading && !error && (
-        <>
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-4">Available Internships</h2>
-            {internships.length === 0 ? (
-              <p className="text-gray-600">No internships available at the moment.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {internships.map((internship) => (
-                  <div key={internship._id} className="p-4 border rounded-lg shadow-sm bg-white hover:shadow-md">
-                    <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
-                    <p className="text-gray-700">{internship.company}</p>
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Location:</span> {internship.location || "Remote"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Duration:</span> {internship.duration}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Stipend:</span> ₹{internship.stipend || "Unpaid"}
-                      </p>
-                    </div>
-                    <div className="mt-3">
-                      <button
-                        onClick={() => handleApply(internship._id)}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Applied Internships</h2>
-            {appliedInternships.length === 0 ? (
-              <p className="text-gray-600">No internships applied yet.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {appliedInternships.map((internship) => (
-                  <div key={internship._id} className="p-4 border rounded-lg shadow-sm bg-gray-100 hover:shadow-md">
-                    <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
-                    <p className="text-gray-700">{internship.company}</p>
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Location:</span> {internship.location || "Remote"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Duration:</span> {internship.duration}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Stipend:</span> ₹{internship.stipend || "Unpaid"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          {loading && <p className="text-gray-600">Loading...</p>}
+          {error && (
+            <div className="p-4 bg-red-100 text-red-700 rounded mb-4">
+              {error}
+              <button 
+                onClick={handleRetry}
+                className="ml-4 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!loading && !error && renderContent()}
+        </div>
+      </div>
     </div>
   );
 };

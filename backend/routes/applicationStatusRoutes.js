@@ -65,10 +65,13 @@ router.get("/student/:studentId", async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const applications = await ApplicationStatus.find({ candidateId: studentId });
+    const applications = await ApplicationStatus.find({ 
+      candidateId: studentId,
+      status: 'Accepted' 
+    });
 
     if (!applications || applications.length === 0) {
-      return res.status(404).json({ error: "No applications found for this student" });
+      return res.json([]); // Return empty array instead of 404
     }
 
     res.json(applications);
@@ -154,6 +157,31 @@ router.get('/applications/:applicationId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching status:', error);
     res.status(500).json({ error: 'Failed to fetch status' });
+  }
+});
+
+// Update task completion status
+router.patch('/tasks/:internshipId', async (req, res) => {
+  try {
+    const { internshipId } = req.params;
+    const { taskIndex, completed } = req.body;
+
+    const applicationStatus = await ApplicationStatus.findById(internshipId);
+    if (!applicationStatus) {
+      return res.status(404).json({ error: 'Application status not found' });
+    }
+
+    // Update the task completion status
+    if (!applicationStatus.taskStatus) {
+      applicationStatus.taskStatus = applicationStatus.tasks.map(() => false);
+    }
+    applicationStatus.taskStatus[taskIndex] = completed;
+    await applicationStatus.save();
+
+    res.json({ message: 'Task status updated successfully' });
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    res.status(500).json({ error: 'Failed to update task status' });
   }
 });
 

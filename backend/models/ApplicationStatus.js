@@ -35,6 +35,10 @@ const applicationStatusSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
+  taskStatus: [{
+    type: Boolean,
+    default: false
+  }],
   updatedAt: {
     type: Date,
     default: Date.now

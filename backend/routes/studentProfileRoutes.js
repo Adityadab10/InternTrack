@@ -42,4 +42,21 @@ router.post("/student-profile", upload.single("resume"), async (req, res) => {
   }
 });
 
+// GET: Fetch student profile
+router.get("/student-profile/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const profile = await StudentProfile.findOne({ email });
+    
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    res.json(profile);
+  } catch (error) {
+    console.error("Error fetching student profile:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
 module.exports = router;
