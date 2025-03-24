@@ -27,7 +27,7 @@ const StudentDashboard = () => {
     setLoading(true);
     try {
       // Fetch both internships and applications in parallel
-      const [internshipsResponse, applicationsResponse] = await Promise.all([
+      const [internshipsResponse, applicationsResponse, approvedApplicationsResponse] = await Promise.all([
         fetch('http://localhost:5000/api/internships', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -37,6 +37,10 @@ const StudentDashboard = () => {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
+        }),
+        // New request to fetch approved applications
+        fetch(`http://localhost:5000/api/application-status/student/${studentId}`, {
+          credentials: 'include'
         })
       ]);
 
@@ -45,24 +49,29 @@ const StudentDashboard = () => {
       }
 
       const allInternships = await internshipsResponse.json();
-      console.log("Fetched internships:", allInternships);
-
-      // Initialize as all available
       let availableInternships = [...allInternships];
       let appliedInternships = [];
 
       // If we successfully got applications, filter the internships
       if (applicationsResponse.ok) {
         const myApplications = await applicationsResponse.json();
-        console.log("Fetched applications:", myApplications);
-
-        // Filter internships into applied and available
+        const approvedApplications = await approvedApplicationsResponse.json();
+        
+        // Get IDs of approved applications
+        const approvedInternshipIds = approvedApplications.map(app => app.internshipId);
+        
+        // Filter out both approved and pending applications
         appliedInternships = allInternships.filter(internship =>
-          myApplications.some(app => app.internshipId === internship._id)
+          myApplications.some(app => 
+            app.internshipId === internship._id && 
+            !approvedInternshipIds.includes(internship._id)
+          )
         );
         
+        // Available internships should exclude both applied and approved
         availableInternships = allInternships.filter(internship =>
-          !myApplications.some(app => app.internshipId === internship._id)
+          !myApplications.some(app => app.internshipId === internship._id) &&
+          !approvedInternshipIds.includes(internship._id)
         );
       }
 
@@ -174,9 +183,9 @@ const StudentDashboard = () => {
             </div>
 
             <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Applied Internships</h2>
+              <h2 className="text-xl font-semibold mb-4">Pending Applications</h2>
               {appliedInternships.length === 0 ? (
-                <p className="text-gray-600">No internships applied yet.</p>
+                <p className="text-gray-600">No pending applications.</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {appliedInternships.map((internship) => (

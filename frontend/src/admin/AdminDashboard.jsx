@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import InternshipForm from "./InternshipForm";
 import InternshipDisplay from "./InternshipDisplay";
 import AdminStats from "./AdminStats";
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
@@ -9,6 +11,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedInternship, setSelectedInternship] = useState(null);
+  const [activeTab, setActiveTab] = useState('internships');
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch internships when component mounts
   useEffect(() => {
@@ -75,63 +80,35 @@ const AdminDashboard = () => {
       alert('Failed to delete internship. Please try again.');
     }
   };
-  
-  
-  
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setSelectedInternship(null);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {showForm ? "Hide Form" : "Post an Internship"}
-        </button>
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'internships':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-800">Internship Management</h1>
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Add New Internship
+              </button>
+            </div>
 
-        <button
-          onClick={fetchInternships}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Refresh
-        </button>
-      </div>
+            {loading && <p className="text-gray-600">Loading internships...</p>}
+            {error && (
+              <div className="bg-red-100 text-red-700 p-4 rounded">
+                {error}
+              </div>
+            )}
 
-      {showForm && (
-        <InternshipForm
-          onSuccess={handleInternshipCreated}
-          internship={selectedInternship}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
-
-      {loading && <p className="text-gray-600">Loading internships...</p>}
-      {error && <div className="p-4 bg-red-100 text-red-700 rounded mb-4">{error}</div>}
-
-      {!showForm && !loading && !error && (
-        <div className="space-y-8">
-          <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-4">Internship Listings</h2>
-            {internships.length === 0 ? (
-              <p className="text-gray-600">No internships found. Create one to get started!</p>
-            ) : (
+            {!loading && !error && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {internships.map((internship) => (
                   <div
@@ -196,13 +173,101 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
+        );
+      case 'applications':
+        return <AdminStats />;
+      case 'reports':
+        return <div>Reports Dashboard</div>;
+      case 'settings':
+        return <div>Admin Settings</div>;
+      default:
+        return <div>Select an option</div>;
+    }
+  };
 
-          <div className="border-t pt-8">
-            <AdminStats />
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-md">
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-semibold">Admin Portal</h2>
+          <p className="text-sm text-gray-600">Manage Internships & Applications</p>
+        </div>
+        <nav className="mt-4">
+          <button
+            onClick={() => setActiveTab('internships')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'internships' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            📑 Internships
+          </button>
+          <button
+            onClick={() => setActiveTab('applications')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'applications' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            👥 Applications
+          </button>
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'reports' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            📊 Reports
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
+              activeTab === 'settings' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            }`}
+          >
+            ⚙️ Settings
+          </button>
+        </nav>
+        <div className="absolute bottom-0 w-64 p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded"
+          >
+            🚪 Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          {renderContent()}
+        </div>
+      </div>
+
+      {/* Modal for adding/editing internship */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Internship</h2>
+              <button 
+                onClick={() => setShowForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <InternshipForm
+              onSuccess={(newInternship) => {
+                setInternships(prev => [newInternship, ...prev]);
+                setShowForm(false);
+              }}
+            />
           </div>
         </div>
       )}
 
+      {/* Modal for internship details */}
       {selectedInternship && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">

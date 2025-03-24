@@ -22,7 +22,7 @@ export default function Login() {
     if (userType) {
       switch (userType.toLowerCase()) {
         case 'viewer':
-          navigate('/viewer/ViewerLogin')
+          navigate('/viewer/ViewerPage')
           break
         case 'faculty':
           navigate('/faculty/FacultyLogin')

@@ -1,13 +1,12 @@
 import { useState } from "react"
-import Navbar from "./components/Navbar"
-import Sidebar from "./components/Sidebar"
-import StatisticsOverview from "./components/StatisticsOverview"
-import InternshipList from "./components/IntershipList"
-import ProjectOutcomes from "./components/ProjectOutcomes"
-import ContactSection from "./components/ContactSection"
+import Navbar from "./Navbar"
+import Sidebar from "./Sidebar"
+import StatisticsOverview from "./StatisticsOverview"
+import InternshipList from "./IntershipList"
+import ProjectOutcomes from "./ProjectOutcomes"
+import ContactSection from "./ContactSection"
 
-
-function App() {
+function ViewerPage() {
   const [activeTab, setActiveTab] = useState("statistics")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filters, setFilters] = useState({
@@ -52,4 +51,4 @@ function App() {
   )
 }
 
-export default App
+export default ViewerPage
