@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 const StudentDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [internships, setInternships] = useState([]);
   const [appliedInternships, setAppliedInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get studentId from location state, localStorage, or use "guest"
-  const studentId = location.state?.studentId || localStorage.getItem("studentId") || "guest";
+  // Use user.email for studentId
+  const studentId = user?.email;
 
   // Store studentId in localStorage for persistence
   useEffect(() => {
@@ -21,29 +24,53 @@ const StudentDashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // Add full URL with the API endpoint
-      const response = await fetch('http://localhost:5000/api/internships', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
+      // Fetch both internships and applications in parallel
+      const [internshipsResponse, applicationsResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/internships', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        }),
+        fetch(`http://localhost:5000/api/applications/student/${studentId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        })
+      ]);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!internshipsResponse.ok) {
+        throw new Error(`Failed to fetch internships: ${internshipsResponse.status}`);
       }
 
-      const data = await response.json();
-      console.log("Fetched internships:", data);
-      
-      setInternships(data);
-      setAppliedInternships([]);
+      const allInternships = await internshipsResponse.json();
+      console.log("Fetched internships:", allInternships);
+
+      // Initialize as all available
+      let availableInternships = [...allInternships];
+      let appliedInternships = [];
+
+      // If we successfully got applications, filter the internships
+      if (applicationsResponse.ok) {
+        const myApplications = await applicationsResponse.json();
+        console.log("Fetched applications:", myApplications);
+
+        // Filter internships into applied and available
+        appliedInternships = allInternships.filter(internship =>
+          myApplications.some(app => app.internshipId === internship._id)
+        );
+        
+        availableInternships = allInternships.filter(internship =>
+          !myApplications.some(app => app.internshipId === internship._id)
+        );
+      }
+
+      setInternships(availableInternships);
+      setAppliedInternships(appliedInternships);
       setError(null);
 
     } catch (err) {
-      console.error("Error fetching internships:", err);
-      setError("Failed to load internships. Please check if the server is running.");
+      console.error("Error fetching data:", err);
+      setError("Failed to load data. Please check if the server is running.");
       setInternships([]);
       setAppliedInternships([]);
     } finally {
@@ -62,10 +89,9 @@ const StudentDashboard = () => {
 
   const handleApply = async (internshipId) => {
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || "";
       const internship = internships.find(i => i._id === internshipId);
       
-      const response = await fetch(`/api/applications`, {
+      const response = await fetch('http://localhost:5000/api/applications', {
         method: "POST",
         headers: { 
           "Content-Type": "application/json" 
@@ -90,16 +116,38 @@ const StudentDashboard = () => {
       setInternships(prev => prev.filter((i) => i._id !== internshipId));
 
       alert("Applied successfully!");
+      
+      // Refresh the data to ensure everything is in sync
+      await fetchAllData();
+      
     } catch (err) {
       console.error("Error applying for internship:", err);
       alert(err.message || "Failed to apply. Please try again.");
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
-      <p className="text-sm text-gray-600 mb-4">Logged in as: {studentId}</p>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className="text-2xl font-bold">Student Dashboard</h1>
+          <p className="text-sm text-gray-600">
+            Logged in as: <span className="font-medium">{user?.name || 'Unknown'}</span>
+            <span className="text-gray-400 ml-2">({user?.email})</span>
+          </p>
+        </div>
+        <button 
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
 
       {loading && <p className="text-gray-600">Loading internships...</p>}
       

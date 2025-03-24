@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import { useAuth } from '../context/AuthContext';
 
 const degreeOptions = [
   { value: "Bachelors", label: "Bachelors" },
@@ -34,17 +35,21 @@ const skillsOptions = [
 
 const StudentProfileForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    dob: "",
-    degree: "",
-    fieldOfStudy: "",
-    yearOfGraduation: "",
-    skills: [],
-    linkedIn: "",
-    github: "",
+  const { login } = useAuth();
+  const [formData, setFormData] = useState(() => {
+    const savedProfile = localStorage.getItem('studentProfile');
+    return savedProfile ? JSON.parse(savedProfile) : {
+      name: "",
+      email: "",
+      phone: "",
+      dob: "",
+      degree: "",
+      fieldOfStudy: "",
+      yearOfGraduation: "",
+      skills: [],
+      linkedIn: "",
+      github: "",
+    };
   });
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -92,8 +97,7 @@ const StudentProfileForm = () => {
     }
 
     try {
-      // Use Vite's environment variable syntax
-      const response = await fetch(`/api/student-profile`, {
+      const response = await fetch('/api/student-profile', {
         method: "POST",
         body: form,
         credentials: "include"
@@ -106,11 +110,17 @@ const StudentProfileForm = () => {
 
       const data = await response.json();
       if (data.success) {
-        localStorage.setItem("studentId", formData.email);
-        alert("Profile submitted successfully!");
-        navigate("/student/StudentDashboard", { 
-          state: { studentId: formData.email }
-        });
+        // Save user data in context and localStorage
+        const userData = {
+          id: data.data._id,
+          email: formData.email,
+          name: formData.name,
+          profile: data.data
+        };
+        login(userData);
+        localStorage.setItem('studentProfile', JSON.stringify(formData));
+        
+        navigate("/student/StudentDashboard");
       }
     } catch (error) {
       console.error("Error submitting profile:", error);

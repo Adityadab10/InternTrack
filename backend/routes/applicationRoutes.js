@@ -37,13 +37,17 @@ router.get('/applications', async (req, res) => {
 router.get('/applications/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
-    console.log("Fetching applications for student:", studentId); // Debug log
+    console.log("Fetching applications for student:", studentId);
 
     const applications = await Application.find({ studentId })
       .populate('internshipId')
       .sort({ appliedAt: -1 });
 
-    console.log("Found applications:", applications); // Debug log
+    console.log("Found applications:", applications);
+
+    if (!applications.length) {
+      return res.status(200).json([]); // Return empty array instead of 404
+    }
 
     const applicationStats = applications.map(app => ({
       applicationId: app._id,

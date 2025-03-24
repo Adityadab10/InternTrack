@@ -1,9 +1,18 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from './context/AuthContext'
 
 export default function Login() {
+  const { user } = useAuth()
   const [userType, setUserType] = useState("")
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    if (user) {
+      navigate('/student/StudentDashboard')
+    }
+  }, [user, navigate])
 
   const handleSelectChange = (e) => {
     setUserType(e.target.value)
@@ -13,22 +22,28 @@ export default function Login() {
     if (userType) {
       switch (userType.toLowerCase()) {
         case 'viewer':
-          navigate('/viewer/ViewerLogin');
-          break;
+          navigate('/viewer/ViewerLogin')
+          break
         case 'faculty':
-          navigate('/faculty/FacultyLogin');
-          break;
+          navigate('/faculty/FacultyLogin')
+          break
         case 'management':
-          navigate('/management/ManagementLogin');
-          break;
+          navigate('/management/ManagementLogin')
+          break
         case 'admin':
-          navigate('/admin/AdminDashboard');
-          break;
+          navigate('/admin/AdminDashboard')
+          break
         case 'student':
-          navigate('/student/StudentProfileForm');
-          break;
+          // Check if profile exists
+          const savedProfile = localStorage.getItem('studentProfile')
+          if (savedProfile) {
+            navigate('/student/StudentDashboard')
+          } else {
+            navigate('/student/StudentProfileForm')
+          }
+          break
         default:
-          console.error('Unknown user type');
+          console.error('Unknown user type')
       }
     }
   }

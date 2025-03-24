@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import Landing from './Landing'
 import Login from './Login'
@@ -10,24 +10,43 @@ import StudentLogin from './student/StudentLogin'
 import AdminDashboard from './admin/AdminDashboard'
 import StudentDashboard from './student/StudentDashboard'
 import StudentProfileForm from './student/StudentProfileForm'
+import { AuthProvider, useAuth } from './context/AuthContext'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/viewer/ViewerLogin" element={<ViewerLogin />} />
-        <Route path="/faculty/FacultyLogin" element={<FacultyLogin />} />
-        <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
-        <Route path="/admin/AdminLogin" element={<AdminLogin />} />
-        <Route path="/student/StudentLogin" element={<StudentLogin />} />
-        <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/student/StudentDashboard" element={<StudentDashboard />} />
-        <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/viewer/ViewerLogin" element={<ViewerLogin />} />
+          <Route path="/faculty/FacultyLogin" element={<FacultyLogin />} />
+          <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
+          <Route path="/admin/AdminLogin" element={<AdminLogin />} />
+          <Route path="/student/StudentLogin" element={<StudentLogin />} />
+          <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
+          <Route 
+            path="/student/StudentDashboard" 
+            element={
+              <ProtectedRoute>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 export default App
