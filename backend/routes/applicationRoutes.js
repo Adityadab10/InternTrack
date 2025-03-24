@@ -13,19 +13,21 @@ router.get('/applications', async (req, res) => {
       .populate('internshipId')
       .sort({ appliedAt: -1 });
 
-    console.log('Found applications:', applications); // Debug log
+    console.log('Found applications:', applications);
 
     const applicationStats = applications.map(app => ({
-      applicationId: app._id,
-      internshipTitle: app.internshipTitle || app.internshipId?.title || 'Unknown Title',
-      company: app.company || app.internshipId?.company || 'Unknown Company',
-      candidateName: app.studentName || `Student ${app.studentId}`,
-      candidateId: app.studentId,
-      status: app.status,
-      appliedAt: app.appliedAt
+      _id: app._id,
+      internshipId: app.internshipId?._id,
+      internshipTitle: app.internshipTitle,
+      company: app.company,
+      studentId: app.studentId,
+      studentName: app.studentName || `Student ${app.studentId}`,
+      status: app.status || 'Pending',
+      appliedAt: app.appliedAt || app.createdAt,
+      tasks: app.tasks || []
     }));
 
-    console.log('Processed stats:', applicationStats); // Debug log
+    console.log('Processed stats:', applicationStats);
     res.json(applicationStats);
   } catch (error) {
     console.error('Error fetching applications:', error);

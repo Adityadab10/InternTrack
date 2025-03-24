@@ -5,13 +5,6 @@ const applicationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  studentName: {
-    type: String,
-    required: true,
-    default: function() {
-      return `Student ${this.studentId}`  // Default name if not provided
-    }
-  },
   internshipId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Internship',
@@ -25,11 +18,15 @@ const applicationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  studentName: String,
   status: {
     type: String,
     enum: ['Pending', 'Accepted', 'Rejected'],
     default: 'Pending'
   },
+  tasks: [{
+    type: String
+  }],
   appliedAt: {
     type: Date,
     default: Date.now

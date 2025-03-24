@@ -10,6 +10,7 @@ const fs = require('fs');
 const internshipRoutes = require('./routes/internshipRoutes');
 const applicationRoutes = require("./routes/applicationRoutes");
 const studentProfileRoutes = require("./routes/studentProfileRoutes");
+const applicationStatusRoutes = require("./routes/applicationStatusRoutes");
 
 dotenv.config();
 connectDB();
@@ -37,6 +38,8 @@ app.use("/uploads", express.static("uploads"));
 app.use('/api/internships', internshipRoutes);
 app.use("/api", applicationRoutes);
 app.use("/api", studentProfileRoutes);
+app.use("/api/application-status", applicationStatusRoutes);
+
 
 // Error Handling
 app.use((err, req, res, next) => {
