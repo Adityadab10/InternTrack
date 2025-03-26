@@ -137,7 +137,8 @@ export default function Landing() {
   </div>
 
   <div className="container mx-auto px-4 md:px-6 relative z-10">
-    <div className="flex flex-col md:flex-row items-center">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+      {/* Left content box */}
       <div className="md:w-1/2 mb-10 md:mb-0">
         <div className="bg-purple-900/20 backdrop-blur-sm p-8 rounded-xl border border-purple-800/30 shadow-lg">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
@@ -158,14 +159,16 @@ export default function Landing() {
           </div>
         </div>
       </div>
+
+      {/* Right image box */}
       <div className="md:w-1/2 flex justify-center items-center">
-        <div className="relative w-3/5 mx-auto">
+        <div className="relative w-full max-w-xl mx-auto">
           <div className="absolute inset-0 bg-purple-600 rounded-lg blur-md -m-2 transform -rotate-3"></div>
           <div className="relative overflow-hidden rounded-lg shadow-2xl transform hover:scale-102 transition-transform duration-500 border-2 border-purple-500/30">
             <img
-              src="/api/placeholder/600/450"
-              alt="Internship Management Dashboard"
-              className="w-full h-auto rounded-lg"
+              src="/assets/CentreHero.jpeg"
+              alt="Internship Management Platform"
+              className="w-full h-[450px] object-cover object-center rounded-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-purple-900/70 to-transparent opacity-60 hover:opacity-40 transition-opacity"></div>
           </div>

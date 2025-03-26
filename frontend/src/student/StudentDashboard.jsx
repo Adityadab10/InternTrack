@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import ProfileContent from './ProfileContent';
+import UserProfile from './UserProfile';
 
 const StudentDashboard = () => {
   const location = useLocation();
@@ -210,14 +211,14 @@ const StudentDashboard = () => {
             </div>
           </>
         );
-      case 'profile':
+      case 'your-internships':
         return <ProfileContent />;
       case 'tasks':
         return <div>Assigned Tasks</div>;
       case 'certificates':
         return <div>Certificates</div>;
-      case 'settings':
-        return <div>Settings</div>;
+      case 'profile':
+        return <UserProfile />;
       default:
         return <div>Select an option</div>;
     }
@@ -226,27 +227,27 @@ const StudentDashboard = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md">
+      <div className="w-64 bg-white h-full border-r">
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold">Student Portal</h2>
           <p className="text-sm text-gray-600">{user?.name || 'Student'}</p>
         </div>
-        <nav className="mt-4">
+        <nav className="p-4 space-y-2">
           <button
             onClick={() => setActiveTab('explore')}
             className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
               activeTab === 'explore' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
             }`}
           >
-            🔍 Explore Internships
+            🔍 Explore
           </button>
           <button
-            onClick={() => setActiveTab('profile')}
+            onClick={() => setActiveTab('your-internships')}
             className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'profile' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+              activeTab === 'your-internships' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
             }`}
           >
-            👤 Profile
+            💼 Your Internships
           </button>
           <button
             onClick={() => setActiveTab('tasks')}
@@ -254,7 +255,7 @@ const StudentDashboard = () => {
               activeTab === 'tasks' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
             }`}
           >
-            📋 Tasks
+            ✓ Tasks
           </button>
           <button
             onClick={() => setActiveTab('certificates')}
@@ -265,12 +266,12 @@ const StudentDashboard = () => {
             🎓 Certificates
           </button>
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => setActiveTab('profile')}
             className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'settings' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+              activeTab === 'profile' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
             }`}
           >
-            ⚙️ Settings
+             Profile
           </button>
         </nav>
         <div className="absolute bottom-0 w-64 p-4 border-t">

@@ -161,27 +161,68 @@ router.get('/applications/:applicationId', async (req, res) => {
 });
 
 // Update task completion status
-router.patch('/tasks/:internshipId', async (req, res) => {
+router.patch('/:internshipId/tasks', async (req, res) => {
   try {
     const { internshipId } = req.params;
     const { taskIndex, completed } = req.body;
 
     const applicationStatus = await ApplicationStatus.findById(internshipId);
+    
     if (!applicationStatus) {
-      return res.status(404).json({ error: 'Application status not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Application status not found'
+      });
     }
 
-    // Update the task completion status
+    // Initialize taskStatus array if it doesn't exist
     if (!applicationStatus.taskStatus) {
-      applicationStatus.taskStatus = applicationStatus.tasks.map(() => false);
+      applicationStatus.taskStatus = new Array(applicationStatus.tasks.length).fill(false);
     }
+
+    // Update the task status
     applicationStatus.taskStatus[taskIndex] = completed;
     await applicationStatus.save();
 
-    res.json({ message: 'Task status updated successfully' });
+    res.json({
+      success: true,
+      message: 'Task status updated successfully',
+      taskStatus: applicationStatus.taskStatus
+    });
+
   } catch (error) {
     console.error('Error updating task status:', error);
-    res.status(500).json({ error: 'Failed to update task status' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update task status'
+    });
+  }
+});
+
+// Add this new route to get approved internships for a student
+router.get('/approved/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    const approvedApplications = await ApplicationStatus.find({
+      candidateId: email,
+      status: 'Accepted'
+    });
+
+    if (!approvedApplications) {
+      return res.status(404).json({
+        success: false,
+        message: 'No approved internships found'
+      });
+    }
+
+    res.json(approvedApplications);
+  } catch (error) {
+    console.error('Error fetching approved internships:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch approved internships'
+    });
   }
 });
 
