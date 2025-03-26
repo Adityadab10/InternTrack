@@ -158,7 +158,7 @@ const ProfileContent = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Active Internships</h2>
+        <h2 className="text-2xl font-bold text-purple-300 mb-6">Your Active Internships</h2>
         {approvedInternships.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6 text-center">
             <p className="text-gray-600">No active internships found.</p>
@@ -166,11 +166,12 @@ const ProfileContent = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {approvedInternships.map((internship) => (
-              <InternshipCard
-                key={internship._id}
-                internship={internship}
-                onTaskToggle={handleTaskToggle}
-              />
+              <div key={internship._id} className="bg-gradient-to-br from-purple-900/20 via-black/40 to-indigo-900/20 rounded-lg border border-purple-500/30 p-6 backdrop-blur-sm">
+                <InternshipCard
+                  internship={internship}
+                  onTaskToggle={handleTaskToggle}
+                />
+              </div>
             ))}
           </div>
         )}

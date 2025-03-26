@@ -38,47 +38,47 @@ const InternshipCard = ({ internship, onTaskToggle }) => {
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-lg font-semibold text-blue-600">
-            {internship.internshipTitle || internship.title}
-          </h3>
-          <p className="text-gray-600">{internship.company}</p>
+    <div className="bg-gradient-to-br from-purple-900/20 via-black/40 to-indigo-900/20 rounded-lg border border-purple-500/30 hover:border-purple-400 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-2">
+      <div className="p-6 backdrop-blur-sm">
+        <h3 className="font-bold text-xl text-purple-300 mb-2">{internship.title}</h3>
+        <p className="text-purple-100/80 mb-4">{internship.company}</p>
+        <div className="mt-4 flex gap-6">
+          <div className="flex-1">
+            <div className="text-purple-100">
+              <h4 className="font-medium text-purple-300 mb-2">Assigned Tasks:</h4>
+              <ul className="space-y-2">
+                {tasks.map((task, index) => (
+                  <li key={index} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => handleTaskToggle(index)}
+                      className="w-4 h-4 text-purple-600 rounded border-purple-400 
+                               focus:ring-purple-500 cursor-pointer bg-purple-900/50"
+                    />
+                    <span className={`text-purple-200 ${
+                      task.completed ? 'line-through text-purple-400/50' : ''
+                    }`}>
+                      {task.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <ProgressCircle percentage={progress} />
+            <p className="text-sm text-gray-600 mt-2">
+              {completedTasks} of {tasks.length} tasks completed
+            </p>
+          </div>
         </div>
-        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-          Active
-        </span>
-      </div>
-      
-      <div className="mt-4 flex gap-6">
-        <div className="flex-1">
-          <h4 className="font-medium text-gray-700 mb-2">Assigned Tasks:</h4>
-          <ul className="space-y-2">
-            {tasks.map((task, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => handleTaskToggle(index)}
-                  className="w-4 h-4 text-purple-600 rounded border-gray-300 
-                           focus:ring-purple-500 cursor-pointer"
-                />
-                <span className={`text-gray-600 ${
-                  task.completed ? 'line-through text-gray-400' : ''
-                }`}>
-                  {task.text}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="flex flex-col items-center justify-center">
-          <ProgressCircle percentage={progress} />
-          <p className="text-sm text-gray-600 mt-2">
-            {completedTasks} of {tasks.length} tasks completed
-          </p>
-        </div>
+        <button
+          onClick={() => handleApply(internship._id)}
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-md hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 shadow-lg hover:shadow-purple-500/50"
+        >
+          Apply Now
+        </button>
       </div>
     </div>
   );

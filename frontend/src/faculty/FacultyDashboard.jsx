@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Home, Users, BookOpen, CheckCircle, FileText, Settings } from 'lucide-react';
+import MentorAllotment from './MentorAllotment';
 
 // Sidebar Component
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -138,12 +139,30 @@ const MentorshipAssignment = () => {
 const FacultyDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return <InternshipOverview />;
+      case "mentorship":
+        return <MentorAllotment />;
+      case "progress":
+        return <div>Progress Component</div>;
+      case "sdg":
+        return <div>SDG Alignment Component</div>;
+      case "reports":
+        return <div>Reports Component</div>;
+      case "settings":
+        return <div>Settings Component</div>;
+      default:
+        return <div>Unknown Component</div>;
+    }
+  };
+
   return (
     <div className="flex">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 bg-gray-50">
-        {activeTab === 'overview' && <InternshipOverview />}
-        {activeTab === 'mentorship' && <MentorshipAssignment />}
+        {renderContent()}
       </div>
     </div>
   );

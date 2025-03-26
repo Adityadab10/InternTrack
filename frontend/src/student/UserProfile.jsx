@@ -47,40 +47,40 @@ const UserProfile = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Personal Information</h2>
-        <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold text-purple-300 mb-6">Personal Information</h2>
+        <div className="bg-gradient-to-br from-purple-900/20 via-black/40 to-indigo-900/20 rounded-lg border border-purple-500/30 p-6 backdrop-blur-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Basic Details</h3>
+                <h3 className="text-sm font-medium text-purple-300">Basic Details</h3>
                 <div className="mt-2 space-y-2">
-                  <p className="text-gray-800">
-                    <span className="font-medium">Name:</span> {profile.name}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Name:</span> {profile.name}
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">Email:</span> {profile.email}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Email:</span> {profile.email}
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">Phone:</span> {profile.phone}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Phone:</span> {profile.phone}
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">Date of Birth:</span>{" "}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Date of Birth:</span>{" "}
                     {new Date(profile.dob).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Education</h3>
-                <div className="mt-2 space-y-2">
-                  <p className="text-gray-800">
-                    <span className="font-medium">Degree:</span> {profile.degree}
+                <h3 className="text-sm font-medium text-purple-300">Education</h3>
+                <div className="mt-2 space-y-2 text-purple-100/80">
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Degree:</span> {profile.degree}
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">Field of Study:</span> {profile.fieldOfStudy}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Field of Study:</span> {profile.fieldOfStudy}
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">Year of Graduation:</span>{" "}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">Year of Graduation:</span>{" "}
                     {profile.yearOfGraduation}
                   </p>
                 </div>
@@ -89,12 +89,12 @@ const UserProfile = () => {
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Skills</h3>
+                <h3 className="text-sm font-medium text-purple-300">Skills</h3>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {profile.skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-sm border border-purple-500/30"
                     >
                       {skill}
                     </span>
@@ -103,26 +103,26 @@ const UserProfile = () => {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Professional Links</h3>
-                <div className="mt-2 space-y-2">
-                  <p className="text-gray-800">
-                    <span className="font-medium">LinkedIn:</span>{" "}
+                <h3 className="text-sm font-medium text-purple-300">Professional Links</h3>
+                <div className="mt-2 space-y-2 text-purple-100/80">
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">LinkedIn:</span>{" "}
                     <a
                       href={profile.linkedIn}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-purple-300 hover:text-purple-200 hover:underline transition-colors"
                     >
                       {profile.linkedIn}
                     </a>
                   </p>
-                  <p className="text-gray-800">
-                    <span className="font-medium">GitHub:</span>{" "}
+                  <p className="text-purple-100">
+                    <span className="font-medium text-purple-300">GitHub:</span>{" "}
                     <a
                       href={profile.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-purple-300 hover:text-purple-200 hover:underline transition-colors"
                     >
                       {profile.github}
                     </a>

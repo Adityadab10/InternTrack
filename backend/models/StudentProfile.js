@@ -11,7 +11,12 @@ const studentProfileSchema = new mongoose.Schema({
   skills: [{ type: String }],
   linkedIn: { type: String, required: true },
   github: { type: String, required: true },
-  resumeUrl: { type: String, required: true }
+  resumeUrl: { type: String, required: true },
+  mentor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Mentor',
+    default: null
+  }
 }, {
   timestamps: true
 });
