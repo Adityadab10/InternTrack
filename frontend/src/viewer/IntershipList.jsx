@@ -26,7 +26,7 @@ const InternshipList = ({ filters, onFilterChange }) => {
       id: 2,
       title: "Electrical Design Intern",
       company: "PowerSystems Inc.",
-      department: "Electrical Engineering",
+      department: "ECS Engineering",
       duration: "6 months",
       location: "Hybrid",
       sdgs: [7, 9, 11],
@@ -67,16 +67,16 @@ const InternshipList = ({ filters, onFilterChange }) => {
     },
     {
       id: 5,
-      title: "Structural Engineering Intern",
-      company: "BuildCo",
-      department: "Civil Engineering",
+      title: "Mechin learning Intern",
+      company: "TECHHACK",
+      department: "AIDS Engineering",
       duration: "6 months",
-      location: "On-site",
+      location: "Remote",
       sdgs: [9, 11],
       pos: ["PO3", "PO4", "PO6"],
       peos: ["PEO2", "PEO3"],
-      description: "Assist in designing and analyzing structural components for sustainable buildings.",
-      requirements: "Knowledge of structural analysis, AutoCAD, and building codes.",
+      description: "Analyze large datasets to extract insights for business decision-making.",
+      requirements: "Knowledge of Python and Machin learning algorithms.",
       sector: "Construction",
     },
   ]
@@ -129,9 +129,9 @@ const InternshipList = ({ filters, onFilterChange }) => {
         >
           <option value="">All Departments</option>
           <option value="Computer Science">Computer Science</option>
-          <option value="Electrical Engineering">Electrical Engineering</option>
+          <option value="Electrical Engineering">ECS Engineering</option>
           <option value="Mechanical Engineering">Mechanical Engineering</option>
-          <option value="Civil Engineering">Civil Engineering</option>
+          <option value="Civil Engineering">AIDS Engineering</option>
         </select>
 
         <select className="select-field" value={filters.sdg} onChange={(e) => onFilterChange("sdg", e.target.value)}>
