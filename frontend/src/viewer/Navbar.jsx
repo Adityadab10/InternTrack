@@ -9,7 +9,7 @@ const Navbar = ({ toggleSidebar }) => {
           <MenuIcon className="h-6 w-6" />
         </button>
         <h1 className="text-xl font-bold text-white">
-          Internship <span className="text-purple-500">Statistics</span>
+          Internship sa<span className="text-purple-500">Statistics</span>
         </h1>
       </div>
 
