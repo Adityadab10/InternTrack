@@ -24,12 +24,17 @@ const applicationSchema = new mongoose.Schema({
     enum: ['Pending', 'Accepted', 'Rejected'],
     default: 'Pending'
   },
+  resumeUrl: String,
   tasks: [{
     type: String
   }],
   appliedAt: {
     type: Date,
     default: Date.now
+  },
+  studentProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'StudentProfile'
   }
 }, {
   timestamps: true

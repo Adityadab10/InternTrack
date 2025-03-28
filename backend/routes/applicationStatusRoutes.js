@@ -1,6 +1,7 @@
 const express = require("express");
 const ApplicationStatus = require("../models/ApplicationStatus");
 const Application = require('../models/Application');
+const StudentProfile = require('../models/StudentProfile');
 
 const router = express.Router();
 
@@ -223,6 +224,32 @@ router.get('/approved/:email', async (req, res) => {
       success: false,
       message: 'Failed to fetch approved internships'
     });
+  }
+});
+
+// Get all applications with student profiles
+router.get('/applications', async (req, res) => {
+  try {
+    // First, get all applications
+    const applications = await Application.find().sort({ createdAt: -1 });
+
+    // Fetch student profiles and enrich the applications data
+    const enrichedApplications = await Promise.all(
+      applications.map(async (application) => {
+        const studentProfile = await StudentProfile.findOne({ email: application.studentId });
+        
+        return {
+          ...application.toObject(),
+          studentProfile: studentProfile ? studentProfile.toObject() : null,
+          studentName: studentProfile ? studentProfile.name : application.studentId
+        };
+      })
+    );
+
+    res.json(enrichedApplications);
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({ message: 'Failed to fetch applications' });
   }
 });
 

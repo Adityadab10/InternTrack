@@ -5,6 +5,8 @@ const AdminStats = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -13,29 +15,45 @@ const AdminStats = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/applications', {
+      // First fetch the student profile
+      const profileResponse = await fetch(`http://localhost:5000/api/student-profile/${selectedProfile?.studentId}`, {
+        credentials: 'include'
+      });
+      
+      // Then fetch the applications with enriched data
+      const response = await fetch('http://localhost:5000/api/application-status/applications', {
         credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch applications");
+        throw new Error('Failed to fetch applications');
       }
 
-      const applications = await response.json();
-      console.log('Fetched applications:', applications);
-
-      // Validate and transform the data
-      const validApplications = applications.filter(app => app._id && app.internshipTitle && app.company);
+      const data = await response.json();
       
-      if (validApplications.length !== applications.length) {
-        console.warn('Some applications were filtered out due to missing required fields');
-      }
+      // Enrich the applications data with student profiles
+      const enrichedData = await Promise.all(data.map(async (application) => {
+        const profileResponse = await fetch(
+          `http://localhost:5000/api/student-profile/by-email/${application.studentId}`,
+          { credentials: 'include' }
+        );
+        
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          return {
+            ...application,
+            studentProfile: profileData,
+            studentName: profileData.name
+          };
+        }
+        return application;
+      }));
 
-      setStats(validApplications);
+      setStats(enrichedData);
       setError(null);
     } catch (err) {
-      console.error("Error fetching stats:", err);
-      setError("Failed to load stats. Please try again.");
+      console.error('Error:', err);
+      setError('Failed to load applications');
     } finally {
       setLoading(false);
     }
@@ -159,6 +177,141 @@ const AdminStats = () => {
     }
   };
 
+  const handleViewProfile = (application) => {
+    setSelectedProfile(application);
+    setShowProfileModal(true);
+  };
+
+  const renderProfileModal = () => {
+    if (!selectedProfile || !selectedProfile.studentProfile) return null;
+
+    const profile = selectedProfile.studentProfile;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Student Profile</h2>
+            <button 
+              onClick={() => setShowProfileModal(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600">Name</p>
+                  <p className="font-medium">{profile.name}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Email</p>
+                  <p className="font-medium">{profile.email}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Phone</p>
+                  <p className="font-medium">{profile.phone}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Education */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Education</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600">Degree</p>
+                  <p className="font-medium">{profile.degree}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Field of Study</p>
+                  <p className="font-medium">{profile.fieldOfStudy}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Year of Graduation</p>
+                  <p className="font-medium">{profile.yearOfGraduation}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Skills */}
+            {profile.skills && profile.skills.length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {profile.skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Professional Links */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Professional Links</h3>
+              <div className="space-y-3">
+                {profile.linkedIn && (
+                  <a
+                    href={profile.linkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-blue-600 hover:text-blue-800"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                    LinkedIn Profile
+                  </a>
+                )}
+                {profile.github && (
+                  <a
+                    href={profile.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-gray-700 hover:text-gray-900"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub Profile
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Resume */}
+            {profile.resumeFile && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Resume</h3>
+                <a
+                  href={`http://localhost:5000/uploads/resumes/${profile.resumeFile}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Download Resume
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderApplicationCard = (stat) => {
     // Add validation check
     if (!stat || !stat._id || !stat.internshipTitle || !stat.company) {
@@ -182,11 +335,79 @@ const AdminStats = () => {
           {stat.internshipTitle}
         </h3>
         <p className="text-gray-700">Company: {stat.company}</p>
-        <p className="text-gray-700">
-          Student Name: {stat.studentName || `Student ${stat.studentId}`}
-        </p>
-        {/* Updated Resume Link with icon and better visibility */}
-        {stat.resumeUrl ? (
+        
+        {/* Student Profile Information */}
+        <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+          <h4 className="font-medium text-gray-800 mb-3">Student Information</h4>
+          <div className="space-y-2">
+            <p className="text-gray-700">
+              <span className="font-medium">Name:</span> {stat.studentName || `Student ${stat.studentId}`}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-medium">Email:</span> {stat.studentId}
+            </p>
+            {stat.studentProfile && (
+              <>
+                <p className="text-gray-700">
+                  <span className="font-medium">Phone:</span> {stat.studentProfile.phone}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Degree:</span> {stat.studentProfile.degree}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Field of Study:</span> {stat.studentProfile.fieldOfStudy}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Year of Graduation:</span> {stat.studentProfile.yearOfGraduation}
+                </p>
+                <div className="mt-2">
+                  <span className="font-medium text-gray-700">Skills:</span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {stat.studentProfile.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2">
+                  {stat.studentProfile.linkedIn && (
+                    <a
+                      href={stat.studentProfile.linkedIn}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                      LinkedIn Profile
+                    </a>
+                  )}
+                  {stat.studentProfile.github && (
+                    <a
+                      href={stat.studentProfile.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-gray-700 hover:text-gray-900"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                      GitHub Profile
+                    </a>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Resume Section */}
+        {stat.resumeUrl && (
           <div className="mt-3">
             <a 
               href={`http://localhost:5000${stat.resumeUrl}`}
@@ -200,58 +421,41 @@ const AdminStats = () => {
               View Resume
             </a>
           </div>
-        ) : (
-          <p className="text-gray-500 italic mt-2">No resume available</p>
         )}
-        <div className="mt-2 space-y-1">
-          <p className="text-sm text-gray-600">
-            <span className="font-medium">Status: </span>
-            <span
-              className={`px-2 py-1 rounded-full text-xs ${
-                stat.status === "Pending"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              {stat.status}
-            </span>
-          </p>
-          <p className="text-sm text-gray-600">
-            <span className="font-medium">Applied: </span>
-            {new Date(stat.appliedAt).toLocaleString()}
-          </p>
+
+        {/* Status and Actions */}
+        <div className="mt-4 flex justify-between items-center">
+          <span className={`px-3 py-1 rounded-full text-sm ${
+            isApproved ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+          }`}>
+            {stat.status}
+          </span>
+          
+          {!isApproved && (
+            <div className="space-x-2">
+              <button
+                onClick={() => handleApprove(stat)}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => handleReject(stat._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Reject
+              </button>
+            </div>
+          )}
         </div>
 
-        {isApproved && stat.tasks ? (
-          // Show assigned tasks for approved applications
-          <div className="mt-4 bg-gray-50 p-3 rounded">
-            <h4 className="font-medium text-gray-700 mb-2">Assignment Details</h4>
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Tasks:</span>
-              <ul className="list-disc list-inside mt-1">
-                {stat.tasks.map((task, index) => (
-                  <li key={index} className="ml-2">{task}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : (
-          // Show approve/reject buttons for pending applications
-          <div className="mt-4 flex justify-between">
-            <button
-              onClick={() => handleApprove(stat)}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Approve
-            </button>
-            <button
-              onClick={() => handleReject(stat._id)}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              Reject
-            </button>
-          </div>
-        )}
+        {/* View Profile Button */}
+        <button
+          onClick={() => handleViewProfile(stat)}
+          className="mt-4 w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors"
+        >
+          View Full Profile
+        </button>
       </div>
     );
   };
@@ -288,6 +492,9 @@ const AdminStats = () => {
         </div>
       )}
 
+      {/* Add Profile Modal */}
+      {showProfileModal && renderProfileModal()}
+      
       {/* Task Assignment Form - updated without mentor selection */}
       {selectedApplication && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

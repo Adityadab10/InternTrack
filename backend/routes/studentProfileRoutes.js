@@ -160,4 +160,18 @@ router.get('/mentors', async (req, res) => {
   }
 });
 
+// Get student profile by email
+router.get('/student-profile/by-email/:email', async (req, res) => {
+  try {
+    const profile = await StudentProfile.findOne({ email: req.params.email });
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+    res.json(profile);
+  } catch (error) {
+    console.error('Error fetching student profile:', error);
+    res.status(500).json({ message: 'Failed to fetch student profile' });
+  }
+});
+
 module.exports = router;

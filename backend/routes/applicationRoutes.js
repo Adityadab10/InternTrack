@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Application = require('../models/Application');
 const Internship = require('../models/Internship');
+const StudentProfile = require('../models/StudentProfile');
 
 // Mock data
 
@@ -71,18 +72,12 @@ router.get('/applications/student/:studentId', async (req, res) => {
 router.post('/applications', async (req, res) => {
   try {
     const { studentId, internshipId, internshipTitle, company } = req.body;
-    console.log("Creating application:", { studentId, internshipId, internshipTitle, company }); // Debug log
     
-    // Check if application already exists
-    const existingApplication = await Application.findOne({ 
-      studentId, 
-      internshipId 
-    });
+    // Find the student profile
+    const studentProfile = await StudentProfile.findOne({ email: studentId });
     
-    if (existingApplication) {
-      return res.status(400).json({ 
-        error: 'Already applied to this internship' 
-      });
+    if (!studentProfile) {
+      return res.status(404).json({ message: 'Student profile not found' });
     }
 
     const application = new Application({
@@ -90,16 +85,15 @@ router.post('/applications', async (req, res) => {
       internshipId,
       internshipTitle,
       company,
-      studentName: `Student ${studentId}` // You can modify this based on your user system
+      studentProfile: studentProfile._id, // Link the student profile
+      resumeUrl: studentProfile.resumeFile ? `/uploads/resumes/${studentProfile.resumeFile}` : null
     });
 
-    const savedApplication = await application.save();
-    console.log("Saved application:", savedApplication); // Debug log
-
-    res.status(201).json(savedApplication);
+    await application.save();
+    res.status(201).json(application);
   } catch (error) {
     console.error('Error creating application:', error);
-    res.status(500).json({ error: 'Failed to create application' });
+    res.status(500).json({ message: 'Failed to create application' });
   }
 });
 
