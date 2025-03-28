@@ -1,107 +1,84 @@
-import { useState } from 'react';
+// LoginPage.js
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth, provider } from "../firebase"; // Updated import path
+import { signInWithPopup } from "firebase/auth";
+import { useAuth } from '../context/AuthContext';
 
-export default function StudentLogin() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
-  });
-  
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+const StudentLogin = () => {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Assuming your AuthContext has a login method
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      
+      // Update the auth context
+      await login(result.user);
+
+      // Check if profile exists
+      try {
+        const response = await fetch(`http://localhost:5000/api/student-profile/${result.user.email}`, {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const profile = await response.json();
+          localStorage.setItem('studentProfile', JSON.stringify(profile));
+          navigate('/student/StudentDashboard');
+        } else {
+          // If no profile exists, redirect to profile form
+          navigate('/student/StudentProfileForm');
+        }
+      } catch (error) {
+        console.error("Error checking profile:", error);
+        navigate('/student/StudentProfileForm');
+      }
+    } catch (error) {
+      console.error("Error during Google Sign-In:", error.message);
+    }
   };
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log('Student login attempt:', formData);
-  };
-  
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black p-4">
+    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-purple-900 to-black">
       <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mb-4">
-            <img 
-              src="/placeholder.svg" 
-              alt="Student Icon" 
-              className="w-8 h-8 invert" 
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">Student Login</h1>
+        {user ? (
+          <div className="text-center text-white">
+            <h2 className="text-lg font-medium">Welcome, {user.displayName}</h2>
+            <img
+              src={user.photoURL}
+              alt="User Avatar"
+              className="w-16 h-16 rounded-full mx-auto my-4"
             />
+            <p>{user.email}</p>
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
+              onClick={() => auth.signOut().then(() => setUser(null))}
+            >
+              Sign Out
+            </button>
           </div>
-          <h1 className="text-2xl font-bold text-white">Student Login</h1>
-          <p className="text-purple-200 text-center mt-2">Access your internship dashboard</p>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-purple-200">
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-purple-500 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="your.email@university.edu"
-            />
+        ) : (
+          <div>
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200 flex items-center justify-center"
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"
+                alt="Google Logo"
+                className="w-6 h-6 mr-2 bg-white rounded-full p-1"
+              />
+              Sign in with Google
+            </button>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium text-purple-200">
-                Password
-              </label>
-              <a href="#" className="text-sm text-purple-300 hover:text-purple-200">
-                Forgot password?
-              </a>
-            </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-purple-500 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="••••••••"
-            />
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              id="rememberMe"
-              name="rememberMe"
-              type="checkbox"
-              checked={formData.rememberMe}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-purple-500 text-purple-600 focus:ring-purple-500"
-            />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-purple-200">
-              Remember me
-            </label>
-          </div>
-          
-          <button
-            type="submit"
-            className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200"
-          >
-            Sign in
-          </button>
-        </form>
-        
-        <div className="mt-6 text-center">
-          <a href="/" className="text-sm text-purple-300 hover:text-purple-200">
-            ← Back to user selection
-          </a>
-        </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default StudentLogin;

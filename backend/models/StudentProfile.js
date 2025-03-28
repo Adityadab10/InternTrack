@@ -8,10 +8,10 @@ const studentProfileSchema = new mongoose.Schema({
   degree: { type: String, required: true },
   fieldOfStudy: { type: String, required: true },
   yearOfGraduation: { type: Number, required: true },
-  skills: [{ type: String }],
+  skills: { type: [String], required: true },
+  resumeFile: { type: String, required: true },
   linkedIn: { type: String, required: true },
   github: { type: String, required: true },
-  resumeUrl: { type: String, required: true },
   mentor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Mentor',

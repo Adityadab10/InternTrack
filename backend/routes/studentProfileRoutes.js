@@ -3,45 +3,44 @@ const multer = require("multer");
 const path = require("path");
 const StudentProfile = require("../models/StudentProfile");
 const Mentor = require('../models/Mentor');
+const { createStudentProfile } = require('../controllers/studentProfileController');
 
 const router = express.Router();
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, "uploads/resumes/");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // Create unique filename with original extension
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+// File filter
+const fileFilter = (req, file, cb) => {
+  // Accept pdf, doc, and docx files
+  if (file.mimetype === 'application/pdf' || 
+      file.mimetype === 'application/msword' || 
+      file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only PDF, DOC, and DOCX files are allowed.'), false);
+  }
+};
 
-// POST: Create student profile
-router.post("/student-profile", upload.single("resume"), async (req, res) => {
-  try {
-    const profileData = {
-      ...req.body,
-      resumeUrl: req.file ? req.file.path : "",
-      skills: Array.isArray(req.body.skills) ? req.body.skills : JSON.parse(req.body.skills)
-    };
-
-    const studentProfile = new StudentProfile(profileData);
-    const savedProfile = await studentProfile.save();
-
-    res.status(201).json({
-      success: true,
-      data: savedProfile
-    });
-  } catch (error) {
-    console.error("Error creating student profile:", error);
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 });
+
+// POST route to create student profile
+router.post('/student-profile', upload.single('resume'), createStudentProfile);
 
 // GET: Fetch student profile
 router.get("/student-profile/:email", async (req, res) => {

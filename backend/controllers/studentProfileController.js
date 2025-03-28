@@ -4,7 +4,14 @@ const StudentProfile = require("../models/StudentProfile");
 const createStudentProfile = async (req, res) => {
   try {
     const { name, email, phone, dob, degree, fieldOfStudy, yearOfGraduation, skills, linkedIn, github } = req.body;
+    
+    // Check if profile already exists
+    const existingProfile = await StudentProfile.findOne({ email });
+    if (existingProfile) {
+      return res.status(400).json({ message: "Profile already exists for this email" });
+    }
 
+    // Create new profile
     const newProfile = new StudentProfile({
       name,
       email,
@@ -14,16 +21,22 @@ const createStudentProfile = async (req, res) => {
       fieldOfStudy,
       yearOfGraduation,
       skills: JSON.parse(skills), // Parse skills array from string
-      resume: req.file.path, // Resume file path
+      resumeFile: req.file ? req.file.filename : null, // Save filename if file was uploaded
       linkedIn,
       github,
     });
 
-    await newProfile.save();
-    res.status(201).json({ message: "Profile saved successfully", profile: newProfile });
+    const savedProfile = await newProfile.save();
+    res.status(201).json({ 
+      message: "Profile created successfully", 
+      profile: savedProfile 
+    });
   } catch (error) {
-    console.error("Error saving profile:", error);
-    res.status(500).json({ error: "Failed to save profile" });
+    console.error("Error in createStudentProfile:", error);
+    res.status(500).json({ 
+      message: "Failed to create profile", 
+      error: error.message 
+    });
   }
 };
 

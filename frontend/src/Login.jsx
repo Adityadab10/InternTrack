@@ -8,9 +8,14 @@ export default function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, check for profile
     if (user) {
-      navigate('/student/StudentDashboard')
+      const savedProfile = localStorage.getItem('studentProfile')
+      if (savedProfile) {
+        navigate('/student/StudentDashboard')
+      } else {
+        navigate('/student/StudentProfileForm')
+      }
     }
   }, [user, navigate])
 
@@ -34,13 +39,7 @@ export default function Login() {
           navigate('/admin/AdminDashboard')
           break
         case 'student':
-          // Check if profile exists
-          const savedProfile = localStorage.getItem('studentProfile')
-          if (savedProfile) {
-            navigate('/student/StudentDashboard')
-          } else {
-            navigate('/student/StudentProfileForm')
-          }
+          navigate('/student/StudentLogin')
           break
         default:
           console.error('Unknown user type')
