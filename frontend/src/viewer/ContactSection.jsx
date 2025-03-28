@@ -77,7 +77,7 @@ const ContactSection = () => {
                       value={formData.name}
                       onChange={handleChange}
                       className="input-field pl-10 w-full"
-                      placeholder="John Doe"
+                      placeholder="Adi Dab"
                       required
                     />
                     <UserIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
@@ -96,7 +96,7 @@ const ContactSection = () => {
                       value={formData.email}
                       onChange={handleChange}
                       className="input-field pl-10 w-full"
-                      placeholder="john@example.com"
+                      placeholder="adidab@gmail.com"
                       required
                     />
                     <MailIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
@@ -174,7 +174,7 @@ const ContactSection = () => {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-medium text-gray-400">Email</h4>
-                  <p className="mt-1">internships@university.edu</p>
+                  <p className="mt-1">internships@frcrce.edu</p>
                 </div>
               </div>
 
@@ -195,9 +195,9 @@ const ContactSection = () => {
                 <div className="ml-4">
                   <h4 className="text-sm font-medium text-gray-400">Address</h4>
                   <p className="mt-1">
-                    123 University Ave, Suite 400
+                    Fr. Agnal Ashram
                     <br />
-                    College Town, ST 12345
+                    Bandstand, Bandra(W)
                   </p>
                 </div>
               </div>
@@ -228,30 +228,30 @@ const ContactSection = () => {
             <div className="space-y-4">
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <span className="font-medium">JS</span>
+                  <span className="font-medium">PP</span>
                 </div>
                 <div className="ml-3">
-                  <h4 className="font-medium">Dr. John Smith</h4>
+                  <h4 className="font-medium">Prof. Prachi Patil</h4>
                   <p className="text-sm text-gray-400">Computer Science</p>
                 </div>
               </div>
 
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <span className="font-medium">RP</span>
+                  <span className="font-medium">RL</span>
                 </div>
                 <div className="ml-3">
-                  <h4 className="font-medium">Dr. Rachel Patel</h4>
-                  <p className="text-sm text-gray-400">Electrical Engineering</p>
+                  <h4 className="font-medium">Prof.Roshni Lad</h4>
+                  <p className="text-sm text-gray-400">Computer Engineering</p>
                 </div>
               </div>
 
               <div className="flex items-center">
                 <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-                  <span className="font-medium">MJ</span>
+                  <span className="font-medium">B</span>
                 </div>
                 <div className="ml-3">
-                  <h4 className="font-medium">Dr. Michael Johnson</h4>
+                  <h4 className="font-medium">Dr.Bhushan </h4>
                   <p className="text-sm text-gray-400">Mechanical Engineering</p>
                 </div>
               </div>
