@@ -1,6 +1,0 @@
-// ... existing imports ...
-
-// Add this to serve static files
-
-
-// ... rest of your app configuration ... 
