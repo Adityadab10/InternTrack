@@ -15,12 +15,7 @@ const AdminStats = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // First fetch the student profile
-      const profileResponse = await fetch(`http://localhost:5000/api/student-profile/${selectedProfile?.studentId}`, {
-        credentials: 'include'
-      });
-      
-      // Then fetch the applications with enriched data
+      // Fetch applications
       const response = await fetch('http://localhost:5000/api/application-status/applications', {
         credentials: 'include'
       });
@@ -31,22 +26,40 @@ const AdminStats = () => {
 
       const data = await response.json();
       
-      // Enrich the applications data with student profiles
+      // Enrich the applications data with student profiles and resume analysis
       const enrichedData = await Promise.all(data.map(async (application) => {
-        const profileResponse = await fetch(
-          `http://localhost:5000/api/student-profile/by-email/${application.studentId}`,
-          { credentials: 'include' }
-        );
-        
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          return {
-            ...application,
-            studentProfile: profileData,
-            studentName: profileData.name
-          };
+        try {
+          const profileResponse = await fetch(
+            `http://localhost:5000/api/student-profile/by-email/${application.studentId}`,
+            { credentials: 'include' }
+          );
+          
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json();
+            let resumeRating = null;
+
+            // If there's a resume, analyze it
+            if (profileData.resumeFile) {
+              console.log(`Analyzing resume for ${profileData.name}...`);
+              resumeRating = await analyzeResume(
+                `/uploads/resumes/${profileData.resumeFile}`,
+                profileData.skills
+              );
+              console.log(`Resume rating for ${profileData.name}: ${resumeRating}/10`);
+            }
+
+            return {
+              ...application,
+              studentProfile: profileData,
+              studentName: profileData.name,
+              resumeRating
+            };
+          }
+          return application;
+        } catch (error) {
+          console.error(`Error processing application for ${application.studentId}:`, error);
+          return application;
         }
-        return application;
       }));
 
       setStats(enrichedData);
@@ -180,6 +193,53 @@ const AdminStats = () => {
   const handleViewProfile = (application) => {
     setSelectedProfile(application);
     setShowProfileModal(true);
+  };
+
+  const analyzeResume = async (resumeUrl, skills) => {
+    try {
+      console.log('Starting resume analysis for:', resumeUrl);
+      
+      // Make sure we have valid inputs
+      if (!resumeUrl || !skills || !Array.isArray(skills)) {
+        console.error('Invalid inputs for resume analysis:', { resumeUrl, skills });
+        return null;
+      }
+
+      // Ensure the URL is properly formatted
+      const fullResumeUrl = resumeUrl.startsWith('http') 
+        ? resumeUrl 
+        : `http://localhost:5000${resumeUrl}`;
+
+      console.log('Sending analysis request with:', {
+        resumeUrl: fullResumeUrl,
+        skills: skills
+      });
+
+      const response = await fetch('http://localhost:5000/api/analyze-resume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          resumeUrl: fullResumeUrl,
+          skills: skills
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Server responded with error:', errorData);
+        throw new Error(errorData.error || 'Failed to analyze resume');
+      }
+
+      const data = await response.json();
+      console.log('Resume analysis successful:', data);
+      return Number(data.rating);
+    } catch (error) {
+      console.error('Resume analysis failed:', error);
+      return null;
+    }
   };
 
   const renderProfileModal = () => {
@@ -420,6 +480,33 @@ const AdminStats = () => {
               </svg>
               View Resume
             </a>
+          </div>
+        )}
+
+        {/* Resume Rating */}
+        {stat.resumeUrl && (
+          <div className="mt-3 bg-blue-50 p-3 rounded-lg">
+            <h4 className="font-medium text-gray-800 mb-2">Resume Rating</h4>
+            <div className="flex items-center">
+              <div className="flex-1">
+                <div className="h-2 bg-gray-200 rounded-full">
+                  <div 
+                    className="h-2 bg-blue-600 rounded-full" 
+                    style={{ width: `${(stat.resumeRating || 0) * 10}%` }}
+                  ></div>
+                </div>
+              </div>
+              <span className="ml-3 font-medium text-blue-600">
+                {stat.resumeRating 
+                  ? `${Number(stat.resumeRating).toFixed(2)}/10` 
+                  : 'Analyzing...'}
+              </span>
+            </div>
+            {stat.resumeAnalysis?.explanation && (
+              <p className="mt-2 text-sm text-gray-600">
+                {stat.resumeAnalysis.explanation}
+              </p>
+            )}
           </div>
         )}
 
