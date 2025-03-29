@@ -4,14 +4,51 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const path = require('path');
 const pdf = require('pdf-parse');
+const rateLimit = require('express-rate-limit');
 
 // Initialize Gemini Pro
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-router.post('/analyze-resume', async (req, res) => {
+// Create rate limiter
+const analyzeLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 2, // limit each IP to 2 requests per minute
+  message: { error: 'Too many analysis requests, please try again later' }
+});
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const analyzeWithRetry = async (model, prompt, maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await model.generateContent(prompt);
+      return result;
+    } catch (error) {
+      if (error.status === 429 && attempt < maxRetries) {
+        // Wait with exponential backoff: 1s, 2s, 4s...
+        const waitTime = Math.pow(2, attempt - 1) * 1000;
+        console.log(`Rate limited. Retrying in ${waitTime}ms...`);
+        await delay(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+};
+
+const resumeCache = new Map();
+
+router.post('/analyze-resume', analyzeLimit, async (req, res) => {
   try {
     const { resumeUrl, skills, jobRole = 'Not Specified', company = 'Not Specified' } = req.body;
+    const cacheKey = `${resumeUrl}-${jobRole}-${skills.join(',')}`;
     
+    // Check cache first
+    if (resumeCache.has(cacheKey)) {
+      console.log('Returning cached analysis');
+      return res.json(resumeCache.get(cacheKey));
+    }
+
     console.log('Analyzing resume:', { resumeUrl, skills, jobRole, company });
 
     if (!resumeUrl) {
@@ -89,7 +126,7 @@ router.post('/analyze-resume', async (req, res) => {
     try {
       console.log('Sending request to Gemini...');
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-      const result = await model.generateContent(prompt);
+      const result = await analyzeWithRetry(model, prompt);
       const response = result.response;
       const analysisText = response.text().trim();
       
@@ -127,9 +164,22 @@ router.post('/analyze-resume', async (req, res) => {
       }
 
       console.log('Final analysis:', analysis);
+
+      // Cache the result for 24 hours
+      resumeCache.set(cacheKey, analysis);
+      setTimeout(() => resumeCache.delete(cacheKey), 24 * 60 * 60 * 1000);
+
       res.json(analysis);
 
     } catch (geminiError) {
+      if (geminiError.status === 429) {
+        // Handle rate limit error
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          details: 'Please wait before requesting another analysis',
+          retryAfter: '60 seconds'
+        });
+      }
       console.error('Error with Gemini API:', geminiError);
       res.status(500).json({
         error: 'Failed to analyze resume',

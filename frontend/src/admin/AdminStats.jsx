@@ -630,6 +630,29 @@ const AdminStats = () => {
     });
   };
 
+  const groupAndSortApplications = (applications) => {
+    // First, group applications by internship title
+    const grouped = applications.reduce((acc, app) => {
+      const key = `${app.internshipTitle}-${app.company}`;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(app);
+      return acc;
+    }, {});
+
+    // Sort applications within each group by resume rating
+    Object.keys(grouped).forEach(key => {
+      grouped[key].sort((a, b) => {
+        const ratingA = a.resumeRating?.rating || 0;
+        const ratingB = b.resumeRating?.rating || 0;
+        return ratingB - ratingA; // Descending order
+      });
+    });
+
+    return grouped;
+  };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Application Statistics</h2>
@@ -654,9 +677,20 @@ const AdminStats = () => {
               <p className="mb-4 text-gray-600">
                 Total Applications: {stats.filter(s => s.status !== "Rejected").length}
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {stats.map(renderApplicationCard)}
-              </div>
+              {/* Group and render applications */}
+              {Object.entries(groupAndSortApplications(stats)).map(([key, applications]) => (
+                <div key={key} className="mb-8">
+                  <h3 className="text-lg font-semibold mb-4 bg-gray-100 p-3 rounded">
+                    {key.split('-')[0]} - {key.split('-')[1]}
+                    <span className="ml-2 text-sm font-normal text-gray-600">
+                      ({applications.length} applications)
+                    </span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {applications.map(app => renderApplicationCard(app))}
+                  </div>
+                </div>
+              ))}
             </>
           )}
         </div>
