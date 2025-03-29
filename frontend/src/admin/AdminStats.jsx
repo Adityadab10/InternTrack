@@ -7,6 +7,7 @@ const AdminStats = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
+  const [expandedExplanations, setExpandedExplanations] = useState(new Set());
 
   useEffect(() => {
     fetchStats();
@@ -15,7 +16,6 @@ const AdminStats = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Fetch applications
       const response = await fetch('http://localhost:5000/api/application-status/applications', {
         credentials: 'include'
       });
@@ -43,9 +43,11 @@ const AdminStats = () => {
               console.log(`Analyzing resume for ${profileData.name}...`);
               resumeRating = await analyzeResume(
                 `/uploads/resumes/${profileData.resumeFile}`,
-                profileData.skills
+                profileData.skills || [],
+                application.internshipTitle,
+                application.company
               );
-              console.log(`Resume rating for ${profileData.name}: ${resumeRating}/10`);
+              console.log(`Resume analysis for ${profileData.name}:`, resumeRating);
             }
 
             return {
@@ -195,25 +197,23 @@ const AdminStats = () => {
     setShowProfileModal(true);
   };
 
-  const analyzeResume = async (resumeUrl, skills) => {
+  const analyzeResume = async (resumeUrl, skills, jobRole = 'Not Specified', company = 'Not Specified') => {
     try {
-      console.log('Starting resume analysis for:', resumeUrl);
+      console.log('Starting resume analysis for:', {
+        resumeUrl,
+        skills,
+        jobRole,
+        company
+      });
       
-      // Make sure we have valid inputs
       if (!resumeUrl || !skills || !Array.isArray(skills)) {
         console.error('Invalid inputs for resume analysis:', { resumeUrl, skills });
         return null;
       }
 
-      // Ensure the URL is properly formatted
       const fullResumeUrl = resumeUrl.startsWith('http') 
         ? resumeUrl 
         : `http://localhost:5000${resumeUrl}`;
-
-      console.log('Sending analysis request with:', {
-        resumeUrl: fullResumeUrl,
-        skills: skills
-      });
 
       const response = await fetch('http://localhost:5000/api/analyze-resume', {
         method: 'POST',
@@ -223,7 +223,9 @@ const AdminStats = () => {
         credentials: 'include',
         body: JSON.stringify({
           resumeUrl: fullResumeUrl,
-          skills: skills
+          skills,
+          jobRole,
+          company
         })
       });
 
@@ -235,10 +237,27 @@ const AdminStats = () => {
 
       const data = await response.json();
       console.log('Resume analysis successful:', data);
-      return Number(data.rating);
+      
+      // Return a properly structured object
+      return {
+        rating: Number(data.rating || 0),
+        explanation: data.explanation || 'Analysis completed',
+        roleMatch: data.roleMatch || {
+          strengthAreas: [],
+          improvementAreas: []
+        }
+      };
     } catch (error) {
       console.error('Resume analysis failed:', error);
-      return null;
+      // Return a default object instead of null
+      return {
+        rating: 0,
+        explanation: 'Analysis failed',
+        roleMatch: {
+          strengthAreas: [],
+          improvementAreas: []
+        }
+      };
     }
   };
 
@@ -484,29 +503,81 @@ const AdminStats = () => {
         )}
 
         {/* Resume Rating */}
-        {stat.resumeUrl && (
+        {stat.resumeRating && (
           <div className="mt-3 bg-blue-50 p-3 rounded-lg">
-            <h4 className="font-medium text-gray-800 mb-2">Resume Rating</h4>
+            <h4 className="font-medium text-gray-800 mb-2">Resume Analysis for {stat.internshipTitle}</h4>
             <div className="flex items-center">
               <div className="flex-1">
                 <div className="h-2 bg-gray-200 rounded-full">
                   <div 
                     className="h-2 bg-blue-600 rounded-full" 
-                    style={{ width: `${(stat.resumeRating || 0) * 10}%` }}
+                    style={{ width: `${(stat.resumeRating.rating || 0) * 10}%` }}
                   ></div>
                 </div>
               </div>
               <span className="ml-3 font-medium text-blue-600">
-                {stat.resumeRating 
-                  ? `${Number(stat.resumeRating).toFixed(2)}/10` 
+                {stat.resumeRating.rating 
+                  ? `${Number(stat.resumeRating.rating).toFixed(2)}/10` 
                   : 'Analyzing...'}
               </span>
             </div>
-            {stat.resumeAnalysis?.explanation && (
-              <p className="mt-2 text-sm text-gray-600">
-                {stat.resumeAnalysis.explanation}
-              </p>
-            )}
+            
+            {/* Collapsible Analysis Section */}
+            <div className="mt-3">
+              <button
+                onClick={() => toggleExplanation(stat._id)}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-blue-600 hover:text-blue-800"
+              >
+                <span>View Detailed Analysis</span>
+                <svg
+                  className={`w-5 h-5 transform transition-transform ${
+                    expandedExplanations.has(stat._id) ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Expandable Content */}
+              {expandedExplanations.has(stat._id) && (
+                <div className="mt-3 space-y-3">
+                  {/* Role Match Analysis */}
+                  {stat.resumeRating.roleMatch && (
+                    <div className="text-sm text-gray-600">
+                      <p className="font-medium mb-2">Strengths:</p>
+                      <ul className="list-disc list-inside mb-2">
+                        {stat.resumeRating.roleMatch.strengthAreas.map((strength, idx) => (
+                          <li key={idx}>{strength}</li>
+                        ))}
+                      </ul>
+                      
+                      <p className="font-medium mb-2">Areas for Improvement:</p>
+                      <ul className="list-disc list-inside">
+                        {stat.resumeRating.roleMatch.improvementAreas.map((area, idx) => (
+                          <li key={idx}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* Explanation */}
+                  {stat.resumeRating.explanation && (
+                    <div className="text-sm text-gray-600">
+                      <p className="font-medium">Analysis:</p>
+                      <p className="whitespace-pre-wrap">{stat.resumeRating.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -545,6 +616,18 @@ const AdminStats = () => {
         </button>
       </div>
     );
+  };
+
+  const toggleExplanation = (applicationId) => {
+    setExpandedExplanations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(applicationId)) {
+        newSet.delete(applicationId);
+      } else {
+        newSet.add(applicationId);
+      }
+      return newSet;
+    });
   };
 
   return (

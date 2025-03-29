@@ -10,38 +10,49 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post('/analyze-resume', async (req, res) => {
   try {
-    const { resumeUrl, skills } = req.body;
+    const { resumeUrl, skills, jobRole = 'Not Specified', company = 'Not Specified' } = req.body;
     
-    if (!resumeUrl || !skills) {
+    console.log('Analyzing resume:', { resumeUrl, skills, jobRole, company });
+
+    if (!resumeUrl) {
       return res.status(400).json({ 
-        error: 'Missing required fields',
-        details: 'Both resumeUrl and skills are required'
+        error: 'Missing resume URL',
+        details: 'Resume URL is required'
       });
     }
 
-    console.log('Processing resume analysis request:', { resumeUrl, skills });
-
-    // Extract the file path from the URL
-    const urlPath = new URL(resumeUrl).pathname;
-    const relativePath = urlPath.replace('/uploads/', '');
-    const resumePath = path.join(__dirname, '..', 'uploads', relativePath);
-
-    console.log('Looking for resume file at:', resumePath);
-
-    if (!fs.existsSync(resumePath)) {
-      console.error('Resume file not found:', resumePath);
-      return res.status(404).json({ 
+    // Extract file path from URL and handle both full URLs and relative paths
+    let resumePath;
+    try {
+      const urlParts = resumeUrl.split('/uploads/');
+      const relativePath = urlParts[urlParts.length - 1];
+      resumePath = path.join(__dirname, '..', 'uploads', relativePath);
+      
+      console.log('Looking for resume at:', resumePath);
+      
+      if (!fs.existsSync(resumePath)) {
+        throw new Error('File not found');
+      }
+    } catch (error) {
+      console.error('Error accessing resume file:', error);
+      return res.status(404).json({
         error: 'Resume file not found',
-        details: 'The specified resume file could not be found on the server'
+        details: `Could not access file at ${resumePath}`
       });
     }
 
+    // Read and parse PDF with error handling
     let pdfText;
     try {
       const dataBuffer = fs.readFileSync(resumePath);
       const pdfData = await pdf(dataBuffer);
       pdfText = pdfData.text;
-      console.log('Successfully parsed PDF, text length:', pdfText.length);
+      
+      if (!pdfText || pdfText.length === 0) {
+        throw new Error('Empty PDF content');
+      }
+      
+      console.log('Successfully parsed PDF, length:', pdfText.length);
     } catch (pdfError) {
       console.error('Error parsing PDF:', pdfError);
       return res.status(500).json({
@@ -50,83 +61,84 @@ router.post('/analyze-resume', async (req, res) => {
       });
     }
 
-    // Updated prompt with strict formatting instructions
+    // Create prompt for Gemini
     const prompt = `
-You are a resume analysis AI. Analyze the following resume and provide a rating between 1.00 and 10.00 based on:
-- Relevant skills matching: ${skills.join(', ')}
-- Project quality and relevance
-- Overall experience
-- Technical depth
+      You are an expert resume analyzer. Analyze this resume for the role of ${jobRole} at ${company}.
+      
+      Required skills: ${skills.join(', ')}
+      
+      Resume content:
+      ${pdfText}
+      
+      Provide a JSON response with:
+      1. A rating from 1-10 (decimals allowed) based on skills match and experience
+      2. A brief explanation of the rating
+      3. Key strengths and areas for improvement
+      
+      Format your response exactly like this:
+      {
+        "rating": 7.5,
+        "explanation": "Brief explanation here",
+        "roleMatch": {
+          "strengthAreas": ["strength 1", "strength 2"],
+          "improvementAreas": ["area 1", "area 2"]
+        }
+      }
+    `;
 
-Resume content:
-${pdfText}
-
-Important: Your response must be ONLY a valid JSON object in exactly this format, with no additional text before or after:
-{
-  "rating": <number between 1.00 and 10.00>,
-  "explanation": "<brief explanation of rating>"
-}
-`;
-
-    console.log('Sending request to Gemini...');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const analysisText = response.text().trim();
-
-    console.log('Raw Gemini response:', analysisText);
-
-    // Try to extract JSON from the response if it's wrapped in other text
-    let jsonStr = analysisText;
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[0];
-    }
-
-    // Parse the response with error handling
-    let analysis;
     try {
-      analysis = JSON.parse(jsonStr);
+      console.log('Sending request to Gemini...');
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const analysisText = response.text().trim();
       
-      if (typeof analysis.rating !== 'number' || !analysis.explanation) {
-        throw new Error('Invalid response format from Gemini');
-      }
+      console.log('Raw Gemini response:', analysisText);
 
-      // Ensure rating is between 1 and 10 and has 2 decimal places
-      analysis.rating = Math.max(1, Math.min(10, Number(analysis.rating)));
-      analysis.rating = Number(analysis.rating.toFixed(2));
+      // Parse the response
+      let analysis;
+      try {
+        // Try to extract JSON if response contains other text
+        const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : analysisText;
+        
+        analysis = JSON.parse(jsonStr);
+        
+        // Validate the parsed data
+        if (!analysis.rating || !analysis.explanation || !analysis.roleMatch) {
+          throw new Error('Invalid response structure');
+        }
 
-      console.log('Parsed analysis:', analysis);
+        // Ensure rating is between 1 and 10
+        analysis.rating = Math.max(1, Math.min(10, Number(analysis.rating)));
+        analysis.rating = Number(analysis.rating.toFixed(2));
 
-    } catch (parseError) {
-      console.error('Error parsing Gemini response:', parseError);
-      console.error('Raw response:', analysisText);
-      
-      // Fallback: Try to extract numbers and create a basic response
-      const numbers = analysisText.match(/\d+(\.\d+)?/g);
-      if (numbers && numbers.length > 0) {
-        const rating = Math.max(1, Math.min(10, Number(numbers[0])));
+      } catch (parseError) {
+        console.error('Error parsing Gemini response:', parseError);
+        // Provide a default response if parsing fails
         analysis = {
-          rating: Number(rating.toFixed(2)),
-          explanation: "Rating extracted from response"
+          rating: 5.00,
+          explanation: "Unable to generate detailed analysis",
+          roleMatch: {
+            strengthAreas: ["Resume received"],
+            improvementAreas: ["Analysis unavailable"]
+          }
         };
-      } else {
-        return res.status(500).json({
-          error: 'Failed to parse analysis result',
-          details: parseError.message,
-          rawResponse: analysisText
-        });
       }
-    }
 
-    // Send successful response
-    res.json({
-      rating: analysis.rating,
-      explanation: analysis.explanation
-    });
+      console.log('Final analysis:', analysis);
+      res.json(analysis);
+
+    } catch (geminiError) {
+      console.error('Error with Gemini API:', geminiError);
+      res.status(500).json({
+        error: 'Failed to analyze resume',
+        details: geminiError.message
+      });
+    }
 
   } catch (error) {
-    console.error('Error in resume analysis:', error);
+    console.error('General error in resume analysis:', error);
     res.status(500).json({ 
       error: 'Failed to analyze resume',
       details: error.message 
