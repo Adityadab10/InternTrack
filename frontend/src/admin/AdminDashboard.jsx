@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import InternshipForm from "./InternshipForm";
 import InternshipDisplay from "./InternshipDisplay";
 import AdminStats from "./AdminStats";
+import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
@@ -92,18 +93,18 @@ const AdminDashboard = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-800">Internship Management</h1>
+              <h1 className="text-2xl font-bold text-purple-300">Internship Management</h1>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
               >
                 Add New Internship
               </button>
             </div>
 
-            {loading && <p className="text-gray-600">Loading internships...</p>}
+            {loading && <p className="text-purple-200 animate-pulse">Loading internships...</p>}
             {error && (
-              <div className="bg-red-100 text-red-700 p-4 rounded">
+              <div className="bg-red-900 text-red-200 p-4 rounded border border-red-700">
                 {error}
               </div>
             )}
@@ -113,27 +114,27 @@ const AdminDashboard = () => {
                 {internships.map((internship) => (
                   <div
                     key={internship._id}
-                    className="p-4 border rounded-lg shadow-sm hover:shadow-md cursor-pointer bg-white"
+                    className="p-4 border border-gray-700 rounded-lg shadow-md hover:shadow-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors"
                     onClick={() => setSelectedInternship(internship)}
                   >
-                    <h3 className="font-bold text-lg text-blue-600">{internship.title}</h3>
-                    <p className="text-gray-700">{internship.company}</p>
+                    <h3 className="font-bold text-lg text-purple-400">{internship.title}</h3>
+                    <p className="text-gray-300">{internship.company}</p>
                     <div className="mt-2 space-y-1">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Location:</span> {internship.location}
+                      <p className="text-sm text-gray-300">
+                        <span className="font-medium text-purple-300">Location:</span> {internship.location}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Duration:</span> {internship.duration}
+                      <p className="text-sm text-gray-300">
+                        <span className="font-medium text-purple-300">Duration:</span> {internship.duration}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Stipend:</span> ₹{internship.stipend}
+                      <p className="text-sm text-gray-300">
+                        <span className="font-medium text-purple-300">Stipend:</span> ₹{internship.stipend}
                       </p>
                     </div>
                     <div className="mt-3 flex justify-between items-center">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         Deadline: {new Date(internship.deadline).toLocaleDateString()}
                       </span>
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded-full">
                         {internship.positions} position{internship.positions !== 1 ? "s" : ""}
                       </span>
                     </div>
@@ -141,8 +142,8 @@ const AdminDashboard = () => {
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
                           internship.status === "Pending Approval"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+                            ? "bg-yellow-900 text-yellow-200"
+                            : "bg-green-900 text-green-200"
                         }`}
                       >
                         {internship.status}
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
                           e.stopPropagation();
                           handleEditInternship(internship);
                         }}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
                       >
                         Edit
                       </button>
@@ -163,7 +164,7 @@ const AdminDashboard = () => {
                           e.stopPropagation();
                           handleDeleteInternship(internship._id);
                         }}
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
                       >
                         Delete
                       </button>
@@ -177,60 +178,60 @@ const AdminDashboard = () => {
       case 'applications':
         return <AdminStats />;
       case 'reports':
-        return <div>Reports Dashboard</div>;
+        return <InternshipStats />;
       case 'settings':
-        return <div>Admin Settings</div>;
+        return <div className="text-purple-300 text-lg">Admin Settings</div>;
       default:
-        return <div>Select an option</div>;
+        return <div className="text-purple-300 text-lg">Select an option</div>;
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-900">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md">
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold">Admin Portal</h2>
-          <p className="text-sm text-gray-600">Manage Internships & Applications</p>
+      <div className="w-64 bg-black shadow-lg border-r border-purple-900">
+        <div className="p-6 border-b border-purple-900">
+          <h2 className="text-xl font-semibold text-purple-300">Admin Portal</h2>
+          <p className="text-sm text-purple-200">Manage Internships & Applications</p>
         </div>
         <nav className="mt-4">
           <button
             onClick={() => setActiveTab('internships')}
-            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'internships' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
+              activeTab === 'internships' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
             📑 Internships
           </button>
           <button
             onClick={() => setActiveTab('applications')}
-            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'applications' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
+              activeTab === 'applications' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
             👥 Applications
           </button>
           <button
             onClick={() => setActiveTab('reports')}
-            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'reports' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
+              activeTab === 'reports' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
-            📊 Reports
+            📊 Stats
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${
-              activeTab === 'settings' ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' : ''
+            className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
+              activeTab === 'settings' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
             ⚙️ Settings
           </button>
         </nav>
-        <div className="absolute bottom-0 w-64 p-4 border-t">
+        <div className="absolute bottom-0 w-64 p-4 border-t border-purple-900">
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded"
+            className="w-full px-4 py-2 text-red-400 hover:bg-red-900 hover:bg-opacity-30 rounded transition-colors"
           >
             🚪 Logout
           </button>
@@ -246,13 +247,13 @@ const AdminDashboard = () => {
 
       {/* Modal for adding/editing internship */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-700 shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Add New Internship</h2>
+              <h2 className="text-xl font-semibold text-purple-300">Add New Internship</h2>
               <button 
                 onClick={() => setShowForm(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-white transition-colors"
               >
                 ✕
               </button>
@@ -269,13 +270,13 @@ const AdminDashboard = () => {
 
       {/* Modal for internship details */}
       {selectedInternship && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-700 shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Internship Details</h2>
+              <h2 className="text-xl font-semibold text-purple-300">Internship Details</h2>
               <button 
                 onClick={() => setSelectedInternship(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-white transition-colors"
               >
                 ✕
               </button>
@@ -284,6 +285,24 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Custom scrollbar styles */}
+      <style jsx>{`
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #4C1D95;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #7C3AED;
+        }
+      `}</style>
     </div>
   );
 };

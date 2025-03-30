@@ -36,7 +36,7 @@ export default function Login() {
           navigate('/management/ManagementLogin')
           break
         case 'admin':
-          navigate('/admin/AdminDashboard')
+          navigate('/admin/AdminLogin')
           break
         case 'student':
           navigate('/student/StudentLogin')

@@ -79,6 +79,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const studentProfileRoutes = require("./routes/studentProfileRoutes");
 const applicationStatusRoutes = require("./routes/applicationStatusRoutes");
 const analyzeRoutes = require('./routes/analyzeRoutes');
+const internshipStatsRoutes = require('./routes/internshipStats');
 
 // Routes
 app.use('/api/internships', internshipRoutes);
@@ -86,6 +87,7 @@ app.use("/api", applicationRoutes);
 app.use("/api", studentProfileRoutes);
 app.use("/api/application-status", applicationStatusRoutes);
 app.use('/api', analyzeRoutes);
+app.use('/api', internshipStatsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
