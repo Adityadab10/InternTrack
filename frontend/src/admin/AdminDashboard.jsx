@@ -5,6 +5,7 @@ import InternshipDisplay from "./InternshipDisplay";
 import AdminStats from "./AdminStats";
 import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
+import ReportGeneration from './reports/ReportGeneration';
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
@@ -177,17 +178,17 @@ const AdminDashboard = () => {
         );
       case 'applications':
         return <AdminStats />;
-      case 'reports':
+      case 'stats':
         return <InternshipStats />;
-      case 'settings':
-        return <div className="text-purple-300 text-lg">Admin Settings</div>;
+      case 'reports':
+        return <ReportGeneration />;
       default:
         return <div className="text-purple-300 text-lg">Select an option</div>;
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex min-h-screen bg-gray-900">
       {/* Sidebar */}
       <div className="w-64 bg-black shadow-lg border-r border-purple-900">
         <div className="p-6 border-b border-purple-900">
@@ -212,20 +213,20 @@ const AdminDashboard = () => {
             👥 Applications
           </button>
           <button
-            onClick={() => setActiveTab('reports')}
+            onClick={() => setActiveTab('stats')}
             className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
-              activeTab === 'reports' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
+              activeTab === 'stats' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
             📊 Stats
           </button>
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => setActiveTab('reports')}
             className={`w-full text-left px-6 py-3 hover:bg-gray-900 transition-colors ${
-              activeTab === 'settings' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
+              activeTab === 'reports' ? 'bg-purple-900 bg-opacity-30 text-purple-300 border-l-4 border-purple-500' : 'text-gray-300'
             }`}
           >
-            ⚙️ Settings
+            📋 Reports
           </button>
         </nav>
         <div className="absolute bottom-0 w-64 p-4 border-t border-purple-900">

@@ -42,7 +42,7 @@ const AdminStats = () => {
             if (profileData.resumeFile) {
               console.log(`Analyzing resume for ${profileData.name}...`);
               resumeRating = await analyzeResume(
-                `/uploads/resumes/${profileData.resumeFile}`,
+                `/uploads/${profileData.resumeFile}`,
                 profileData.skills || [],
                 application.internshipTitle,
                 application.company
@@ -197,22 +197,10 @@ const AdminStats = () => {
 
   const analyzeResume = async (resumeUrl, skills, jobRole = 'Not Specified', company = 'Not Specified') => {
     try {
-      console.log('Starting resume analysis for:', {
-        resumeUrl,
-        skills,
-        jobRole,
-        company
-      });
+      console.log('Starting resume analysis:', { resumeUrl, skills, jobRole, company });
       
-      if (!resumeUrl || !skills || !Array.isArray(skills)) {
-        console.error('Invalid inputs for resume analysis:', { resumeUrl, skills });
-        return null;
-      }
-
-      const fullResumeUrl = resumeUrl.startsWith('http') 
-        ? resumeUrl 
-        : `http://localhost:5000${resumeUrl}`;
-
+      const cleanResumeUrl = resumeUrl.replace('/uploads/resumes/', '/uploads/');
+      
       const response = await fetch('http://localhost:5000/api/analyze-resume', {
         method: 'POST',
         headers: {
@@ -220,38 +208,28 @@ const AdminStats = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          resumeUrl: fullResumeUrl,
-          skills,
+          resumeUrl: cleanResumeUrl,
+          skills: Array.isArray(skills) ? skills : [],
           jobRole,
           company
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server responded with error:', errorData);
-        throw new Error(errorData.error || 'Failed to analyze resume');
+        throw new Error(`Analysis failed: ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('Resume analysis successful:', data);
-      
-      return {
-        rating: Number(data.rating || 0),
-        explanation: data.explanation || 'Analysis completed',
-        roleMatch: data.roleMatch || {
-          strengthAreas: [],
-          improvementAreas: []
-        }
-      };
+      console.log('Resume analysis result:', data);
+      return data;
     } catch (error) {
-      console.error('Resume analysis failed:', error);
+      console.error('Resume analysis error:', error);
       return {
         rating: 0,
-        explanation: 'Analysis failed',
+        explanation: 'Failed to analyze resume',
         roleMatch: {
-          strengthAreas: [],
-          improvementAreas: []
+          strengthAreas: ['Analysis failed'],
+          improvementAreas: ['Please try again']
         }
       };
     }
@@ -669,7 +647,7 @@ const AdminStats = () => {
         try {
           if (application.studentProfile?.resumeFile) {
             const resumeRating = await analyzeResume(
-              `/uploads/resumes/${application.studentProfile.resumeFile}`,
+              `/uploads/${application.studentProfile.resumeFile}`,
               application.studentProfile.skills || [],
               application.internshipTitle,
               application.company

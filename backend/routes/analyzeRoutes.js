@@ -6,13 +6,19 @@ const path = require('path');
 const pdf = require('pdf-parse');
 const rateLimit = require('express-rate-limit');
 
-// Initialize Gemini Pro
+// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Add this check at the top of your file
+if (!process.env.GEMINI_API_KEY) {
+  console.error('GEMINI_API_KEY is not set in environment variables');
+  throw new Error('Missing required API key');
+}
 
 // Create rate limiter
 const analyzeLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 2, // limit each IP to 2 requests per minute
+  max: 5, // increased limit as Flash is faster
   message: { error: 'Too many analysis requests, please try again later' }
 });
 
@@ -25,8 +31,7 @@ const analyzeWithRetry = async (model, prompt, maxRetries = 3) => {
       return result;
     } catch (error) {
       if (error.status === 429 && attempt < maxRetries) {
-        // Wait with exponential backoff: 1s, 2s, 4s...
-        const waitTime = Math.pow(2, attempt - 1) * 1000;
+        const waitTime = Math.pow(2, attempt - 1) * 500; // Reduced wait time for Flash
         console.log(`Rate limited. Retrying in ${waitTime}ms...`);
         await delay(waitTime);
         continue;
@@ -41,6 +46,14 @@ const resumeCache = new Map();
 router.post('/analyze-resume', analyzeLimit, async (req, res) => {
   try {
     const { resumeUrl, skills, jobRole = 'Not Specified', company = 'Not Specified' } = req.body;
+    
+    console.log('Received analysis request:', {
+      resumeUrl,
+      skillsCount: skills?.length,
+      jobRole,
+      company
+    });
+
     const cacheKey = `${resumeUrl}-${jobRole}-${skills.join(',')}`;
     
     // Check cache first
@@ -49,32 +62,44 @@ router.post('/analyze-resume', analyzeLimit, async (req, res) => {
       return res.json(resumeCache.get(cacheKey));
     }
 
-    console.log('Analyzing resume:', { resumeUrl, skills, jobRole, company });
+    console.log('Analyzing resume with Gemini 2.0 Flash:', { resumeUrl, skills, jobRole, company });
 
     if (!resumeUrl) {
-      return res.status(400).json({ 
+      console.error('Missing resume URL in request');
+      return res.status(400).json({
         error: 'Missing resume URL',
         details: 'Resume URL is required'
       });
     }
 
-    // Extract file path from URL and handle both full URLs and relative paths
+    // Update the file path handling
     let resumePath;
     try {
+      // Handle both full URLs and relative paths
       const urlParts = resumeUrl.split('/uploads/');
       const relativePath = urlParts[urlParts.length - 1];
-      resumePath = path.join(__dirname, '..', 'uploads', relativePath);
       
-      console.log('Looking for resume at:', resumePath);
+      // Always look in the uploads/resumes directory
+      resumePath = path.join(__dirname, '..', 'uploads', 'resumes', relativePath);
+      
+      console.log('Attempting to read resume from:', resumePath);
       
       if (!fs.existsSync(resumePath)) {
-        throw new Error('File not found');
+        console.error('File not found at path:', resumePath);
+        // Try alternative path if first attempt fails
+        const alternativePath = path.join(__dirname, '..', 'uploads', 'resumes', path.basename(relativePath));
+        if (fs.existsSync(alternativePath)) {
+          resumePath = alternativePath;
+          console.log('Found resume at alternative path:', resumePath);
+        } else {
+          throw new Error('Resume file not found');
+        }
       }
     } catch (error) {
       console.error('Error accessing resume file:', error);
       return res.status(404).json({
         error: 'Resume file not found',
-        details: `Could not access file at ${resumePath}`
+        details: `Could not access resume file: ${error.message}`
       });
     }
 
@@ -98,34 +123,35 @@ router.post('/analyze-resume', analyzeLimit, async (req, res) => {
       });
     }
 
-    // Create prompt for Gemini
+    // Create prompt for Gemini 2.0 Flash
     const prompt = `
       You are an expert resume analyzer. Analyze this resume for the role of ${jobRole} at ${company}.
+      Focus on quick, accurate assessment.
       
       Required skills: ${skills.join(', ')}
       
       Resume content:
       ${pdfText}
       
-      Provide a JSON response with:
+      Provide a concise JSON response with:
       1. A rating from 1-10 (decimals allowed) based on skills match and experience
-      2. A brief explanation of the rating
-      3. Key strengths and areas for improvement
+      2. A brief explanation of the rating (max 2 sentences)
+      3. Key strengths and areas for improvement (max 3 each)
       
-      Format your response exactly like this:
+      Format:
       {
         "rating": 7.5,
         "explanation": "Brief explanation here",
         "roleMatch": {
-          "strengthAreas": ["strength 1", "strength 2"],
-          "improvementAreas": ["area 1", "area 2"]
+          "strengthAreas": ["strength 1", "strength 2", "strength 3"],
+          "improvementAreas": ["area 1", "area 2", "area 3"]
         }
       }
     `;
 
     try {
-      console.log('Sending request to Gemini...');
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      console.log('Sending request to Gemini 2.0 Flash...');
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const result = await analyzeWithRetry(model, prompt);
       const response = result.response;
       const analysisText = response.text().trim();
@@ -152,7 +178,6 @@ router.post('/analyze-resume', analyzeLimit, async (req, res) => {
 
       } catch (parseError) {
         console.error('Error parsing Gemini response:', parseError);
-        // Provide a default response if parsing fails
         analysis = {
           rating: 5.00,
           explanation: "Unable to generate detailed analysis",
@@ -173,11 +198,10 @@ router.post('/analyze-resume', analyzeLimit, async (req, res) => {
 
     } catch (geminiError) {
       if (geminiError.status === 429) {
-        // Handle rate limit error
         return res.status(429).json({
           error: 'Rate limit exceeded',
           details: 'Please wait before requesting another analysis',
-          retryAfter: '60 seconds'
+          retryAfter: '30 seconds' // Reduced for Flash
         });
       }
       console.error('Error with Gemini API:', geminiError);
