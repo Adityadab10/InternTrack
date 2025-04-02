@@ -97,4 +97,84 @@ router.post('/applications', async (req, res) => {
   }
 });
 
+// Add this new route to get rejected applications
+router.get('/student/:studentId/rejected', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    if (!studentId) {
+      return res.status(400).json({ error: 'Student ID is required' });
+    }
+
+    const rejectedApplications = await Application.find({
+      studentId: studentId,
+      status: 'Rejected'
+    }).lean();
+
+    // Ensure we're always sending JSON
+    res.setHeader('Content-Type', 'application/json');
+    res.json(rejectedApplications || []);
+
+  } catch (error) {
+    console.error('Error fetching rejected applications:', error);
+    // Ensure error response is also JSON
+    res.status(500).json({ 
+      error: 'Failed to fetch rejected applications',
+      message: error.message 
+    });
+  }
+});
+
+// Update the route to only fetch pending applications
+router.get('/pending-applications', async (req, res) => {
+  try {
+    const pendingApplications = await Application.find({
+      status: { $nin: ['Rejected', 'Approved', 'Accepted'] } // Exclude rejected and approved applications
+    })
+    .populate('internshipId')  // Add this if you need internship details
+    .sort({ createdAt: -1 });
+
+    // Ensure we're sending JSON
+    res.setHeader('Content-Type', 'application/json');
+    res.json(pendingApplications || []);
+
+  } catch (error) {
+    console.error('Error fetching pending applications:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch applications',
+      message: error.message 
+    });
+  }
+});
+
+// Update status route (for both approve and reject)
+router.patch('/applications/:applicationId/status', async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { status } = req.body;
+
+    if (!['Accepted', 'Rejected', 'Pending'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updatedApplication = await Application.findByIdAndUpdate(
+      applicationId,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedApplication) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    res.json(updatedApplication);
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    res.status(500).json({ 
+      error: 'Failed to update application status',
+      message: error.message 
+    });
+  }
+});
+
 module.exports = router;

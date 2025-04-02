@@ -10,6 +10,7 @@ const AdminStats = () => {
   const [expandedExplanations, setExpandedExplanations] = useState(new Set());
   const [analyzingApplications, setAnalyzingApplications] = useState(new Set());
   const [hasStartedAnalysis, setHasStartedAnalysis] = useState(false);
+  const [currentProfile, setCurrentProfile] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -18,12 +19,14 @@ const AdminStats = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/application-status/applications', {
+      const response = await fetch('http://localhost:5000/api/pending-applications', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch applications');
+        throw new Error(`Failed to fetch applications: ${response.status}`);
       }
 
       const data = await response.json();
@@ -37,24 +40,10 @@ const AdminStats = () => {
           
           if (profileResponse.ok) {
             const profileData = await profileResponse.json();
-            let resumeRating = null;
-
-            if (profileData.resumeFile) {
-              console.log(`Analyzing resume for ${profileData.name}...`);
-              resumeRating = await analyzeResume(
-                `/uploads/${profileData.resumeFile}`,
-                profileData.skills || [],
-                application.internshipTitle,
-                application.company
-              );
-              console.log(`Resume analysis for ${profileData.name}:`, resumeRating);
-            }
-
             return {
               ...application,
               studentProfile: profileData,
-              studentName: profileData.name,
-              resumeRating
+              studentName: profileData.name
             };
           }
           return application;
@@ -68,40 +57,34 @@ const AdminStats = () => {
       setError(null);
     } catch (err) {
       console.error('Error:', err);
-      setError('Failed to load applications');
+      setError(err.message || 'Failed to load applications');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = (application) => {
-    console.log("Approving application:", application);
-    if (!application || !application._id) {
-      console.error("Invalid application data:", application);
-      alert("Invalid application selected");
-      return;
+  const handleApprove = async (application) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/applications/${application._id}/status`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'Accepted' })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to approve application');
+      }
+
+      setStats(prevStats => prevStats.filter(stat => stat._id !== application._id));
+      alert('Application approved successfully');
+    } catch (err) {
+      console.error('Error approving application:', err);
+      alert(err.message || 'Failed to approve application');
     }
-
-    const applicationData = {
-      _id: application._id,
-      internshipId: application.internshipId,
-      internshipTitle: application.internshipTitle,
-      company: application.company,
-      studentId: application.studentId,
-      studentName: application.studentName || `Student ${application.studentId}`,
-      status: application.status || 'Pending'
-    };
-
-    const requiredFields = ['_id', 'internshipTitle', 'company', 'studentId'];
-    const missingFields = requiredFields.filter(field => !applicationData[field]);
-
-    if (missingFields.length > 0) {
-      console.error("Missing required fields:", missingFields);
-      alert(`Missing required fields: ${missingFields.join(', ')}`);
-      return;
-    }
-
-    setSelectedApplication(applicationData);
   };
 
   const handleReject = async (applicationId) => {
@@ -120,73 +103,12 @@ const AdminStats = () => {
         throw new Error(errorData.error || "Failed to update status");
       }
 
+      setStats(prevStats => prevStats.filter(stat => stat._id !== applicationId));
+
       alert("Application rejected successfully.");
-      fetchStats();
     } catch (err) {
       console.error("Error rejecting application:", err);
       alert(err.message || "Failed to reject application. Please try again.");
-    }
-  };
-
-  const handleTaskAssignment = async (e) => {
-    e.preventDefault();
-    
-    if (!selectedApplication?._id) {
-      console.error("No application ID found:", selectedApplication);
-      alert("Invalid application selected");
-      return;
-    }
-  
-    const formData = new FormData(e.target);
-    const tasks = formData.get("tasks")
-      .split("\n")
-      .filter(task => task.trim())
-      .map(task => task.trim());
-  
-    if (tasks.length === 0) {
-      alert("Please enter at least one task");
-      return;
-    }
-  
-    try {
-      const taskDetails = {
-        applicationId: selectedApplication._id,
-        tasks,
-        internshipId: selectedApplication.internshipId,
-        internshipTitle: selectedApplication.internshipTitle,
-        company: selectedApplication.company,
-        candidateId: selectedApplication.studentId,
-        candidateName: selectedApplication.studentName || `Student ${selectedApplication.studentId}`
-      };
-  
-      console.log('Sending approval request:', taskDetails);
-  
-      const response = await fetch(
-        `http://localhost:5000/api/application-status/applications/${selectedApplication._id}/approve`,
-        {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json"
-          },
-          credentials: 'include',
-          body: JSON.stringify(taskDetails),
-        }
-      );
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to approve application");
-      }
-  
-      const data = await response.json();
-      console.log('Approval response:', data);
-      
-      alert("Application approved and tasks assigned successfully.");
-      setSelectedApplication(null);
-      fetchStats();
-    } catch (err) {
-      console.error("Error approving application:", err);
-      alert(err.message || "Failed to approve application. Please try again.");
     }
   };
 
@@ -368,23 +290,10 @@ const AdminStats = () => {
   };
 
   const renderApplicationCard = (stat) => {
-    if (!stat || !stat._id || !stat.internshipTitle || !stat.company) {
-      console.error("Invalid application data in renderApplicationCard:", stat);
-      return null;
-    }
-
-    const isApproved = stat.status === "Accepted";
-    const isRejected = stat.status === "Rejected";
-
-    if (isRejected) {
-      return null;
-    }
-
+    const isApproved = stat.status === 'Accepted';
+    
     return (
-      <div
-        key={stat._id}
-        className="p-6 border border-purple-800 rounded-lg shadow-lg bg-gray-900 hover:shadow-purple-900/30 transition-all duration-300"
-      >
+      <div key={stat._id} className="bg-gray-900/50 rounded-lg border border-purple-500/30 overflow-hidden">
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-bold text-xl text-purple-300">
@@ -801,55 +710,6 @@ const AdminStats = () => {
 
         {/* Profile Modal */}
         {showProfileModal && renderProfileModal()}
-        
-        {/* Task Assignment Modal */}
-        {selectedApplication && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-xl border border-purple-800">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-purple-300">
-                  Assign Tasks
-                </h2>
-                <button
-                  onClick={() => setSelectedApplication(null)}
-                  className="text-purple-400 hover:text-purple-200"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <form onSubmit={handleTaskAssignment}>
-                <div className="mb-4">
-                  <label className="block font-medium mb-2 text-purple-400">Tasks</label>
-                  <textarea
-                    name="tasks"
-                    rows="5"
-                    className="w-full p-3 bg-gray-800 border border-purple-900 rounded-lg text-white focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                    placeholder="Enter tasks, one per line"
-                    required
-                  ></textarea>
-                  <p className="mt-1 text-xs text-purple-400">Separate tasks with line breaks</p>
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedApplication(null)}
-                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-colors"
-                  >
-                    Assign Tasks
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
