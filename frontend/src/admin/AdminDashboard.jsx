@@ -287,23 +287,25 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Custom scrollbar styles */}
-      <style jsx>{`
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #1a1a1a;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #4C1D95;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #7C3AED;
-        }
-      `}</style>
+      {/* Custom scrollbar styles - Fixed version */}
+      <style>
+        {`
+          ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #4C1D95;
+            border-radius: 4px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #7C3AED;
+          }
+        `}
+      </style>
     </div>
   );
 };

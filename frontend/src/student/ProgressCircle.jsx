@@ -30,8 +30,10 @@ export const ProgressCircle = ({ percentage, color = 'purple' }) => {
         return { start: '#60A5FA', end: '#3B82F6' };
       case 'green':
         return { start: '#34D399', end: '#10B981' };
+      case 'purple':
+        return { start: '#C084FC', end: '#818CF8' };
       default:
-        return { start: '#C084FC', end: '#818CF8' }; // purple default
+        return { start: '#C084FC', end: '#818CF8' };
     }
   };
 

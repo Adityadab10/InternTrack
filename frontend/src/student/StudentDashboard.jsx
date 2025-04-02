@@ -12,6 +12,7 @@ const StudentDashboard = () => {
   const [internships, setInternships] = useState([]);
   const [appliedInternships, setAppliedInternships] = useState([]);
   const [rejectedInternships, setRejectedInternships] = useState([]);
+  const [approvedInternships, setApprovedInternships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('explore');
@@ -29,7 +30,7 @@ const StudentDashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      // First fetch internships as they're required
+      // Fetch all internships first
       const internshipsResponse = await fetch('http://localhost:5000/api/internships', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -42,87 +43,69 @@ const StudentDashboard = () => {
 
       const allInternships = await internshipsResponse.json();
 
-      // Initialize with all internships as available
+      // Initialize arrays
       let availableInternships = [...allInternships];
       let appliedInternships = [];
       let rejectedInternships = [];
+      let approvedInternships = [];
 
-      // Only fetch student-specific data if we have a studentId
       if (studentId) {
         try {
           const [applicationsResponse, approvedApplicationsResponse, rejectedApplicationsResponse] = 
             await Promise.all([
               fetch(`http://localhost:5000/api/applications/student/${studentId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
               }),
-              fetch(`http://localhost:5000/api/application-status/student/${studentId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+              fetch(`http://localhost:5000/api/applications/student/${studentId}/approved`, {
                 credentials: 'include'
               }),
               fetch(`http://localhost:5000/api/applications/student/${studentId}/rejected`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
               })
             ]);
 
-          // Process each response individually
           const myApplications = applicationsResponse.ok ? await applicationsResponse.json() : [];
           const approvedApplications = approvedApplicationsResponse.ok ? await approvedApplicationsResponse.json() : [];
           const rejectedApplications = rejectedApplicationsResponse.ok ? await rejectedApplicationsResponse.json() : [];
 
-          console.log('Rejected applications:', rejectedApplications); // Debug log
+          // Filter approved internships
+          approvedInternships = allInternships.filter(internship =>
+            approvedApplications.some(app => app.internshipId === internship._id)
+          );
 
-          // Get IDs of applications with their status
-          const applicationStatuses = myApplications.reduce((acc, app) => {
-            acc[app.internshipId] = app.status;
-            return acc;
-          }, {});
-
-          // Filter rejected applications first
+          // Update other filters to exclude approved internships
           rejectedInternships = allInternships.filter(internship =>
-            applicationStatuses[internship._id] === 'Rejected' ||
             rejectedApplications.some(app => app.internshipId === internship._id)
           );
-          
-          // Filter pending applications (not rejected or approved)
+
           appliedInternships = allInternships.filter(internship =>
-            applicationStatuses[internship._id] === 'Pending' &&
-            !rejectedApplications.some(app => app.internshipId === internship._id) &&
-            !approvedApplications.some(app => app.internshipId === internship._id)
-          );
-          
-          // Available internships should exclude any that have been applied to
-          availableInternships = allInternships.filter(internship =>
-            !applicationStatuses[internship._id] &&
-            !rejectedApplications.some(app => app.internshipId === internship._id) &&
-            !approvedApplications.some(app => app.internshipId === internship._id)
+            myApplications.some(app => 
+              app.internshipId === internship._id && 
+              app.status === 'Pending' &&
+              !approvedApplications.some(approved => approved.internshipId === internship._id) &&
+              !rejectedApplications.some(rejected => rejected.internshipId === internship._id)
+            )
           );
 
-          console.log('Filtered internships:', {
-            available: availableInternships.length,
-            applied: appliedInternships.length,
-            rejected: rejectedInternships.length
-          }); // Debug log
-        } catch (studentDataError) {
-          console.error("Error fetching student-specific data:", studentDataError);
+          availableInternships = allInternships.filter(internship =>
+            !myApplications.some(app => app.internshipId === internship._id) &&
+            !approvedApplications.some(app => app.internshipId === internship._id) &&
+            !rejectedApplications.some(app => app.internshipId === internship._id)
+          );
+        } catch (error) {
+          console.error("Error fetching application status:", error);
         }
       }
 
       setInternships(availableInternships);
       setAppliedInternships(appliedInternships);
       setRejectedInternships(rejectedInternships);
+      setApprovedInternships(approvedInternships);
       setError(null);
 
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError(err.message || "Failed to load data. Please try again later.");
-      setInternships([]);
-      setAppliedInternships([]);
-      setRejectedInternships([]);
+      setError(err.message || "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -338,43 +321,50 @@ const StudentDashboard = () => {
       case 'your-internships':
         return (
           <div className="space-y-8">
-            {/* Shortlisted/Approved Internships */}
+            {/* Dynamic Shortlisted/Approved Internships */}
             <div>
               <h2 className="text-2xl font-bold text-purple-200 mb-4">Shortlisted Internships</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Add approved internships here */}
-                <div className="bg-black/80 rounded-lg border border-green-800/50 hover:border-green-600 shadow-lg hover:shadow-green-900/20 transition-all duration-300">
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <span className="bg-green-900/50 text-green-200 px-3 py-1 rounded-full text-sm">
-                        Shortlisted
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-xl text-green-400 mb-2">Frontend Developer</h3>
-                    <p className="text-gray-300 mb-4">TechCorp Solutions</p>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-sm text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                        </svg>
-                        Remote
-                      </div>
-                      <div className="flex items-center text-sm text-gray-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M8.433 7.418c.155-.63.244-1.28.244-1.96s-.09-1.33-.244-1.96L10.932 2.5C11.582 2 12 1.24 12 .5H4c-.751 0-1.45.515-1.787 1.355L0 6v8l2.151.864A2.5 2.5 0 004.5 17h11a2.5 2.5 0 002.45-2.014L20 8v-1.5a1.5 1.5 0 00-1.5-1.5H16V5a1 1 0 00-1-1h-4.014L10.433 2.58zM12 10h2v3h-2v-3zM4 10h2v3H4v-3z" />
-                        </svg>
-                        ₹20,000/month
-                      </div>
-                    </div>
-                    <button className="w-full bg-green-900 text-green-100 py-2 rounded-md hover:bg-green-800 transition-colors duration-300">
-                      View Details
-                    </button>
+                {approvedInternships.length === 0 ? (
+                  <div className="col-span-full bg-black/70 p-6 rounded-lg border border-purple-500/30 text-center">
+                    <p className="text-purple-200">No shortlisted internships yet.</p>
                   </div>
-                </div>
+                ) : (
+                  approvedInternships.map(internship => (
+                    <div key={internship._id} className="bg-black/80 rounded-lg border border-green-800/50 hover:border-green-600 shadow-lg hover:shadow-green-900/20 transition-all duration-300">
+                      <div className="p-6">
+                        <div className="mb-4">
+                          <span className="bg-green-900/50 text-green-200 px-3 py-1 rounded-full text-sm">
+                            Shortlisted
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-xl text-green-400 mb-2">{internship.title}</h3>
+                        <p className="text-gray-300 mb-4">{internship.company}</p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center text-sm text-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                            </svg>
+                            {internship.location || "Remote"}
+                          </div>
+                          <div className="flex items-center text-sm text-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M8.433 7.418c.155-.63.244-1.28.244-1.96s-.09-1.33-.244-1.96L10.932 2.5C11.582 2 12 1.24 12 .5H4c-.751 0-1.45.515-1.787 1.355L0 6v8l2.151.864A2.5 2.5 0 004.5 17h11a2.5 2.5 0 002.45-2.014L20 8v-1.5a1.5 1.5 0 00-1.5-1.5H16V5a1 1 0 00-1-1h-4.014L10.433 2.58zM12 10h2v3h-2v-3zM4 10h2v3H4v-3z" />
+                            </svg>
+                            ₹{internship.stipend || "Unpaid"}
+                          </div>
+                        </div>
+                        <button className="w-full bg-green-900 text-green-100 py-2 rounded-md hover:bg-green-800 transition-colors duration-300">
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
-            {/* Ongoing Internship */}
+            {/* Static Ongoing Internship */}
             <div>
               <h2 className="text-2xl font-bold text-purple-200 mb-4">Ongoing Internship</h2>
               <div className="bg-black/80 rounded-lg border border-blue-800/50 p-6">
@@ -383,7 +373,7 @@ const StudentDashboard = () => {
                     <h3 className="font-bold text-xl text-blue-400">Full Stack Developer</h3>
                     <p className="text-gray-300">InnoTech Solutions</p>
                   </div>
-                  <ProgressCircle percentage={65} />
+                  <ProgressCircle percentage={65} color="blue" />
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -402,7 +392,7 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Completed Internship */}
+            {/* Static Completed Internship */}
             <div>
               <h2 className="text-2xl font-bold text-purple-200 mb-4">Completed Internship</h2>
               <div className="bg-black/80 rounded-lg border border-purple-800/50 p-6">
