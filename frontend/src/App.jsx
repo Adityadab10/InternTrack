@@ -11,55 +11,46 @@ import StudentDashboard from './student/StudentDashboard'
 import StudentProfileForm from './student/StudentProfileForm'
 import ViewerPage from './viewer/ViewerPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import { WebSocketProvider } from './faculty/WebSocketContext'
 import { FacultyProvider } from './faculty/FacultyContext'
+import { WebSocketProvider } from './context/WebSocketContext'
 import FacultyDashboardPage from './faculty/FacultyDashboardPage'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/faculty/login" element={<FacultyLogin />} />
-          <Route 
-            path="/faculty/dashboard" 
-            element={
-              <ProtectedRoute>
-                <WebSocketProvider>
+      <WebSocketProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/faculty/login" element={<FacultyLogin />} />
+            <Route 
+              path="/faculty/dashboard" 
+              element={
+                <ProtectedRoute>
                   <FacultyProvider>
                     <FacultyDashboardPage />
                   </FacultyProvider>
-                </WebSocketProvider>
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/faculty-dashboard" element={
-            <ProtectedRoute>
-              <WebSocketProvider>
-                <FacultyProvider>
-                  <FacultyDashboardPage />
-                </FacultyProvider>
-              </WebSocketProvider>
-            </ProtectedRoute>
-          } />
-          <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
-          <Route path="/admin/AdminLogin" element={<AdminLogin />} />
-          <Route path="/student/StudentLogin" element={<StudentLogin />} />
-          <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
-          <Route path="/viewer/ViewerPage" element={<ViewerPage />} />
-          <Route 
-            path="/student/StudentDashboard" 
-            element={
-              <ProtectedRoute>
-                <StudentDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
-        </Routes>
-      </Router>
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
+            <Route path="/admin/AdminLogin" element={<AdminLogin />} />
+            <Route path="/student/StudentLogin" element={<StudentLogin />} />
+            <Route path="/admin/AdminDashboard" element={<AdminDashboard />} />
+            <Route path="/viewer/ViewerPage" element={<ViewerPage />} />
+            <Route 
+              path="/student/StudentDashboard" 
+              element={
+                <ProtectedRoute>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
+          </Routes>
+        </Router>
+      </WebSocketProvider>
     </AuthProvider>
   )
 }

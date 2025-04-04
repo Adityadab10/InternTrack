@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
 const cors = require("cors");
 const multer = require('multer');
+const http = require('http');
+const ChatServer = require('./websocket/chatServer');
 
 // Resolve the absolute path to .env file
 const envPath = path.resolve(__dirname, '.env');
@@ -40,6 +42,7 @@ try {
 }
 
 const app = express();
+const server = http.createServer(app);
 
 // Create uploads and resumes directories if they don't exist
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -110,6 +113,9 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Initialize WebSocket server
+new ChatServer(server);
+
 const PORT = process.env.PORT || 5000;
 
 // Connect to database and start server
@@ -119,7 +125,7 @@ const startServer = async () => {
     await connectDB();
     
     // Start server only after successful DB connection
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV} mode on http://localhost:${PORT}`);
     });
   } catch (error) {

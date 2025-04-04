@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WebSocketProvider } from './WebSocketContext';
+import { WebSocketProvider } from '../context/WebSocketContext';
 import FacultySidebar from './FacultySidebar';
 import InternshipOverview from './InternshipOverview';
 import MentorshipAssignment from './MentorshipAssignment';

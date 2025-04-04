@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { WebSocketProvider } from './WebSocketContext';
+import { WebSocketProvider } from '../contexts/WebSocketContext';
 import { FacultyProvider } from './FacultyContext';
 import FacultyDashboardPage from './FacultyDashboardPage';
 import './App.css';
@@ -8,6 +8,7 @@ import './App.css';
 function Da() {
   return (
     <Router>
+      <WebSocketProvider>
         <FacultyProvider>
           <div className="App">
             <Routes>
@@ -15,6 +16,7 @@ function Da() {
             </Routes>
           </div>
         </FacultyProvider>
+      </WebSocketProvider>
     </Router>
   );
 }
