@@ -11,6 +11,9 @@ import StudentDashboard from './student/StudentDashboard'
 import StudentProfileForm from './student/StudentProfileForm'
 import ViewerPage from './viewer/ViewerPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { WebSocketProvider } from './faculty/WebSocketContext'
+import { FacultyProvider } from './faculty/FacultyContext'
+import FacultyDashboardPage from './faculty/FacultyDashboardPage'
 
 function App() {
   return (
@@ -19,7 +22,28 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/faculty/FacultyLogin" element={<FacultyLogin />} />
+          <Route path="/faculty/login" element={<FacultyLogin />} />
+          <Route 
+            path="/faculty/dashboard" 
+            element={
+              <ProtectedRoute>
+                <WebSocketProvider>
+                  <FacultyProvider>
+                    <FacultyDashboardPage />
+                  </FacultyProvider>
+                </WebSocketProvider>
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/faculty-dashboard" element={
+            <ProtectedRoute>
+              <WebSocketProvider>
+                <FacultyProvider>
+                  <FacultyDashboardPage />
+                </FacultyProvider>
+              </WebSocketProvider>
+            </ProtectedRoute>
+          } />
           <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
           <Route path="/admin/AdminLogin" element={<AdminLogin />} />
           <Route path="/student/StudentLogin" element={<StudentLogin />} />

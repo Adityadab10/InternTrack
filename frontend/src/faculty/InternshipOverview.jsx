@@ -1,6 +1,6 @@
 import React from 'react';
-import DataTable from '../common/DataTable';
-import StatusBadge from '../common/StatusBadge';
+import DataTable from './DataTable';
+import StatusBadge from './StatusBadge';
 
 const InternshipOverview = () => {
   // Mock data - replace with API calls

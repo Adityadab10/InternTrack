@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DataTable from '../common/DataTable';
+import DataTable from './DataTable';
 
 const MentorshipAssignment = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);

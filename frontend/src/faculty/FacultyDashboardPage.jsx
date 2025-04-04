@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { WebSocketProvider } from '../contexts/WebSocketContext';
-import FacultySidebar from '../components/ FacultyDashboard/FacultySidebar';
-import InternshipOverview from '../components/ FacultyDashboard/InternshipOverview';
-import MentorshipAssignment from '../components/ FacultyDashboard/MentorshipAssignment';
-import ProgressMonitoring from '../components/ FacultyDashboard/ProgressMonitoring';
-import StudentFeedback from '../components/ FacultyDashboard/StudentFeedback';
-import SDGPOEMapping from '../components/ FacultyDashboard/SDGPOEMapping';
+import { WebSocketProvider } from './WebSocketContext';
+import FacultySidebar from './FacultySidebar';
+import InternshipOverview from './InternshipOverview';
+import MentorshipAssignment from './MentorshipAssignment';
+import ProgressMonitoring from './ProgressMonitoring';
+import StudentFeedback from './StudentFeedback';
+import SDGPOEMapping from './SDGPOEMapping';
 
 const FacultyDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');

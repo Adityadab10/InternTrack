@@ -1,6 +1,6 @@
 import React from 'react';
-import { useWebSocket } from '../../contexts/WebSocketContext';
-import NotificationBell from '../common/NotificationBell';
+import { useWebSocket } from './WebSocketContext';
+import NotificationBell from './NotificationBell';
 
 const FacultySidebar = ({ activeTab, setActiveTab }) => {
   const { notifications } = useWebSocket();

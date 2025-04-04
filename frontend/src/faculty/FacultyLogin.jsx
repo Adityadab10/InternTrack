@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function FacultyLogin() {
+const FacultyLogin = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,10 +19,14 @@ export default function FacultyLogin() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Faculty login attempt:", formData);
+    try {
+      await login(formData);
+      navigate('/faculty/dashboard');  // Navigate to dashboard after login
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (
@@ -104,4 +112,6 @@ export default function FacultyLogin() {
       </div>
     </div>
   );
-}
+};
+
+export default FacultyLogin;

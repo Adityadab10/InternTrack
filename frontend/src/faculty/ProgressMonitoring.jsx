@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import StatusBadge from '../common/StatusBadge';
+import StatusBadge from './StatusBadge';
 
 const ProgressMonitoring = () => {
   const [expandedStudent, setExpandedStudent] = useState(null);

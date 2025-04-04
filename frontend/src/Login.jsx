@@ -30,7 +30,7 @@ export default function Login() {
           navigate('/viewer/ViewerPage')
           break
         case 'faculty':
-          navigate('/faculty/FacultyLogin')
+          navigate('/faculty/login')
           break
         case 'management':
           navigate('/management/ManagementLogin')

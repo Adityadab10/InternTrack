@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useWebSocket } from '../../contexts/WebSocketContext';
-import DataTable from '../common/DataTable';
+import { useWebSocket } from './WebSocketContext';
+import DataTable from './DataTable';
 
 const StudentFeedback = () => {
   const { sendFeedback, notifications } = useWebSocket();
