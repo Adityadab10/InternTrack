@@ -16,6 +16,14 @@ import {
   Search,
   Twitter,
   Users,
+  Mail,
+  Phone,
+  Send,
+  Filter,
+  Target,
+  Bookmark,
+  CheckCircle,
+  ChevronDown
 } from "lucide-react"
 
 export default function Landing() {
@@ -23,6 +31,57 @@ export default function Landing() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeTab, setActiveTab] = useState("All Departments")
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    message: ""
+  })
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    department: "",
+    sdg: "",
+    po: "",
+    industry: ""
+  })
+
+  // Sample data
+  const departments = ["Computer Science", "Engineering", "Business", "Arts", "Science"]
+  const sdgs = Array.from({length: 17}, (_, i) => `SDG ${i+1}`)
+  const pos = ["PO1", "PO2", "PO3", "PO4", "PO5"]
+  const industries = ["Tech", "Finance", "Healthcare", "Education", "Government"]
+  
+  const featuredInternships = [
+    {
+      id: 1,
+      company: "Tech Innovations Inc.",
+      department: "Computer Science",
+      description: "Develop web applications using modern frameworks and contribute to open-source projects.",
+      sdgs: [4, 8, 9],
+      pos: ["PO1", "PO3"],
+      location: "Remote",
+      duration: "3 months"
+    },
+    {
+      id: 2,
+      company: "Green Energy Solutions",
+      department: "Engineering",
+      description: "Work on sustainable energy projects and help design eco-friendly solutions.",
+      sdgs: [7, 13],
+      pos: ["PO2", "PO4"],
+      location: "New York, NY",
+      duration: "6 months"
+    },
+    {
+      id: 3,
+      company: "Global Finance Corp",
+      department: "Business",
+      description: "Analyze market trends and assist in financial planning strategies.",
+      sdgs: [8, 10],
+      pos: ["PO1", "PO5"],
+      location: "Chicago, IL",
+      duration: "4 months"
+    }
+  ]
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,9 +102,36 @@ export default function Landing() {
     navigate('/login')
   }
 
+  const handleContactSubmit = (e) => {
+    e.preventDefault()
+    // Here you would typically send the form data to your backend
+    console.log("Form submitted:", contactForm)
+    alert("Thank you for your message! We'll get back to you soon.")
+    setContactForm({ name: "", email: "", message: "" })
+  }
+
+  const handleContactChange = (e) => {
+    const { name, value } = e.target
+    setContactForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target
+    setFilters(prev => ({ ...prev, [name]: value }))
+  }
+
+  const resetFilters = () => {
+    setFilters({
+      department: "",
+      sdg: "",
+      po: "",
+      industry: ""
+    })
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
+      {/* Header (same as before) */}
       <header
         className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? "bg-black shadow-md py-2" : "bg-transparent py-4"}`}
       >
@@ -128,10 +214,9 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section (same as before) */}
       <section className="pt-32 pb-20 bg-gradient-to-br from-purple-900 to-black text-white relative overflow-hidden">
-  {/* Abstract background shapes */}
-  <div className="absolute top-0 left-0 w-full h-full opacity-10">
+      <div className="absolute top-0 left-0 w-full h-full opacity-10">
     <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-purple-500 blur-3xl"></div>
     <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-indigo-600 blur-3xl"></div>
   </div>
@@ -176,11 +261,11 @@ export default function Landing() {
       </div>
     </div>
   </div>
-</section>
+      </section>
 
-      {/* Statistics Section */}
+      {/* Statistics Section (same as before) */}
       <section className="py-16 bg-gray-900">
-        <div className="container mx-auto px-4 md:px-6">
+      <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">Internship Statistics Overview</h2>
             <p className="text-lg text-gray-300 max-w-3xl mx-auto">
@@ -249,156 +334,311 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* Internship Showcase Section */}
       <section className="py-16 bg-black">
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">How It Works</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Explore Internship Opportunities</h2>
             <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-              Our platform serves different stakeholders with tailored features and workflows.
+              Browse through available internships and find the perfect match for your academic and career goals.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-b-2 border-purple-600">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-900 rounded-full mb-6 mx-auto">
-                <GraduationCap className="h-8 w-8 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3 text-center">For Students</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">1</span>
-                  </div>
-                  <span>Find and apply for internships</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">2</span>
-                  </div>
-                  <span>Track application progress</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">3</span>
-                  </div>
-                  <span>Receive mentorship</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">4</span>
-                  </div>
-                  <span>Submit reports and get feedback</span>
-                </li>
-              </ul>
-            </div>
+          {/* Filters Section */}
+          <div className="mb-8 bg-gray-900 rounded-lg p-4">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 text-white hover:text-purple-400 transition-colors"
+            >
+              <Filter className="h-5 w-5" />
+              {showFilters ? "Hide Filters" : "Show Filters"}
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            </button>
 
-            <div className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-b-2 border-purple-500">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-900 rounded-full mb-6 mx-auto">
-                <BookOpen className="h-8 w-8 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3 text-center">For Faculty</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">1</span>
-                  </div>
-                  <span>Assign mentors to students</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">2</span>
-                  </div>
-                  <span>Evaluate student progress</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">3</span>
-                  </div>
-                  <span>Provide feedback and guidance</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">4</span>
-                  </div>
-                  <span>Track SDG and academic alignment</span>
-                </li>
-              </ul>
-            </div>
+            {showFilters && (
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Department</label>
+                  <select
+                    name="department"
+                    value={filters.department}
+                    onChange={handleFilterChange}
+                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700"
+                  >
+                    <option value="">All Departments</option>
+                    {departments.map(dept => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-b-2 border-purple-400">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-900 rounded-full mb-6 mx-auto">
-                <Building2 className="h-8 w-8 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3 text-center">For Employers</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">1</span>
-                  </div>
-                  <span>Post internship opportunities</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">2</span>
-                  </div>
-                  <span>Review student applications</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">3</span>
-                  </div>
-                  <span>Connect with institutions</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">4</span>
-                  </div>
-                  <span>Provide feedback on interns</span>
-                </li>
-              </ul>
-            </div>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">SDG Alignment</label>
+                  <select
+                    name="sdg"
+                    value={filters.sdg}
+                    onChange={handleFilterChange}
+                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700"
+                  >
+                    <option value="">All SDGs</option>
+                    {sdgs.map(sdg => (
+                      <option key={sdg} value={sdg}>{sdg}</option>
+                    ))}
+                  </select>
+                </div>
 
-            <div className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-b-2 border-purple-300">
-              <div className="flex items-center justify-center w-16 h-16 bg-purple-900 rounded-full mb-6 mx-auto">
-                <BarChart3 className="h-8 w-8 text-purple-400" />
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Program Outcome</label>
+                  <select
+                    name="po"
+                    value={filters.po}
+                    onChange={handleFilterChange}
+                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700"
+                  >
+                    <option value="">All POs</option>
+                    {pos.map(po => (
+                      <option key={po} value={po}>{po}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Industry</label>
+                  <select
+                    name="industry"
+                    value={filters.industry}
+                    onChange={handleFilterChange}
+                    className="w-full bg-gray-800 text-white rounded-md p-2 border border-gray-700"
+                  >
+                    <option value="">All Industries</option>
+                    {industries.map(industry => (
+                      <option key={industry} value={industry}>{industry}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-2 items-end">
+                  <button 
+                    onClick={resetFilters}
+                    className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+                  >
+                    Reset Filters
+                  </button>
+                  <button 
+                    onClick={() => setShowFilters(false)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3 text-center">For Admins</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">1</span>
+            )}
+          </div>
+
+          {/* Internship Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredInternships.map(internship => (
+              <div key={internship.id} className="bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-gray-800 hover:border-purple-500/30">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-white">{internship.company}</h3>
+                    <span className="bg-purple-600 text-xs px-2 py-1 rounded">{internship.department}</span>
                   </div>
-                  <span>Manage internship listings</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">2</span>
+                  
+                  <div className="flex items-center text-gray-400 text-sm mb-3">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span>{internship.location}</span>
+                    <span className="mx-2">•</span>
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{internship.duration}</span>
                   </div>
-                  <span>Monitor platform performance</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">3</span>
+                  
+                  <p className="text-gray-300 mb-4">{internship.description}</p>
+                  
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">SDG Alignment</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {internship.sdgs.map(sdg => (
+                        <span key={sdg} className="bg-green-900/50 text-green-300 text-xs px-2 py-1 rounded flex items-center">
+                          <Target className="h-3 w-3 mr-1" />
+                          {sdg}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <span>Generate detailed reports</span>
-                </li>
-                <li className="flex items-start">
-                  <div className="flex-shrink-0 h-5 w-5 rounded-full bg-purple-900 flex items-center justify-center mr-2 mt-0.5">
-                    <span className="text-purple-400 text-xs font-bold">4</span>
+                  
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-400 mb-2">Program Outcomes</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {internship.pos.map(po => (
+                        <span key={po} className="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded flex items-center">
+                          <Bookmark className="h-3 w-3 mr-1" />
+                          {po}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <span>Oversee faculty assignments</span>
-                </li>
-              </ul>
+                  
+                  <div className="flex gap-3">
+                    <button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded transition-colors flex items-center justify-center">
+                      <Send className="h-4 w-4 mr-2" />
+                      Apply Now
+                    </button>
+                    <button className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded transition-colors">
+                      Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SDG Alignment Section */}
+      <section className="py-16 bg-gray-900">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">Sustainable Development Goals Alignment</h2>
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+              See how our internships contribute to the United Nations Sustainable Development Goals
+            </p>
+          </div>
+
+          <div className="bg-black p-6 rounded-lg shadow-inner border border-gray-800">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[1, 4, 5, 7, 8, 9, 10, 13].map(sdg => (
+                <div key={sdg} className="bg-gray-800 p-4 rounded-lg text-center hover:bg-gray-700 transition-colors">
+                  <div className="w-16 h-16 mx-auto mb-3 bg-blue-900 rounded-full flex items-center justify-center text-white font-bold">
+                    {sdg}
+                  </div>
+                  <h3 className="text-sm font-semibold text-white mb-1">SDG {sdg}</h3>
+                  <p className="text-xs text-gray-400">{sdgDescriptions[sdg]}</p>
+                  <div className="mt-2 text-purple-400 text-sm font-medium">
+                    {Math.floor(Math.random() * 30) + 15}% of internships
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
+      {/* Contact Us Section */}
+      <section className="py-16 bg-black" id="contact">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">Contact Us</h2>
+              <p className="text-lg text-gray-300">
+                Have questions or want to collaborate? Reach out to our team.
+              </p>
+            </div>
 
-      {/* Footer */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-gray-900 p-8 rounded-lg border border-gray-800">
+                <h3 className="text-xl font-bold text-white mb-6">Get in Touch</h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-purple-900/50 p-3 rounded-full">
+                      <Mail className="h-5 w-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-400">Email</h4>
+                      <p className="text-white">info@interntrack.edu</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="bg-purple-900/50 p-3 rounded-full">
+                      <Phone className="h-5 w-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-400">Phone</h4>
+                      <p className="text-white">+1 (555) 123-4567</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="bg-purple-900/50 p-3 rounded-full">
+                      <MapPin className="h-5 w-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-400">Address</h4>
+                      <p className="text-white">123 Education Street</p>
+                      <p className="text-white">Academic City, AC 12345</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-900 p-8 rounded-lg border border-gray-800">
+                <h3 className="text-xl font-bold text-white mb-6">Send Us a Message</h3>
+                
+                <form onSubmit={handleContactSubmit}>
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={contactForm.name}
+                      onChange={handleContactChange}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                      Your Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={contactForm.email}
+                      onChange={handleContactChange}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-6">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-1">
+                      Your Message
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows="4"
+                      value={contactForm.message}
+                      onChange={handleContactChange}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      required
+                    ></textarea>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center"
+                  >
+                    <Send className="h-5 w-5 mr-2" />
+                    Send Message
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer (same as before) */}
       <footer className="bg-black text-gray-300 border-t border-gray-800">
-        <div className="container mx-auto px-4 md:px-6 py-12">
+      <div className="container mx-auto px-4 md:px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="text-white font-bold text-2xl mb-4">
@@ -506,5 +746,17 @@ export default function Landing() {
       </footer>
     </div>
   )
+}
+
+// Helper data for SDGs
+const sdgDescriptions = {
+  1: "No Poverty",
+  4: "Quality Education",
+  5: "Gender Equality",
+  7: "Affordable and Clean Energy",
+  8: "Decent Work and Economic Growth",
+  9: "Industry, Innovation and Infrastructure",
+  10: "Reduced Inequalities",
+  13: "Climate Action"
 }
 
