@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import ProfileContent from './ProfileContent';
 import UserProfile from './UserProfile';
 import { ProgressCircle } from './ProgressCircle';
+import StudentMentor from "./StudentMentor";
+import StudentReport from "./StudentReport";
 
 const StudentDashboard = () => {
   const location = useLocation();
@@ -431,10 +433,10 @@ const StudentDashboard = () => {
             </div>
           </div>
         );
-      case 'tasks':
-        return <div className="bg-black/70 p-6 rounded-lg border border-purple-500/30 text-purple-200">Assigned Tasks</div>;
-      case 'certificates':
-        return <div className="bg-black/70 p-6 rounded-lg border border-purple-500/30 text-purple-200">Certificates</div>;
+      case 'Mentor':
+        return <StudentMentor/>;
+      case 'Report':
+        return <StudentReport/>;
       case 'profile':
         return <UserProfile />;
       default:
@@ -464,8 +466,8 @@ const StudentDashboard = () => {
           {[
             { name: 'explore', icon: '🔍', label: 'Explore' },
             { name: 'your-internships', icon: '💼', label: 'Your Internships' },
-            { name: 'tasks', icon: '✓', label: 'Tasks' },
-            { name: 'certificates', icon: '🎓', label: 'Certificates' },
+            { name: 'Mentor', icon: '✓', label: 'Mentor' },
+            { name: 'Report', icon: '🎓', label: 'Report' },
             { name: 'profile', icon: '👤', label: 'Profile' }
           ].map(item => (
             <button

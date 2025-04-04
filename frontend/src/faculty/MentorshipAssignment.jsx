@@ -1,100 +1,58 @@
-import React, { useState } from 'react';
-import DataTable from './DataTable';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const MentorshipAssignment = () => {
-  const [selectedStudents, setSelectedStudents] = useState([]);
-  const [selectedMentor, setSelectedMentor] = useState('');
+  const [mentorsData, setMentorsData] = useState([]);
 
-  // Mock data
-  const students = [
-    { id: 1, name: 'John Doe', department: 'CS', internship: 'Tech Corp', mentor: 'Dr. Smith' },
-    { id: 2, name: 'Jane Smith', department: 'IT', internship: 'Data Systems', mentor: '' },
-    { id: 3, name: 'Mike Johnson', department: 'CS', internship: 'Web Solutions', mentor: '' },
-  ];
-
-  const mentors = [
-    { id: 1, name: 'Dr. Smith', department: 'CS', maxStudents: 5, currentStudents: 3 },
-    { id: 2, name: 'Dr. Johnson', department: 'IT', maxStudents: 4, currentStudents: 1 },
-    { id: 3, name: 'Dr. Williams', department: 'CS', maxStudents: 6, currentStudents: 2 },
-  ];
-
-  const columns = [
-    { 
-      Header: 'Select',
-      accessor: 'id',
-      Cell: ({ value }) => (
-        <input 
-          type="checkbox" 
-          checked={selectedStudents.includes(value)}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedStudents([...selectedStudents, value]);
-            } else {
-              setSelectedStudents(selectedStudents.filter(id => id !== value));
-            }
-          }}
-          className="h-4 w-4 text-blue-600 rounded"
-        />
-      )
-    },
-    { Header: 'Student Name', accessor: 'name' },
-    { Header: 'Department', accessor: 'department' },
-    { Header: 'Internship Company', accessor: 'internship' },
-    { Header: 'Current Mentor', accessor: 'mentor' },
-  ];
-
-  const handleAssignMentor = () => {
-    if (selectedStudents.length === 0 || !selectedMentor) return;
-    
-    // Here you would make an API call to assign the mentor
-    console.log(`Assigning mentor ${selectedMentor} to students:`, selectedStudents);
-    
-    // Reset selection
-    setSelectedStudents([]);
-    setSelectedMentor('');
-  };
+  useEffect(() => {
+    const fetchMentors = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/mentors");
+        console.log("Mentor API Response:", response.data);
+        
+        // Access the mentors array from response.data.data
+        if (response.data && Array.isArray(response.data.data)) {
+          setMentorsData(response.data.data);
+        } else {
+          console.error("Unexpected API response format", response.data);
+          setMentorsData([]);
+        }
+      } catch (error) {
+        console.error("Error fetching mentors:", error);
+        setMentorsData([]);
+      }
+    };
+  
+    fetchMentors();
+  }, []);
+  
+  
 
   return (
-    <div>
+    <div className="p-4">
       <h2 className="text-2xl font-bold mb-6">Mentorship Assignment</h2>
       
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Assign Mentor to Selected Students</h3>
-        
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Mentor</label>
-            <select
-              value={selectedMentor}
-              onChange={(e) => setSelectedMentor(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">Select a mentor</option>
-              {mentors.map(mentor => (
-                <option key={mentor.id} value={mentor.id}>
-                  {mentor.name} ({mentor.department}) - {mentor.currentStudents}/{mentor.maxStudents} students
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <button
-            onClick={handleAssignMentor}
-            disabled={selectedStudents.length === 0 || !selectedMentor}
-            className={`px-4 py-2 rounded-md ${selectedStudents.length && selectedMentor ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-          >
-            Assign Mentor
-          </button>
+        <h3 className="text-lg font-semibold mb-4">Available Mentors</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.isArray(mentorsData) && mentorsData.length > 0 ? (
+            mentorsData.map((mentor, index) => (
+              <div 
+                key={index} 
+                className="border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <h4 className="font-semibold text-lg mb-2">{mentor.name}</h4>
+                <div className="space-y-1">
+                  <p><span className="font-medium">Department:</span> {mentor.department}</p>
+                  <p><span className="font-medium">Expertise:</span> {mentor.expertise}</p>
+                  <p><span className="font-medium">Email:</span> {mentor.email}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No mentors available</p>
+          )}
         </div>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <DataTable 
-          columns={columns} 
-          data={students} 
-          pagination 
-          searchable 
-        />
       </div>
     </div>
   );
