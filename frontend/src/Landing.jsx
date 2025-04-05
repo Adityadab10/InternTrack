@@ -143,23 +143,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-white hover:text-purple-400 font-medium">
-                Home
-              </a>
-              <a href="#" className="text-white hover:text-purple-400 font-medium">
-                About
-              </a>
-              <a href="#" className="text-white hover:text-purple-400 font-medium">
-                Internship Statistics
-              </a>
-              <a href="#" className="text-white hover:text-purple-400 font-medium">
-                How It Works
-              </a>
-              <a href="#" className="text-white hover:text-purple-400 font-medium">
-                Contact
-              </a>
-            </nav>
+           
 
             <div className="hidden md:flex items-center space-x-4">
               <button 
