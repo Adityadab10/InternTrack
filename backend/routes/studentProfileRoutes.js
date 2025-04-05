@@ -170,7 +170,21 @@ router.get('/student-profile/by-email/:email', async (req, res) => {
     res.json(profile);
   } catch (error) {
     console.error('Error fetching student profile:', error);
-    res.status(500).json({ message: 'Failed to fetch student profile' });
+    res.status(500).json({ message: 'Failed to fetch profile' });
+  }
+});
+
+// Get mentor details by ID
+router.get('/mentors/:id', async (req, res) => {
+  try {
+    const mentor = await Mentor.findById(req.params.id);
+    if (!mentor) {
+      return res.status(404).json({ message: 'Mentor not found' });
+    }
+    res.json(mentor);
+  } catch (error) {
+    console.error('Error fetching mentor:', error);
+    res.status(500).json({ message: 'Error fetching mentor details' });
   }
 });
 
