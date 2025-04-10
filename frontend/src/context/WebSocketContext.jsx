@@ -1,99 +1,53 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// context/WebSocketContext.jsx
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import io from 'socket.io-client';
 
-const WebSocketContext = createContext({
-  messages: [],
-  sendMessage: null,
-  registerUser: null,
-  connected: false
-});
+const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+  const socketRef = useRef();
   const [messages, setMessages] = useState([]);
-  const [connected, setConnected] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    let ws;
-    try {
-      ws = new WebSocket('ws://localhost:5000');
-      
-      ws.onopen = () => {
-        console.log('WebSocket Connected');
-        setSocket(ws);
-        setConnected(true);
-      };
+    socketRef.current = io('http://localhost:5000');
 
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          if (message.type === 'chat') {
-            setMessages(prev => [...prev, message]);
-          }
-        } catch (error) {
-          console.error('Error parsing message:', error);
-        }
-      };
+    socketRef.current.on('connect', () => {
+      console.log('🟢 Connected to WebSocket');
+    });
 
-      ws.onclose = () => {
-        console.log('WebSocket Disconnected');
-        setSocket(null);
-        setConnected(false);
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-        setSocket(null);
-        setConnected(false);
-      };
-    } catch (error) {
-      console.error('WebSocket Connection Error:', error);
-    }
+    socketRef.current.on('receive_message', (data) => {
+      console.log('📨 Message received:', data);
+      setMessages((prev) => [...prev, data]);
+    });
 
     return () => {
-      if (ws) {
-        ws.close();
-      }
+      if (socketRef.current) socketRef.current.disconnect();
     };
   }, []);
 
-  const sendMessage = (recipientId, message, senderName) => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket is not connected');
-      return;
-    }
-
-    const messageData = {
-      type: 'chat',
-      recipientId,
-      message,
-      senderId: localStorage.getItem('userId'),
-      senderName,
-      timestamp: new Date().toISOString()
-    };
-
-    try {
-      socket.send(JSON.stringify(messageData));
-      setMessages(prev => [...prev, messageData]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
+  const registerUser = (id, role) => {
+    setUserId(id);
+    setUserRole(role);
+    socketRef.current.emit('register_user', { 
+      userId: id, 
+      role,
+      isFaculty: role === 'faculty'
+    });
   };
 
-  const registerUser = (userId, role) => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket is not connected');
-      return;
-    }
-
-    try {
-      socket.send(JSON.stringify({
-        type: 'register',
-        userId,
-        role
-      }));
-    } catch (error) {
-      console.error('Error registering user:', error);
-    }
+  const sendMessage = (recipientId, message, metadata = {}) => {
+    const messageData = {
+      senderId: userId,
+      recipientId,
+      message,
+      ...metadata,
+      timestamp: new Date(),
+    };
+    console.log('Sending message:', messageData);
+    socketRef.current.emit('send_message', messageData);
+    setMessages((prev) => [...prev, messageData]);
   };
 
   return (
@@ -101,23 +55,12 @@ export const WebSocketProvider = ({ children }) => {
       messages,
       sendMessage,
       registerUser,
-      connected
+      userRole,
+      userId
     }}>
       {children}
     </WebSocketContext.Provider>
   );
 };
 
-export const useWebSocket = () => {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    console.warn('useWebSocket must be used within a WebSocketProvider');
-    return {
-      messages: [],
-      sendMessage: () => {},
-      registerUser: () => {},
-      connected: false
-    };
-  }
-  return context;
-};
+export const useWebSocket = () => useContext(WebSocketContext);

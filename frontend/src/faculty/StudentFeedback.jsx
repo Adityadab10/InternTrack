@@ -112,32 +112,31 @@ const StudentFeedback = () => {
           </div>
           
           {/* Chat Messages */}
-          <div 
-            ref={chatContainerRef}
-            className="h-[400px] overflow-y-auto mb-4 p-4 border rounded-lg bg-gray-50"
-          >
+          <div ref={chatContainerRef} className="h-[400px] overflow-y-auto mb-4 p-4 border rounded-lg bg-gray-50">
             {messages
-              .filter(msg => 
-                msg.senderId === selectedStudent._id || 
-                msg.recipientId === selectedStudent._id
-              )
+              .filter(msg => {
+                return (
+                  // Show messages from selected student to faculty
+                  (msg.senderId === selectedStudent?.email && msg.recipientId === 'FACULTY') ||
+                  // Show messages from faculty to selected student
+                  (msg.senderRole === 'faculty' && msg.recipientId === selectedStudent?.email)
+                );
+              })
               .map((msg, index) => (
                 <div
-                  key={index}
-                  className={`mb-3 ${
-                    msg.senderId === localStorage.getItem('userId')
-                      ? 'ml-auto text-right'
-                      : ''
-                  }`}
+                  key={`${msg.timestamp}-${index}`}
+                  className={`mb-3 ${msg.senderRole === 'faculty' ? 'ml-auto text-right' : ''}`}
                 >
                   <div
                     className={`inline-block p-3 rounded-lg max-w-[70%] ${
-                      msg.senderId === localStorage.getItem('userId')
-                        ? 'bg-blue-500 text-white'
+                      msg.senderRole === 'faculty' 
+                        ? 'bg-blue-500 text-white' 
                         : 'bg-gray-200'
                     }`}
                   >
-                    <p className="text-sm font-semibold mb-1">{msg.senderName}</p>
+                    <p className="text-sm font-semibold mb-1">
+                      {msg.senderRole === 'faculty' ? 'You' : msg.senderName}
+                    </p>
                     <p className="break-words">{msg.message}</p>
                     <p className="text-xs mt-1 opacity-75">
                       {new Date(msg.timestamp).toLocaleTimeString()}
@@ -151,7 +150,16 @@ const StudentFeedback = () => {
           <form onSubmit={(e) => {
             e.preventDefault();
             if (newMessage.trim() && selectedStudent?._id) {
-              sendMessage?.(selectedStudent._id, newMessage, 'Faculty');
+              sendMessage(
+                selectedStudent.email, // Send to specific student
+                newMessage,
+                {
+                  senderRole: 'faculty',
+                  senderName: 'Faculty',
+                  studentId: selectedStudent._id,
+                  recipientId: selectedStudent.email
+                }
+              );
               setNewMessage('');
             }
           }} className="flex gap-2">
