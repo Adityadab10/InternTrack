@@ -323,42 +323,84 @@ const StudentDashboard = () => {
       case 'your-internships':
         return (
           <div className="space-y-8">
-            {/* Dynamic Shortlisted/Approved Internships */}
+            {/* Dynamic Shortlisted/Approved/Accepted Internships */}
             <div>
-              <h2 className="text-2xl font-bold text-purple-200 mb-4">Shortlisted Internships</h2>
+              <h2 className="text-2xl font-bold text-purple-200 mb-4">Shortlisted/Accepted Internships</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {approvedInternships.length === 0 ? (
                   <div className="col-span-full bg-black/70 p-6 rounded-lg border border-purple-500/30 text-center">
-                    <p className="text-purple-200">No shortlisted internships yet.</p>
+                    <p className="text-purple-200">No shortlisted or accepted internships yet.</p>
                   </div>
                 ) : (
                   approvedInternships.map(internship => (
-                    <div key={internship._id} className="bg-black/80 rounded-lg border border-green-800/50 hover:border-green-600 shadow-lg hover:shadow-green-900/20 transition-all duration-300">
+                    <div 
+                      key={internship._id} 
+                      className="bg-black/80 rounded-lg border border-green-800/50 hover:border-green-600 
+                        shadow-lg hover:shadow-green-900/20 transition-all duration-300 transform hover:-translate-y-1"
+                    >
                       <div className="p-6">
                         <div className="mb-4">
-                          <span className="bg-green-900/50 text-green-200 px-3 py-1 rounded-full text-sm">
-                            Shortlisted
+                          <span className={`px-3 py-1 rounded-full text-sm
+                            ${internship.status === "Accepted" 
+                              ? "bg-emerald-900/50 text-emerald-200 border border-emerald-500/30"
+                              : "bg-green-900/50 text-green-200 border border-green-500/30"
+                            }`}
+                          >
+                            {internship.status || "Shortlisted"}
                           </span>
                         </div>
                         <h3 className="font-bold text-xl text-green-400 mb-2">{internship.title}</h3>
                         <p className="text-gray-300 mb-4">{internship.company}</p>
-                        <div className="space-y-2 mb-4">
+                        <div className="space-y-3 mb-4">
                           <div className="flex items-center text-sm text-gray-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                            <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             {internship.location || "Remote"}
                           </div>
                           <div className="flex items-center text-sm text-gray-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M8.433 7.418c.155-.63.244-1.28.244-1.96s-.09-1.33-.244-1.96L10.932 2.5C11.582 2 12 1.24 12 .5H4c-.751 0-1.45.515-1.787 1.355L0 6v8l2.151.864A2.5 2.5 0 004.5 17h11a2.5 2.5 0 002.45-2.014L20 8v-1.5a1.5 1.5 0 00-1.5-1.5H16V5a1 1 0 00-1-1h-4.014L10.433 2.58zM12 10h2v3h-2v-3zM4 10h2v3H4v-3z" />
+                            <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {internship.duration}
+                          </div>
+                          <div className="flex items-center text-sm text-gray-300">
+                            <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             ₹{internship.stipend || "Unpaid"}
                           </div>
+                          <div className="flex items-center text-sm text-gray-300">
+                            <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Start Date: {new Date(internship.startDate || Date.now()).toLocaleDateString()}
+                          </div>
                         </div>
-                        <button className="w-full bg-green-900 text-green-100 py-2 rounded-md hover:bg-green-800 transition-colors duration-300">
-                          View Details
-                        </button>
+                        <div className="flex space-x-3">
+                          <button 
+                            className="flex-1 bg-green-900 text-green-100 py-2 rounded-md hover:bg-green-800 
+                              transition-colors duration-300 flex items-center justify-center space-x-2"
+                          >
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span>View Details</span>
+                          </button>
+                          {internship.status === "Accepted" && (
+                            <button 
+                              className="flex-1 bg-emerald-900/70 text-emerald-100 py-2 rounded-md hover:bg-emerald-800 
+                                transition-colors duration-300 flex items-center justify-center space-x-2"
+                            >
+                              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                              </svg>
+                              <span>Start Onboarding</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
