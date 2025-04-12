@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
-const InternshipForm = ({ onSuccess }) => {
-  const [formData, setFormData] = useState({
+const InternshipForm = ({ onSuccess, internship }) => {
+  const [formData, setFormData] = useState(internship || {
     title: "",
     company: "",
     description: "",
@@ -39,6 +40,17 @@ const InternshipForm = ({ onSuccess }) => {
   
   const poOptions = ["Engineering Knowledge", "Problem Analysis", "Design Solutions"];
   const peoOptions = ["Leadership Skills", "Problem Solving", "Communication Skills"];
+
+  const formFields = [
+    { name: 'title', label: 'Internship Title', type: 'text', required: true, icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { name: 'company', label: 'Company Name', type: 'text', required: true, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { name: 'location', label: 'Location', type: 'text', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
+    { name: 'positions', label: 'Number of Positions', type: 'number', required: true, icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+    { name: 'stipend', label: 'Stipend Amount', type: 'text', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { name: 'duration', label: 'Duration', type: 'text', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { name: 'deadline', label: 'Application Deadline', type: 'date', required: true, icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { name: 'contact', label: 'Contact Information', type: 'text', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,146 +108,147 @@ const InternshipForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 max-w-lg mx-auto bg-gray-100 rounded shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Post an Internship</h1>
-
-      <input
-        type="text"
-        name="title"
-        value={formData.title}
-        onChange={handleInputChange}
-        placeholder="Internship Title"
-        className="w-full p-2 mb-4 border rounded"
-        required
-      />
-      <input
-        type="text"
-        name="company"
-        value={formData.company}
-        onChange={handleInputChange}
-        placeholder="Company Name"
-        className="w-full p-2 mb-4 border rounded"
-        required
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleInputChange}
-        placeholder="Internship Description"
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <textarea
-        name="requirements"
-        value={formData.requirements}
-        onChange={handleInputChange}
-        placeholder="Requirements"
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <input
-        type="number"
-        name="positions"
-        value={formData.positions}
-        onChange={handleInputChange}
-        placeholder="Number of Positions"
-        className="w-full p-2 mb-4 border rounded"
-        required
-      />
-      <input
-        type="text"
-        name="location"
-        value={formData.location}
-        onChange={handleInputChange}
-        placeholder="Location"
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <input
-        type="text"
-        name="stipend"
-        value={formData.stipend}
-        onChange={handleInputChange}
-        placeholder="Stipend (e.g., 5000)"
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <input
-        type="text"
-        name="duration"
-        value={formData.duration}
-        onChange={handleInputChange}
-        placeholder="Duration (e.g., 3 months)"
-        className="w-full p-2 mb-4 border rounded"
-      />
-      <input
-        type="date"
-        name="deadline"
-        value={formData.deadline}
-        onChange={handleInputChange}
-        className="w-full p-2 mb-4 border rounded"
-        required
-      />
-      <input
-        type="text"
-        name="contact"
-        value={formData.contact}
-        onChange={handleInputChange}
-        placeholder="Contact Email or Phone"
-        className="w-full p-2 mb-4 border rounded"
-      />
-
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">SDGs (hold Ctrl/Cmd to select multiple):</label>
-        <select
-          multiple
-          name="sdgs"
-          value={formData.sdgs}
-          onChange={(e) => handleMultiSelect(e, "sdgs")}
-          className="w-full p-2 border rounded h-48"
-        >
-          {sdgOptions.map((sdg, index) => (
-            <option key={index} value={sdg}>
-              {sdg}
-            </option>
-          ))}
-        </select>
+    <motion.form 
+      onSubmit={handleSubmit}
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {formFields.map((field) => (
+          <motion.div 
+            key={field.name}
+            className="relative group"
+            whileHover={{ scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-xl 
+              group-hover:from-purple-500/10 group-hover:to-indigo-500/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-center space-x-2 mb-2">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={field.icon} />
+                </svg>
+                <label className="block text-sm font-medium text-purple-300">
+                  {field.label}
+                  {field.required && <span className="text-red-400 ml-1">*</span>}
+                </label>
+              </div>
+              <input
+                type={field.type}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleInputChange}
+                required={field.required}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-purple-500/20 rounded-xl text-white 
+                  placeholder-purple-300/50 focus:outline-none focus:border-purple-500/50 
+                  focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+              />
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">POs (hold Ctrl/Cmd to select multiple):</label>
-        <select
-          multiple
-          name="pos"
-          value={formData.pos}
-          onChange={(e) => handleMultiSelect(e, "pos")}
-          className="w-full p-2 border rounded"
-        >
-          {poOptions.map((po, index) => (
-            <option key={index} value={po}>
-              {po}
-            </option>
-          ))}
-        </select>
+      {/* Description and Requirements */}
+      <div className="space-y-6">
+        {[
+          { name: 'description', label: 'Internship Description', icon: 'M4 6h16M4 12h16M4 18h7' },
+          { name: 'requirements', label: 'Requirements', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' }
+        ].map((field) => (
+          <motion.div 
+            key={field.name}
+            className="relative group"
+            whileHover={{ scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-xl 
+              group-hover:from-purple-500/10 group-hover:to-indigo-500/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-center space-x-2 mb-2">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={field.icon} />
+                </svg>
+                <label className="block text-sm font-medium text-purple-300">{field.label}</label>
+              </div>
+              <textarea
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-purple-500/20 rounded-xl text-white 
+                  placeholder-purple-300/50 focus:outline-none focus:border-purple-500/50 
+                  focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+              />
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">PEOs (hold Ctrl/Cmd to select multiple):</label>
-        <select
-          multiple
-          name="peos"
-          value={formData.peos}
-          onChange={(e) => handleMultiSelect(e, "peos")}
-          className="w-full p-2 border rounded"
-        >
-          {peoOptions.map((peo, index) => (
-            <option key={index} value={peo}>
-              {peo}
-            </option>
-          ))}
-        </select>
+      {/* Multi-select Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { name: 'sdgs', label: 'SDGs', options: sdgOptions, icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
+          { name: 'pos', label: 'Program Outcomes', options: poOptions, icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+          { name: 'peos', label: 'Program Educational Objectives', options: peoOptions, icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' }
+        ].map((field) => (
+          <motion.div 
+            key={field.name}
+            className="relative group"
+            whileHover={{ scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 rounded-xl 
+              group-hover:from-purple-500/10 group-hover:to-indigo-500/10 transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-center space-x-2 mb-2">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={field.icon} />
+                </svg>
+                <label className="block text-sm font-medium text-purple-300">
+                  {field.label}
+                  <span className="text-purple-400/60 text-xs ml-1">(Multi-select)</span>
+                </label>
+              </div>
+              <select
+                multiple
+                name={field.name}
+                value={formData[field.name]}
+                onChange={(e) => handleMultiSelect(e, field.name)}
+                className="w-full h-32 px-4 py-3 bg-gray-900/50 border border-purple-500/20 rounded-xl text-white 
+                  focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 
+                  transition-all duration-300 scrollbar-thin scrollbar-thumb-purple-500/20 
+                  scrollbar-track-transparent"
+              >
+                {field.options.map((option, index) => (
+                  <option key={index} value={option} className="bg-gray-900 py-1">
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-        Submit Internship
-      </button>
-    </form>
+      <motion.button
+        type="submit"
+        className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl
+          hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 
+          shadow-lg hover:shadow-purple-500/20 flex items-center justify-center space-x-2 group"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <svg className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" 
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span className="font-medium text-lg">Submit Internship</span>
+      </motion.button>
+    </motion.form>
   );
 };
 

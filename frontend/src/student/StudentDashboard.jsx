@@ -446,53 +446,90 @@ const StudentDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-purple-950 via-black to-indigo-950">
-      {/* Enhanced Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-black to-purple-950 text-white h-full border-r border-purple-500/30 shadow-xl">
+      {/* Enhanced Sidebar with better UI */}
+      <div className="w-72 bg-gradient-to-b from-black via-purple-950/50 to-black text-white h-full border-r border-purple-500/30 shadow-xl relative z-10 backdrop-blur-xl">
         {/* Profile Section */}
         <div className="p-6 border-b border-purple-500/30 bg-black/40">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-xl font-bold">
-              {user?.name?.[0] || 'S'}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-purple-300">Student Portal</h2>
-              <p className="text-sm text-purple-200">{user?.name || 'Student'}</p>
+          <div className="relative group">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-2xl font-bold ring-2 ring-purple-500/30 ring-offset-2 ring-offset-black/50 transform transition-all duration-300 group-hover:scale-105">
+                  {user?.name?.[0] || 'S'}
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black"></div>
+                </div>
+                <div className="absolute inset-0 rounded-full bg-purple-500 blur-xl opacity-30 group-hover:opacity-40 transition-opacity"></div>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+                  Student Portal
+                </h2>
+                <p className="text-sm text-purple-300/80">{user?.name || 'Student'}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Menu */}
         <nav className="p-4 space-y-2">
-          {[
-            { name: 'explore', icon: '🔍', label: 'Explore' },
-            { name: 'your-internships', icon: '💼', label: 'Your Internships' },
-            { name: 'Mentor', icon: '✓', label: 'Mentor' },
-            { name: 'Report', icon: '🎓', label: 'Report' },
-            { name: 'profile', icon: '👤', label: 'Profile' }
-          ].map(item => (
-            <button
-              key={item.name}
-              onClick={() => setActiveTab(item.name)}
-              className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 
-                ${activeTab === item.name 
-                  ? 'bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white shadow-lg shadow-purple-500/20' 
-                  : 'hover:bg-purple-900/30 text-purple-200 hover:text-white'
-                }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
+          <div className="space-y-1">
+            {[
+              { name: 'explore', icon: '🔍', label: 'Explore', desc: 'Find internships' },
+              { name: 'your-internships', icon: '💼', label: 'Your Internships', desc: 'Track progress' },
+              { name: 'Mentor', icon: '👥', label: 'Mentor', desc: 'Get guidance' },
+              { name: 'Report', icon: '📊', label: 'Report', desc: 'View analytics' },
+              { name: 'profile', icon: '👤', label: 'Profile', desc: 'Manage account' }
+            ].map(item => (
+              <button
+                key={item.name}
+                onClick={() => setActiveTab(item.name)}
+                className={`w-full text-left p-3 rounded-xl transition-all duration-300 relative group
+                  ${activeTab === item.name 
+                    ? 'bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white shadow-lg shadow-purple-500/20' 
+                    : 'hover:bg-purple-900/30 text-purple-200 hover:text-white'
+                  }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+                    activeTab === item.name 
+                      ? 'bg-white/10' 
+                      : 'bg-black/20 group-hover:bg-white/5'
+                    } backdrop-blur-sm transition-colors`}>
+                    <span className="text-xl transform transition-transform group-hover:scale-110">
+                      {item.icon}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">{item.label}</div>
+                    <div className="text-xs text-purple-300/70 group-hover:text-purple-200/90 transition-colors">
+                      {item.desc}
+                    </div>
+                  </div>
+                  {activeTab === item.name && (
+                    <div className="w-1.5 h-8 bg-white rounded-full absolute right-2 top-1/2 transform -translate-y-1/2"></div>
+                  )}
+                </div>
+                
+                {/* Hover effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-indigo-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+              </button>
+            ))}
+          </div>
         </nav>
 
-        {/* Logout Button */}
-        <div className="absolute bottom-0 w-64 p-4 border-t border-purple-500/30 bg-black/20">
+        {/* Enhanced Logout Button - moved up to fill space */}
+        <div className="fixed bottom-0 w-72 p-4 border-t border-purple-500/30 bg-black/20 backdrop-blur-sm">
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 bg-gradient-to-r from-red-900/50 to-purple-900/50 text-white rounded-lg hover:from-red-800 hover:to-purple-800 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-purple-500/20"
+            className="w-full px-4 py-3 bg-gradient-to-r from-red-900/50 to-purple-900/50 text-white rounded-xl 
+              hover:from-red-800 hover:to-purple-800 transition-all duration-300 
+              flex items-center justify-center space-x-2 shadow-lg hover:shadow-purple-500/20
+              transform hover:-translate-y-0.5"
           >
-            <span>🚪</span>
-            <span>Logout</span>
+            <span className="text-xl">🚪</span>
+            <span className="font-medium">Logout</span>
+            
+            {/* Hover effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-purple-600/10 rounded-xl opacity-0 hover:opacity-100 transition-opacity"></div>
           </button>
         </div>
       </div>

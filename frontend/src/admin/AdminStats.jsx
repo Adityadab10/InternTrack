@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AdminStats = () => {
   const [stats, setStats] = useState([]);
@@ -11,6 +12,12 @@ const AdminStats = () => {
   const [analyzingApplications, setAnalyzingApplications] = useState(new Set());
   const [hasStartedAnalysis, setHasStartedAnalysis] = useState(false);
   const [currentProfile, setCurrentProfile] = useState(null);
+
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
 
   useEffect(() => {
     fetchStats();
@@ -584,56 +591,180 @@ const AdminStats = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-purple-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950 text-purple-100 p-6">
+      <motion.div 
+        className="max-w-7xl mx-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div 
+          className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+        >
           <div>
-            <h2 className="text-3xl font-bold text-purple-300 mb-2">Application Dashboard</h2>
-            <p className="text-purple-400">Manage and review internship applications</p>
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent mb-2">
+              Application Dashboard
+            </h2>
+            <p className="text-purple-400/80">Track and manage internship applications efficiently</p>
           </div>
+          
           <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={fetchStats}
-              className="bg-purple-800 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center"
+              className="bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 
+                text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/20 
+                flex items-center justify-center group"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Refresh
-            </button>
+              Refresh Data
+            </motion.button>
+            
             {!hasStartedAnalysis && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={startAnalysis}
-                className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-lg transition-colors flex items-center"
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 
+                  text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 
+                  flex items-center justify-center group"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <svg 
+                  className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-500" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                Analyze Resumes
-              </button>
+                Start Analysis
+              </motion.button>
             )}
           </div>
-        </div>
+        </motion.div>
+
+        <motion.div 
+          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+        >
+          {[
+            {
+              label: 'Total Applications',
+              value: stats.filter(s => s.status !== "Rejected").length,
+              color: 'purple',
+              icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              )
+            },
+            {
+              label: 'Pending Review',
+              value: stats.filter(s => s.status === "Pending").length,
+              color: 'yellow',
+              icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )
+            },
+            {
+              label: 'Approved',
+              value: stats.filter(s => s.status === "Accepted").length,
+              color: 'green',
+              icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )
+            },
+            {
+              label: 'Rejected',
+              value: stats.filter(s => s.status === "Rejected").length,
+              color: 'red',
+              icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )
+            }
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-${stat.color}-500/20
+                hover:border-${stat.color}-500/40 transition-all duration-300 group`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`p-3 bg-${stat.color}-900/30 rounded-lg group-hover:bg-${stat.color}-900/50 
+                  transition-colors duration-300`}>
+                  <div className={`text-${stat.color}-400`}>{stat.icon}</div>
+                </div>
+                <div>
+                  <p className={`text-${stat.color}-400 text-sm`}>{stat.label}</p>
+                  <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-          </div>
-        )}
-        
-        {error && (
-          <div className="p-4 bg-red-900/50 text-red-300 rounded-lg mb-6 border border-red-800">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
+          <motion.div 
+            className="flex justify-center items-center py-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+              </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="p-4 bg-red-900/20 backdrop-blur-sm text-red-300 rounded-xl mb-6 border border-red-800"
+            >
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {error}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {!loading && !error && (
-          <div>
+          <motion.div
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+            className="space-y-8"
+          >
             {stats.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -684,7 +815,6 @@ const AdminStats = () => {
                   </div>
                 </div>
                 
-                {/* Group and render applications */}
                 {Object.entries(groupAndSortApplications(stats)).map(([key, applications]) => (
                   <div key={key} className="mb-10">
                     <div className="flex items-center mb-4 p-3 bg-gray-900 rounded-lg border border-purple-900/50">
@@ -705,12 +835,11 @@ const AdminStats = () => {
                 ))}
               </>
             )}
-          </div>
+          </motion.div>
         )}
 
-        {/* Profile Modal */}
         {showProfileModal && renderProfileModal()}
-      </div>
+      </motion.div>
     </div>
   );
 };
