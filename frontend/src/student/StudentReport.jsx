@@ -12,7 +12,7 @@ const StudentReport = () => {
       try {
         // First get student profile ID
         const profileResponse = await fetch(
-          `http://localhost:5000/api/student-profile/by-email/${user.email}`,
+          `http://localhost:5001/api/student-profile/by-email/${user.email}`,
           { credentials: 'include' }
         );
         
@@ -21,7 +21,7 @@ const StudentReport = () => {
 
         // Generate report using profile ID
         const reportResponse = await fetch(
-          `http://localhost:5000/api/reports/generate-student-report/${profile._id}`,
+          `http://localhost:5001/api/reports/generate-student-report/${profile._id}`,
           { 
             method: 'POST',
             credentials: 'include'

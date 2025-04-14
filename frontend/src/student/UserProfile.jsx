@@ -10,7 +10,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/student-profile/${user.email}`, {
+        const response = await fetch(`http://localhost:5001/api/student-profile/${user.email}`, {
           credentials: 'include'
         });
 

@@ -24,7 +24,7 @@ const StudentMentor = () => {
         setLoading(true);
 
         const profileResponse = await fetch(
-          `http://localhost:5000/api/student-profile/by-email/${user.email}`,
+          `http://localhost:5001/api/student-profile/by-email/${user.email}`,
           {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
