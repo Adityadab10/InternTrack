@@ -22,16 +22,34 @@ const MentorRegistration = () => {
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    // Pre-fill email from Google Auth
-    if (user?.email) {
-      setFormData(prev => ({
-        ...prev,
-        email: user.email
-      }));
-    } else {
-      // Redirect if no authenticated user
-      navigate('/faculty/mentor-login');
-    }
+    const checkMentorStatus = async () => {
+      if (user?.email) {
+        try {
+          const response = await axios.get(`http://localhost:5001/api/mentor/status/${user.email}`, {
+            withCredentials: true
+          });
+          
+          if (response.data.exists) {
+            // If mentor profile exists, redirect to dashboard
+            navigate('/faculty/mentor-dashboard');
+          } else {
+            // Pre-fill email if profile doesn't exist
+            setFormData(prev => ({
+              ...prev,
+              email: user.email
+            }));
+          }
+        } catch (error) {
+          console.error('Error checking mentor status:', error);
+          setError('Unable to verify mentor status');
+        }
+      } else {
+        // Redirect if no authenticated user
+        navigate('/faculty/mentor-login');
+      }
+    };
+
+    checkMentorStatus();
   }, [user, navigate]);
 
   const departments = [
@@ -73,7 +91,7 @@ const MentorRegistration = () => {
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/mentor/register', formData, {
+      const response = await axios.post('http://localhost:5001/api/mentor/register', formData, {
         headers: {
           'Content-Type': 'application/json'
         },

@@ -110,7 +110,7 @@ const StudentProfileForm = () => {
         }
       });
 
-      const response = await fetch('http://localhost:5000/api/student-profile', {
+      const response = await fetch('http://localhost:5001/api/student-profile', {
         method: 'POST',
         credentials: 'include',
         body: formDataToSend

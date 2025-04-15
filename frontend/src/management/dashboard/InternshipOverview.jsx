@@ -14,7 +14,7 @@ const InternshipOverview = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/management/stats');
+        const response = await axios.get('http://localhost:5001/api/management/stats');
         setStats({
           ...response.data,
           isLoading: false,

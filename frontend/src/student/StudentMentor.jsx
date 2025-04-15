@@ -24,7 +24,7 @@ const StudentMentor = () => {
         setLoading(true);
 
         const profileResponse = await fetch(
-          `http://localhost:5000/api/student-profile/by-email/${user.email}`,
+          `http://localhost:5001/api/student-profile/by-email/${user.email}`,
           {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -40,7 +40,7 @@ const StudentMentor = () => {
 
         if (profileData.mentor) {
           const mentorResponse = await fetch(
-            `http://localhost:5000/api/mentors/${profileData.mentor}`,
+            `http://localhost:5001/api/mentors/${profileData.mentor}`,
             {
               credentials: 'include',
               headers: { 'Content-Type': 'application/json' },

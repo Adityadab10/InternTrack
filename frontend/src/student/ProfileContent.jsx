@@ -49,7 +49,7 @@ const ProfileContent = () => {
     const fetchApprovedInternships = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/application-status/approved/${user.email}`,
+          `http://localhost:5001/api/application-status/approved/${user.email}`,
           {
             credentials: 'include',
             headers: {
@@ -97,7 +97,7 @@ const ProfileContent = () => {
       );
 
       // Then update the server
-      const response = await fetch(`http://localhost:5000/api/application-status/${internshipId}/tasks`, {
+      const response = await fetch(`http://localhost:5001/api/application-status/${internshipId}/tasks`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       formData.append('document', file);
 
       const response = await axios.post(
-        'http://localhost:5000/api/mentor/verify-document',
+        'http://localhost:5001/api/mentor/verify-document',
         formData,
         {
           headers: {
@@ -62,13 +62,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleFacultyLogin = async (email, role) => {
+    try {
+      // ... existing login logic ...
+      
+      if (role === 'mentor') {
+        navigate('/faculty/mentor-dashboard');
+      } else if (role === 'instructor') {
+        navigate('/faculty/instructor-dashboard');
+      }
+      
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
       login, 
       logout, 
       verifyMentor,
-      verificationStatus 
+      verificationStatus,
+      handleFacultyLogin
     }}>
       {children}
     </AuthContext.Provider>

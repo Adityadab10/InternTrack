@@ -10,7 +10,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/student-profile/${user.email}`, {
+        const response = await fetch(`http://localhost:5001/api/student-profile/${user.email}`, {
           credentials: 'include'
         });
 
@@ -197,7 +197,7 @@ const UserProfile = () => {
 
                 {profile?.resumeFile && (
                   <a
-                    href={`http://localhost:5000/uploads/resumes/${profile.resumeFile}`}
+                    href={`http://localhost:5001/uploads/resumes/${profile.resumeFile}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-4 bg-purple-900/20 rounded-lg hover:bg-purple-800/30 transition-colors group"

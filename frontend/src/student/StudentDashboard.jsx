@@ -33,7 +33,7 @@ const StudentDashboard = () => {
     setLoading(true);
     try {
       // Fetch all internships first
-      const internshipsResponse = await fetch('http://localhost:5000/api/internships', {
+      const internshipsResponse = await fetch('http://localhost:5001/api/internships', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -55,13 +55,13 @@ const StudentDashboard = () => {
         try {
           const [applicationsResponse, approvedApplicationsResponse, rejectedApplicationsResponse] = 
             await Promise.all([
-              fetch(`http://localhost:5000/api/applications/student/${studentId}`, {
+              fetch(`http://localhost:5001/api/applications/student/${studentId}`, {
                 credentials: 'include'
               }),
-              fetch(`http://localhost:5000/api/applications/student/${studentId}/approved`, {
+              fetch(`http://localhost:5001/api/applications/student/${studentId}/approved`, {
                 credentials: 'include'
               }),
-              fetch(`http://localhost:5000/api/applications/student/${studentId}/rejected`, {
+              fetch(`http://localhost:5001/api/applications/student/${studentId}/rejected`, {
                 credentials: 'include'
               })
             ]);
@@ -126,7 +126,7 @@ const StudentDashboard = () => {
     try {
       const internship = internships.find(i => i._id === internshipId);
       
-      const response = await fetch('http://localhost:5000/api/applications', {
+      const response = await fetch('http://localhost:5001/api/applications', {
         method: "POST",
         headers: { 
           "Content-Type": "application/json" 

@@ -19,6 +19,7 @@ import FacultyLoginSelector from './faculty/FacultyLoginSelector';
 import MentorGoogleAuth from './faculty/MentorGoogleAuth';
 import MentorRegistration from './faculty/MentorRegistration';
 import MentorDashboard from './faculty/MentorDashboard';
+import CourseInstructorDashboard from './faculty/CourseInstructorDashboard';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/faculty/login" element={<FacultyLoginSelector />} />
             <Route path="/faculty/mentor-login" element={<MentorGoogleAuth />} />
+            <Route path="/faculty/instructor-login" element={<FacultyLogin />} />
             <Route path="/faculty/mentor-registration" element={<MentorRegistration />} />
             <Route 
               path="/faculty/dashboard" 
@@ -46,6 +48,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MentorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/faculty/instructor-dashboard" 
+              element={
+                <ProtectedRoute>
+                  <CourseInstructorDashboard />
                 </ProtectedRoute>
               } 
             />

@@ -20,7 +20,7 @@ const StudentLogin = () => {
 
       // Check if profile exists
       try {
-        const response = await fetch(`http://localhost:5000/api/student-profile/${result.user.email}`, {
+        const response = await fetch(`http://localhost:5001/api/student-profile/${result.user.email}`, {
           credentials: 'include'
         });
 
