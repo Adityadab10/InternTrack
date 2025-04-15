@@ -2,38 +2,81 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    // Check localStorage on initial load
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState(null);
 
-  // Update localStorage whenever user changes
+  // Initialize authentication state on mount
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
-  }, [user]);
+    const initAuth = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          // Verify token with backend
+          const response = await axios.get('http://localhost:5001/api/auth/verify', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.data.valid) {
+            setUser(response.data.user);
+            setIsAuthenticated(true);
+          } else {
+            // Clear invalid token
+            localStorage.removeItem('authToken');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const login = (userData) => {
-    setUser(userData);
+    initAuth();
+  }, []);
+
+  const login = async (userData) => {
+    try {
+      const response = await axios.post('http://localhost:5001/api/auth/login', {
+        email: userData.email,
+        uid: userData.uid
+      }, {
+        withCredentials: true
+      });
+
+      const { token, user: userDetails } = response.data;
+      localStorage.setItem('authToken', token);
+      setUser(userDetails);
+      setIsAuthenticated(true);
+      return userDetails;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
     try {
-      await signOut(auth); // Firebase signout
-      setUser(null); // Clear user from context
-      // Clear any stored tokens or user data
-      localStorage.removeItem('user');
+      await signOut(auth);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('studentProfile');
+      setUser(null);
+      setIsAuthenticated(false);
     } catch (error) {
+      console.error('Logout error:', error);
       throw error;
     }
   };
@@ -77,16 +120,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Add axios interceptor for token handling
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
+    return () => axios.interceptors.request.eject(interceptor);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      loading,
+      login,
+      logout,
       verifyMentor,
       verificationStatus,
       handleFacultyLogin
     }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

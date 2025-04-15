@@ -20,6 +20,7 @@ import MentorGoogleAuth from './faculty/MentorGoogleAuth';
 import MentorRegistration from './faculty/MentorRegistration';
 import MentorDashboard from './faculty/MentorDashboard';
 import CourseInstructorDashboard from './faculty/CourseInstructorDashboard';
+import PrivateRoute from './context/PrivateRoute';
 
 function App() {
   return (
@@ -68,12 +69,19 @@ function App() {
             <Route 
               path="/student/StudentDashboard" 
               element={
-                <ProtectedRoute>
+                <PrivateRoute>
                   <StudentDashboard />
-                </ProtectedRoute>
+                </PrivateRoute>
               } 
             />
-            <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
+            <Route 
+              path="/student/StudentProfileForm" 
+              element={
+                <PrivateRoute>
+                  <StudentProfileForm />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </Router>
       </WebSocketProvider>
