@@ -26,7 +26,7 @@ const AdminStats = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/pending-applications', {
+      const response = await fetch('http://localhost:5001/api/pending-applications', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -41,7 +41,7 @@ const AdminStats = () => {
       const enrichedData = await Promise.all(data.map(async (application) => {
         try {
           const profileResponse = await fetch(
-            `http://localhost:5000/api/student-profile/by-email/${application.studentId}`,
+            `http://localhost:5001/api/student-profile/by-email/${application.studentId}`,
             { credentials: 'include' }
           );
           
@@ -73,7 +73,7 @@ const AdminStats = () => {
   const handleApprove = async (application) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/applications/${application._id}/status`,
+        `http://localhost:5001/api/applications/${application._id}/status`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -130,7 +130,7 @@ const AdminStats = () => {
       
       const cleanResumeUrl = resumeUrl.replace('/uploads/resumes/', '/uploads/');
       
-      const response = await fetch('http://localhost:5000/api/analyze-resume', {
+      const response = await fetch('http://localhost:5001/api/analyze-resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -278,7 +278,7 @@ const AdminStats = () => {
               <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
                 <h3 className="text-lg font-semibold text-purple-300 mb-4">Resume</h3>
                 <a
-                  href={`http://localhost:5000/uploads/resumes/${profile.resumeFile}`}
+                  href={`http://localhost:5001/uploads/resumes/${profile.resumeFile}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors"
@@ -389,7 +389,7 @@ const AdminStats = () => {
         {stat.resumeUrl && (
           <div className="mt-3">
             <a 
-              href={`http://localhost:5000${stat.resumeUrl}`}
+              href={`http://localhost:5001${stat.resumeUrl}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-4 py-2 bg-purple-800 text-purple-100 rounded-lg hover:bg-purple-700 transition-colors"

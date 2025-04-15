@@ -19,6 +19,8 @@ import FacultyLoginSelector from './faculty/FacultyLoginSelector';
 import MentorGoogleAuth from './faculty/MentorGoogleAuth';
 import MentorRegistration from './faculty/MentorRegistration';
 import MentorDashboard from './faculty/MentorDashboard';
+import CourseInstructorDashboard from './faculty/CourseInstructorDashboard';
+import PrivateRoute from './context/PrivateRoute';
 
 function App() {
   return (
@@ -30,6 +32,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/faculty/login" element={<FacultyLoginSelector />} />
             <Route path="/faculty/mentor-login" element={<MentorGoogleAuth />} />
+            <Route path="/faculty/instructor-login" element={<FacultyLogin />} />
             <Route path="/faculty/mentor-registration" element={<MentorRegistration />} />
             <Route 
               path="/faculty/dashboard" 
@@ -49,6 +52,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/faculty/instructor-dashboard" 
+              element={
+                <ProtectedRoute>
+                  <CourseInstructorDashboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/management/ManagementLogin" element={<ManagementLogin />} />
             <Route path="/management/dashboard" element={<ManagementDashboard />} />
             <Route path="/admin/AdminLogin" element={<AdminLogin />} />
@@ -58,12 +69,19 @@ function App() {
             <Route 
               path="/student/StudentDashboard" 
               element={
-                <ProtectedRoute>
+                <PrivateRoute>
                   <StudentDashboard />
-                </ProtectedRoute>
+                </PrivateRoute>
               } 
             />
-            <Route path="/student/StudentProfileForm" element={<StudentProfileForm />} />
+            <Route 
+              path="/student/StudentProfileForm" 
+              element={
+                <PrivateRoute>
+                  <StudentProfileForm />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </Router>
       </WebSocketProvider>

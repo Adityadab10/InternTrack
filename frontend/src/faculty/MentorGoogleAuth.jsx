@@ -15,29 +15,59 @@ const MentorGoogleAuth = () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await signInWithPopup(auth, provider);
+
+      // Configure popup settings
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+
+      // Check if popups are allowed
+      const popupBlocked = window.innerWidth <= 0 || window.innerHeight <= 0;
+      if (popupBlocked) {
+        throw new Error('Popup blocked. Please allow popups for this site.');
+      }
+
+      const result = await signInWithPopup(auth, provider).catch(error => {
+        if (error.code === 'auth/popup-blocked') {
+          throw new Error('Popup was blocked. Please allow popups and try again.');
+        }
+        throw error;
+      });
       
       if (result.user) {
-        // Store user data in auth context
         await login({
           email: result.user.email,
-          name: result.user.displayName,
-          photoURL: result.user.photoURL,
-        });
+          uid: result.user.uid,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL
+        }, 'mentor');
 
-        // Navigate to mentor registration with user data
-        navigate('/faculty/mentor-registration', { 
-          state: { 
-            email: result.user.email,
-            name: result.user.displayName,
-            photoURL: result.user.photoURL
-          },
-          replace: true // Replace current history entry
-        });
+        // Check mentor status
+        try {
+          const response = await axios.get(
+            `http://localhost:5001/api/mentor/status/${result.user.email}`,
+            { withCredentials: true }
+          );
+
+          if (response.data.exists) {
+            navigate('/faculty/mentor-dashboard');
+          } else {
+            navigate('/faculty/mentor-registration', {
+              state: {
+                email: result.user.email,
+                name: result.user.displayName,
+                photoURL: result.user.photoURL
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error checking mentor status:', error);
+          setError('Unable to verify mentor status. Please try again.');
+        }
       }
     } catch (error) {
       console.error('Google Sign In Error:', error);
-      setError('Sign in failed. Please try again.');
+      setError(error.message || 'Sign in failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -93,6 +123,11 @@ const MentorGoogleAuth = () => {
             className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-center"
           >
             <p className="text-red-200 text-sm">{error}</p>
+            {error.includes('popup') && (
+              <p className="text-red-200/80 text-xs mt-2">
+                Please disable your popup blocker and try again
+              </p>
+            )}
           </motion.div>
         )}
 

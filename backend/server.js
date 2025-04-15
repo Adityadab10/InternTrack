@@ -10,6 +10,7 @@ const cors = require("cors");
 const multer = require('multer');
 const http = require('http');
 const { setupChatServer } = require("./websocket/chatServer");
+const authRoutes = require('./routes/authRoutes');
 
 // Resolve the absolute path to .env file
 const envPath = path.resolve(__dirname, '.env');
@@ -100,6 +101,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/mentors', mentorRoutes);
 app.use('/api/management', managementRoutes);
 app.use('/api/mentor', mentorRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

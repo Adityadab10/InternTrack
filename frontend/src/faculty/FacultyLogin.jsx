@@ -2,110 +2,118 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const FacultyLogin = () => {
+const InstructorLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
+    instructorId: "123",
+    email: "adityadab27@gmail.com",
+    accessPin: "123"
   });
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await login(formData);
-      navigate('/faculty/dashboard');  // Navigate to dashboard after login
-    } catch (error) {
-      console.error('Login failed:', error);
+    setError(null);
+    
+    // Verify hardcoded credentials
+    if (
+      formData.instructorId === "123" &&
+      formData.email === "adityadab27@gmail.com" &&
+      formData.accessPin === "123"
+    ) {
+      try {
+        await login(formData);
+        navigate('/faculty/instructor-dashboard');
+      } catch (error) {
+        setError('Login failed. Please try again.');
+        console.error('Login failed:', error);
+      }
+    } else {
+      setError('Invalid credentials');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black p-4">
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mb-4">
-            <img
-              src="/placeholder.svg"
-              alt="Faculty Icon"
-              className="w-8 h-8 invert"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 flex items-center justify-center px-4">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/10">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mb-3">
+            <img src="/instructor-icon.svg" alt="Instructor Icon" className="w-8 h-8 invert" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Faculty Login</h1>
-          <p className="text-purple-200 text-center mt-2">Monitor and mentor student internships</p>
+          <h2 className="text-2xl font-bold text-white">Course Instructor Login</h2>
+          <p className="text-sm text-indigo-200 mt-1 text-center">
+            Access your teaching dashboard and student records
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-purple-200">
-              Faculty Email
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="instructorId" className="block text-sm text-indigo-300 mb-1">Instructor ID</label>
+            <input
+              id="instructorId"
+              name="instructorId"
+              type="text"
+              value={formData.instructorId}
+              onChange={handleChange}
+              required
+              placeholder="Enter your instructor ID"
+              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-indigo-500 text-white focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm text-indigo-300 mb-1">Official Email</label>
             <input
               id="email"
               name="email"
               type="email"
-              required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-purple-500 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="faculty.name@university.edu"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-sm font-medium text-purple-200">
-                Password
-              </label>
-              <a href="#" className="text-sm text-purple-300 hover:text-purple-200">
-                Forgot password?
-              </a>
-            </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
               required
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-purple-500 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="••••••••"
+              placeholder="Enter your official email"
+              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-indigo-500 text-white focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          <div className="flex items-center">
+          <div>
+            <label htmlFor="accessPin" className="block text-sm text-indigo-300 mb-1">Access PIN</label>
             <input
-              id="rememberMe"
-              name="rememberMe"
-              type="checkbox"
-              checked={formData.rememberMe}
+              id="accessPin"
+              name="accessPin"
+              type="password"
+              value={formData.accessPin}
               onChange={handleChange}
-              className="h-4 w-4 rounded border-purple-500 text-purple-600 focus:ring-purple-500"
+              required
+              placeholder="Enter your access PIN"
+              className="w-full px-4 py-3 rounded-lg bg-black/30 border border-indigo-500 text-white focus:ring-2 focus:ring-indigo-500"
             />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-purple-200">
-              Remember me
-            </label>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200"
+            className="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition duration-200"
           >
-            Sign in
+            Sign In
           </button>
         </form>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-sm text-purple-300 hover:text-purple-200">
+          <a href="/" className="text-sm text-indigo-300 hover:text-indigo-100">
             ← Back to user selection
           </a>
         </div>
@@ -114,4 +122,4 @@ const FacultyLogin = () => {
   );
 };
 
-export default FacultyLogin;
+export default InstructorLogin;

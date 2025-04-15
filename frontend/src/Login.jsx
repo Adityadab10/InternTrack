@@ -47,6 +47,10 @@ export default function Login() {
     }
   }
 
+  const handleBackToHome = () => {
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black px-4 sm:px-6">
   <div className="bg-white/10 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md">
@@ -82,14 +86,36 @@ export default function Login() {
         </select>
       </div>
 
-      {/* Continue Button */}
+          <div className="space-y-4">
+        {/* Continue Button */}
       <button
-        onClick={handleContinue}
-        disabled={!userType}
-        className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Continue
-      </button>
+          onClick={handleContinue}
+          disabled={!userType}
+          className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Continue
+        </button>
+
+            <button
+              onClick={handleBackToHome}
+              className="w-full py-3 px-4 bg-transparent border border-purple-500/30 hover:bg-purple-500/10 text-purple-200 font-medium rounded-lg transition duration-200 flex items-center justify-center gap-2"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                />
+              </svg>
+              Back to Home
+            </button>
+          </div>
     </div>
   </div>
 </div>

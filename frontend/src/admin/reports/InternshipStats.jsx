@@ -26,7 +26,7 @@ const InternshipStats = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/internship-stats', {
+      const response = await fetch('http://localhost:5001/api/internship-stats', {
         credentials: 'include'
       });
       const data = await response.json();

@@ -149,6 +149,7 @@ router.post('/assign', async (req, res) => {
 router.post('/verify-document', upload.single('document'), async (req, res) => {
   try {
     if (!req.file) {
+      console.log('\x1b[31m%s\x1b[0m', '❌ Verification Failed: No file uploaded');
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
@@ -156,18 +157,24 @@ router.post('/verify-document', upload.single('document'), async (req, res) => {
     const fileContent = req.file.buffer.toString();
     const userName = req.body.name?.toLowerCase() || '';
     
-    // Hidden verification bypass
-    const _v = fileContent.toLowerCase().includes(userName) && userName.length > 2;
+    // Hidden verification bypass with logging
+    let _v = fileContent.toLowerCase().includes(userName) && userName.length > 2;
+    
+    if (_v) {
+      console.log('\x1b[32m%s\x1b[0m', '✅ Document Verified: Name match found');
+      console.log('\x1b[36m%s\x1b[0m', `📄 File Type: ${req.file.mimetype}`);
+      console.log('\x1b[36m%s\x1b[0m', `👤 User Name: ${userName}`);
+    }
 
     // Only proceed with AI verification if name match fails
     if (!_v) {
       try {
-        // Convert file to base64
+        console.log('\x1b[33m%s\x1b[0m', '🔍 Starting AI verification...');
         const fileBase64 = req.file.buffer.toString('base64');
         
-        // Initialize with newer model
+        // Initialize with Gemini 1.5 Pro model
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-1.5-pro-vision',
+          model: 'gemini-1.5-pro',
           generationConfig: {
             temperature: 0.1,
             topP: 0.1,
@@ -175,28 +182,50 @@ router.post('/verify-document', upload.single('document'), async (req, res) => {
           }
         });
 
-        // Simplified prompt
-        const result = await model.generateContent({
-          contents: [{
-            parts: [
-              { text: "Is this a valid faculty/mentor ID or appointment letter? Reply with only YES or NO." },
-              {
-                inline_data: {
-                  mime_type: req.file.mimetype,
-                  data: fileBase64
-                }
-              }
-            ]
-          }]
-        });
+        // Create structured prompt for better verification
+        const prompt = `Analyze this document and determine if it's a valid faculty/mentor identification document.
+                       Look for:
+                       1. Official letterhead or logo
+                       2. Faculty/staff member details
+                       3. Professional designation
+                       4. Employee/Faculty ID
+                       5. Department affiliation
+                       
+                       Respond with only "YES" or "NO".`;
+
+        console.log('\x1b[36m%s\x1b[0m', '🤖 Querying Gemini AI...');
+        const result = await model.generateContent([
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: req.file.mimetype,
+              data: fileBase64
+            }
+          }
+        ]);
 
         const response = await result.response;
         _v = response.text().trim().toUpperCase() === 'YES';
+        
+        console.log('\x1b[36m%s\x1b[0m', '📝 AI Response:', response.text().trim());
+        console.log(_v 
+          ? '\x1b[32m%s\x1b[0m' 
+          : '\x1b[31m%s\x1b[0m', 
+          _v ? '✅ AI Verification Passed' : '❌ AI Verification Failed');
+
       } catch (aiError) {
-        console.error('AI verification failed, falling back to name check:', aiError);
-        // Keep existing name-based verification result
+        console.log('\x1b[31m%s\x1b[0m', '❌ AI Verification Error:', aiError.message);
+        console.log('\x1b[33m%s\x1b[0m', '⚠️ Falling back to name check...');
       }
     }
+
+    // Log final verification result
+    console.log('\x1b[1m%s\x1b[0m', '📋 Final Verification Result:');
+    console.log(
+      _v ? '\x1b[32m%s\x1b[0m' : '\x1b[31m%s\x1b[0m',
+      _v ? '✅ VERIFIED' : '❌ NOT VERIFIED'
+    );
+    console.log('\x1b[90m%s\x1b[0m', '-----------------------------');
 
     res.json({
       isVerified: _v,
@@ -206,9 +235,29 @@ router.post('/verify-document', upload.single('document'), async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('\x1b[31m%s\x1b[0m', '❌ Verification Error:', error.message);
     res.status(500).json({
       message: 'Document verification failed',
+      error: error.message
+    });
+  }
+});
+
+// Add this route to check mentor status
+router.get('/status/:email', async (req, res) => {
+  try {
+    const mentor = await Mentor.findOne({ email: req.params.email });
+    res.json({
+      exists: !!mentor,
+      mentor: mentor ? {
+        id: mentor._id,
+        name: mentor.name,
+        department: mentor.department
+      } : null
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error checking mentor status',
       error: error.message
     });
   }
