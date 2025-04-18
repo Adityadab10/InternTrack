@@ -88,6 +88,7 @@ const internshipStatsRoutes = require('./routes/internshipStats');
 const reportRoutes = require('./routes/reportRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
 const managementRoutes = require('./routes/management');
+const applicationsRouter = require('./routes/applications');
 
 
 // Routes
@@ -102,6 +103,7 @@ app.use('/api/mentors', mentorRoutes);
 app.use('/api/management', managementRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/applications', applicationsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
