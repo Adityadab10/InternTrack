@@ -786,35 +786,6 @@ const AdminStats = () => {
               </div>
             ) : (
               <>
-                <div className="bg-gray-900/50 border border-purple-900/50 rounded-lg p-4 mb-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-800 p-4 rounded-lg border border-purple-900/50">
-                      <p className="text-sm text-purple-400">Total Applications</p>
-                      <p className="text-2xl font-bold text-purple-300">
-                        {stats.filter(s => s.status !== "Rejected").length}
-                      </p>
-                    </div>
-                    <div className="bg-gray-800 p-4 rounded-lg border border-purple-900/50">
-                      <p className="text-sm text-purple-400">Pending</p>
-                      <p className="text-2xl font-bold text-yellow-400">
-                        {stats.filter(s => s.status === "Pending").length}
-                      </p>
-                    </div>
-                    <div className="bg-gray-800 p-4 rounded-lg border border-purple-900/50">
-                      <p className="text-sm text-purple-400">Approved</p>
-                      <p className="text-2xl font-bold text-green-400">
-                        {stats.filter(s => s.status === "Accepted").length}
-                      </p>
-                    </div>
-                    <div className="bg-gray-800 p-4 rounded-lg border border-purple-900/50">
-                      <p className="text-sm text-purple-400">Rejected</p>
-                      <p className="text-2xl font-bold text-red-400">
-                        {stats.filter(s => s.status === "Rejected").length}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
                 {Object.entries(groupAndSortApplications(stats)).map(([key, applications]) => (
                   <div key={key} className="mb-10">
                     <div className="flex items-center mb-4 p-3 bg-gray-900 rounded-lg border border-purple-900/50">

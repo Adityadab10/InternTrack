@@ -19,6 +19,10 @@ const applicationSchema = new mongoose.Schema({
     required: true
   },
   studentName: String,
+  studentEmail: {
+    type: String,
+    required: true
+  },
   status: {
     type: String,
     enum: ['Pending', 'Accepted', 'Rejected'],

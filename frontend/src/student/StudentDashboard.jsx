@@ -18,6 +18,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('explore');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Use user.email for studentId
   const studentId = user?.email;
@@ -51,49 +52,64 @@ const StudentDashboard = () => {
       let rejectedInternships = [];
       let approvedInternships = [];
 
-      if (studentId) {
+      if (user?.email) {  // Use user.email instead of studentId
         try {
           const [applicationsResponse, approvedApplicationsResponse, rejectedApplicationsResponse] = 
             await Promise.all([
-              fetch(`http://localhost:5001/api/applications/student/${studentId}`, {
+              fetch(`http://localhost:5001/api/applications/student/${user.email}`, {
                 credentials: 'include'
               }),
-              fetch(`http://localhost:5001/api/applications/student/${studentId}/approved`, {
+              fetch(`http://localhost:5001/api/applications/student/${user.email}/accepted`, {
                 credentials: 'include'
               }),
-              fetch(`http://localhost:5001/api/applications/student/${studentId}/rejected`, {
+              fetch(`http://localhost:5001/api/applications/student/${user.email}/rejected`, {
                 credentials: 'include'
               })
             ]);
 
-          const myApplications = applicationsResponse.ok ? await applicationsResponse.json() : [];
-          const approvedApplications = approvedApplicationsResponse.ok ? await approvedApplicationsResponse.json() : [];
-          const rejectedApplications = rejectedApplicationsResponse.ok ? await rejectedApplicationsResponse.json() : [];
+            // Add error handling for each response
+            if (!applicationsResponse.ok) {
+              console.error('Failed to fetch applications:', await applicationsResponse.text());
+            }
+            if (!approvedApplicationsResponse.ok) {
+              console.error('Failed to fetch approved applications:', await approvedApplicationsResponse.text());
+            }
+            if (!rejectedApplicationsResponse.ok) {
+              console.error('Failed to fetch rejected applications:', await rejectedApplicationsResponse.text());
+            }
 
-          // Filter approved internships
-          approvedInternships = allInternships.filter(internship =>
-            approvedApplications.some(app => app.internshipId === internship._id)
-          );
+            const myApplications = applicationsResponse.ok ? await applicationsResponse.json() : [];
+            const acceptedApplications = approvedApplicationsResponse.ok ? await approvedApplicationsResponse.json() : [];
+            const rejectedApplications = rejectedApplicationsResponse.ok ? await rejectedApplicationsResponse.json() : [];
 
-          // Update other filters to exclude approved internships
-          rejectedInternships = allInternships.filter(internship =>
-            rejectedApplications.some(app => app.internshipId === internship._id)
-          );
+            // Filter accepted internships
+            approvedInternships = allInternships.filter(internship =>
+              acceptedApplications.some(app => 
+                app.internshipId === internship._id && 
+                app.status === 'Accepted'
+              )
+            );
 
-          appliedInternships = allInternships.filter(internship =>
-            myApplications.some(app => 
-              app.internshipId === internship._id && 
-              app.status === 'Pending' &&
-              !approvedApplications.some(approved => approved.internshipId === internship._id) &&
-              !rejectedApplications.some(rejected => rejected.internshipId === internship._id)
-            )
-          );
+            // Update other filters to exclude accepted internships
+            rejectedInternships = allInternships.filter(internship =>
+              rejectedApplications.some(app => app.internshipId === internship._id)
+            );
 
-          availableInternships = allInternships.filter(internship =>
-            !myApplications.some(app => app.internshipId === internship._id) &&
-            !approvedApplications.some(app => app.internshipId === internship._id) &&
-            !rejectedApplications.some(app => app.internshipId === internship._id)
-          );
+            appliedInternships = allInternships.filter(internship =>
+              myApplications.some(app => 
+                app.internshipId === internship._id && 
+                app.status === 'Pending' &&
+                !acceptedApplications.some(accepted => accepted.internshipId === internship._id) &&
+                !rejectedApplications.some(rejected => rejected.internshipId === internship._id)
+              )
+            );
+
+            // Available internships should exclude all other categories
+            availableInternships = allInternships.filter(internship =>
+              !myApplications.some(app => app.internshipId === internship._id) &&
+              !acceptedApplications.some(app => app.internshipId === internship._id) &&
+              !rejectedApplications.some(app => app.internshipId === internship._id)
+            );
         } catch (error) {
           console.error("Error fetching application status:", error);
         }
@@ -306,8 +322,8 @@ const StudentDashboard = () => {
           >
             <div className="p-6">
               <div className="mb-4">
-                <span className={`px-3 py-1 rounded-full text-sm ${internship.status === "Accepted" ? "bg-emerald-900/50 text-emerald-200 border border-emerald-500/30" : "bg-green-900/50 text-green-200 border border-green-500/30"}`}>
-                  {internship.status || "Shortlisted"}
+                <span className="px-3 py-1 rounded-full text-sm bg-emerald-900/50 text-emerald-200 border border-emerald-500/30">
+                  Accepted
                 </span>
               </div>
               <h3 className="font-bold text-xl text-green-400 mb-2">{internship.title}</h3>
