@@ -6,6 +6,7 @@ import AdminStats from "./AdminStats";
 import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
 import ReportGeneration from './reports/ReportGeneration';
+import { FiMenu, FiX, FiPlus, FiEdit2, FiTrash2, FiAlertCircle, FiLogOut } from "react-icons/fi";
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
@@ -14,6 +15,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [selectedInternship, setSelectedInternship] = useState(null);
   const [activeTab, setActiveTab] = useState('internships');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -30,9 +32,7 @@ const AdminDashboard = () => {
         throw new Error("Failed to fetch internships");
       }
       const data = await response.json();
-      console.log("Fetched data:", data); // Debug log
-      
-      // Since our backend returns the internships directly, not wrapped in data property
+      console.log("Fetched data:", data);
       setInternships(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
@@ -71,7 +71,6 @@ const AdminDashboard = () => {
         throw new Error('Failed to delete internship');
       }
 
-      // Remove the deleted internship from state
       setInternships(prevInternships => 
         prevInternships.filter(internship => internship._id !== id)
       );
@@ -92,132 +91,124 @@ const AdminDashboard = () => {
     switch(activeTab) {
       case 'internships':
         return (
-          <div className="space-y-8">
-            {/* Enhanced Header with Animation */}
+          <div className="space-y-4 md:space-y-8">
+            {/* Header with responsive layout */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-purple-500/20">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
                   Internship Management
                 </h1>
-                <p className="text-purple-300/80 mt-2">Create and manage internship opportunities</p>
+                <p className="text-purple-300/80 mt-1 md:mt-2 text-sm md:text-base">
+                  Create and manage internship opportunities
+                </p>
               </div>
               <button
                 onClick={() => setShowForm(true)}
-                className="group px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl
+                className="group px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg md:rounded-xl
                   hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 
-                  shadow-lg hover:shadow-purple-500/20 flex items-center space-x-2"
+                  shadow-lg hover:shadow-purple-500/20 flex items-center space-x-1 md:space-x-2 w-full md:w-auto justify-center"
               >
-                <svg 
-                  className="w-5 h-5 text-white transform group-hover:rotate-180 transition-transform duration-500" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span className="text-white font-medium">Create New Internship</span>
+                <FiPlus className="w-4 h-4 md:w-5 md:h-5 text-white transform group-hover:rotate-90 transition-transform duration-300" />
+                <span className="text-white text-sm md:text-base font-medium">Create New</span>
               </button>
             </div>
 
-            {/* Enhanced Loading State */}
+            {/* Loading State */}
             {loading && (
-              <div className="flex flex-col items-center justify-center h-64 space-y-4">
+              <div className="flex flex-col items-center justify-center h-48 md:h-64 space-y-3 md:space-y-4">
                 <div className="relative">
-                  <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+                  <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
                   </div>
                 </div>
-                <p className="text-purple-300/80 animate-pulse">Loading internships...</p>
+                <p className="text-purple-300/80 animate-pulse text-sm md:text-base">Loading internships...</p>
               </div>
             )}
 
-            {/* Enhanced Error State */}
+            {/* Error State */}
             {error && (
-              <div className="bg-red-900/20 backdrop-blur-sm p-6 rounded-xl border border-red-500/30 flex items-center space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+              <div className="bg-red-900/20 backdrop-blur-sm p-4 md:p-6 rounded-lg md:rounded-xl border border-red-500/30 flex items-start md:items-center space-x-3 md:space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-full bg-red-500/20 flex items-center justify-center mt-1 md:mt-0">
+                  <FiAlertCircle className="w-4 h-4 md:w-6 md:h-6 text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-red-300 font-semibold mb-1">Error Loading Internships</h3>
-                  <p className="text-red-300/80">{error}</p>
+                  <h3 className="text-red-300 font-semibold mb-1 text-sm md:text-base">Error Loading Internships</h3>
+                  <p className="text-red-300/80 text-xs md:text-sm">{error}</p>
                 </div>
               </div>
             )}
 
-            {/* Enhanced Internship Grid */}
+            {/* Internship Grid - Responsive layout */}
             {!loading && !error && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {internships.map((internship) => (
                   <div
                     key={internship._id}
-                    className="group relative bg-gradient-to-br from-gray-900/90 to-purple-950/90 rounded-xl 
+                    className="group relative bg-gradient-to-br from-gray-900/90 to-purple-950/90 rounded-lg md:rounded-xl 
                       border border-purple-500/20 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 
                       backdrop-blur-xl overflow-hidden cursor-pointer"
                     onClick={() => setSelectedInternship(internship)}
                   >
-                    {/* Background Gradient Animation */}
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 
                       opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
-                    <div className="relative p-6 space-y-4">
-                      {/* Status Badge */}
-                      <div className="flex justify-between items-start mb-4">
-                        <span className={`px-4 py-1 rounded-full text-sm font-medium 
+                    <div className="relative p-4 md:p-6 space-y-3 md:space-y-4">
+                      {/* Status Badge - adjusted for mobile */}
+                      <div className="flex justify-between items-start mb-2 md:mb-4">
+                        <span className={`px-2 md:px-4 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-medium 
                           ${internship.status === "Pending Approval"
                             ? "bg-yellow-900/50 text-yellow-200 border border-yellow-500/30"
                             : "bg-green-900/50 text-green-200 border border-green-500/30"}`}
                         >
                           {internship.status}
                         </span>
-                        <span className="bg-purple-900/50 text-purple-200 px-3 py-1 rounded-full text-sm border border-purple-500/30">
+                        <span className="bg-purple-900/50 text-purple-200 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm border border-purple-500/30">
                           {internship.positions} position{internship.positions !== 1 ? "s" : ""}
                         </span>
                       </div>
 
                       {/* Main Content */}
                       <div>
-                        <h3 className="text-xl font-bold text-white group-hover:text-purple-200 transition-colors">
+                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-purple-200 transition-colors">
                           {internship.title}
                         </h3>
-                        <p className="text-purple-300 mt-1">{internship.company}</p>
+                        <p className="text-purple-300 mt-1 text-sm md:text-base">{internship.company}</p>
                       </div>
 
-                      {/* Details Grid */}
-                      <div className="grid grid-cols-2 gap-4 py-4">
-                        <div className="space-y-1">
-                          <p className="text-sm text-purple-300">Location</p>
-                          <p className="text-white font-medium">{internship.location}</p>
+                      {/* Details Grid - adjusted spacing */}
+                      <div className="grid grid-cols-2 gap-2 md:gap-4 py-2 md:py-4">
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-xs md:text-sm text-purple-300">Location</p>
+                          <p className="text-white font-medium text-sm md:text-base">{internship.location}</p>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-purple-300">Duration</p>
-                          <p className="text-white font-medium">{internship.duration}</p>
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-xs md:text-sm text-purple-300">Duration</p>
+                          <p className="text-white font-medium text-sm md:text-base">{internship.duration}</p>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-purple-300">Stipend</p>
-                          <p className="text-white font-medium">₹{internship.stipend}</p>
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-xs md:text-sm text-purple-300">Stipend</p>
+                          <p className="text-white font-medium text-sm md:text-base">₹{internship.stipend}</p>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-purple-300">Deadline</p>
-                          <p className="text-white font-medium">{new Date(internship.deadline).toLocaleDateString()}</p>
+                        <div className="space-y-0.5 md:space-y-1">
+                          <p className="text-xs md:text-sm text-purple-300">Deadline</p>
+                          <p className="text-white font-medium text-sm md:text-base">
+                            {new Date(internship.deadline).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex justify-between pt-4 border-t border-purple-500/20">
+                      {/* Action Buttons - adjusted size */}
+                      <div className="flex justify-between pt-2 md:pt-4 border-t border-purple-500/20">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditInternship(internship);
                           }}
-                          className="px-4 py-2 bg-purple-600/80 hover:bg-purple-500 text-white rounded-lg 
-                            transition-all duration-300 flex items-center space-x-2"
+                          className="px-2 md:px-4 py-1 md:py-2 bg-purple-600/80 hover:bg-purple-500 text-white rounded-md md:rounded-lg 
+                            transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
+                          <FiEdit2 className="w-3 h-3 md:w-4 md:h-4" />
                           <span>Edit</span>
                         </button>
                         <button
@@ -225,12 +216,10 @@ const AdminDashboard = () => {
                             e.stopPropagation();
                             handleDeleteInternship(internship._id);
                           }}
-                          className="px-4 py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-lg 
-                            transition-all duration-300 flex items-center space-x-2"
+                          className="px-2 md:px-4 py-1 md:py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-md md:rounded-lg 
+                            transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <FiTrash2 className="w-3 h-3 md:w-4 md:h-4" />
                           <span>Delete</span>
                         </button>
                       </div>
@@ -248,32 +237,53 @@ const AdminDashboard = () => {
       case 'reports':
         return <ReportGeneration />;
       default:
-        return <div className="text-purple-300 text-lg">Select an option</div>;
+        return <div className="text-purple-300 text-base md:text-lg">Select an option</div>;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-950">
-      {/* Fixed Sidebar - added overflow-hidden and h-screen */}
-      <div className="w-72 h-screen bg-black/40 backdrop-blur-xl shadow-2xl border-r border-purple-500/20 
-        flex flex-col shrink-0 overflow-hidden">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-gray-900 via-black to-purple-950">
+      {/* Mobile Header - visible only on small screens */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-black/40 backdrop-blur-md border-b border-purple-500/20">
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-purple-300 hover:text-white transition-colors"
+          >
+            {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+          </h1>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="text-purple-300 hover:text-white transition-colors"
+        >
+          <FiLogOut size={20} />
+        </button>
+      </div>
+
+      {/* Sidebar - hidden on mobile when menu is closed */}
+      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-72 h-screen bg-black/40 backdrop-blur-xl shadow-2xl border-r border-purple-500/20 
+        flex flex-col shrink-0 overflow-hidden fixed md:relative z-50 md:z-auto`}>
         {/* Admin Profile Section */}
-        <div className="p-6 border-b border-purple-500/20 bg-gradient-to-r from-purple-900/20 to-transparent">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-xl font-bold text-white shadow-lg">
+        <div className="p-4 md:p-6 border-b border-purple-500/20 bg-gradient-to-r from-purple-900/20 to-transparent">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-lg md:text-xl font-bold text-white shadow-lg">
               A
             </div>
             <div>
-              <h2 className="text-xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+              <h2 className="text-lg md:text-xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
                 Admin Portal
               </h2>
-              <p className="text-sm text-purple-300/80">Managing Excellence</p>
+              <p className="text-xs md:text-sm text-purple-300/80">Managing Excellence</p>
             </div>
           </div>
         </div>
 
-        {/* Nav section - added max-height and overflow-hidden */}
-        <nav className="p-4 space-y-2 flex-1 overflow-hidden">
+        {/* Nav section */}
+        <nav className="p-2 md:p-4 space-y-1 md:space-y-2 flex-1 overflow-y-auto">
           {[
             { id: 'internships', icon: '📑', label: 'Internships', desc: 'Manage listings' },
             { id: 'applications', icon: '👥', label: 'Applications', desc: 'Review & track' },
@@ -282,58 +292,61 @@ const AdminDashboard = () => {
           ].map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full text-left p-3 rounded-xl transition-all duration-300 relative group
+              onClick={() => {
+                setActiveTab(item.id);
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full text-left p-2 md:p-3 rounded-lg md:rounded-xl transition-all duration-300 relative group
                 ${activeTab === item.id 
                   ? 'bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white shadow-lg shadow-purple-500/20' 
                   : 'hover:bg-purple-900/30 text-purple-200 hover:text-white'
                 }`}
             >
-              <div className="flex items-center space-x-3">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-md md:rounded-lg ${
                   activeTab === item.id 
                     ? 'bg-white/10' 
                     : 'bg-black/20 group-hover:bg-white/5'
                   } backdrop-blur-sm transition-colors`}>
-                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-lg md:text-xl">{item.icon}</span>
                 </div>
                 <div>
-                  <div className="font-semibold">{item.label}</div>
+                  <div className="font-semibold text-sm md:text-base">{item.label}</div>
                   <div className="text-xs text-purple-300/70">{item.desc}</div>
                 </div>
               </div>
               
               {activeTab === item.id && (
-                <div className="absolute inset-y-0 -right-4 w-1 bg-purple-500 rounded-full"></div>
+                <div className="absolute inset-y-0 -right-4 w-1 bg-purple-500 rounded-full hidden md:block"></div>
               )}
             </button>
           ))}
         </nav>
 
         {/* Logout button section */}
-        <div className="p-4 border-t border-purple-500/20 bg-black/20 backdrop-blur-sm">
+        <div className="p-2 md:p-4 border-t border-purple-500/20 bg-black/20 backdrop-blur-sm">
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-3 bg-gradient-to-r from-red-900/50 to-purple-900/50 text-white rounded-xl 
+            className="w-full px-3 py-2 md:px-4 md:py-3 bg-gradient-to-r from-red-900/50 to-purple-900/50 text-white rounded-lg md:rounded-xl 
               hover:from-red-800 hover:to-purple-800 transition-all duration-300 
-              flex items-center justify-center space-x-2 group"
+              flex items-center justify-center space-x-2 group text-sm md:text-base"
           >
-            <span className="text-xl group-hover:rotate-12 transition-transform">🚪</span>
+            <span className="text-lg group-hover:rotate-12 transition-transform">🚪</span>
             <span className="font-medium">Logout</span>
           </button>
         </div>
       </div>
 
-      {/* Scrollable Main Content - added h-screen and overflow-y-auto */}
+      {/* Main Content */}
       <div className="flex-1 h-screen overflow-y-auto">
-        <div className="px-8 py-6">
+        <div className="p-4 md:px-8 md:py-6">
           <div className="max-w-7xl mx-auto">
-            {/* Content Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
+            {/* Content Header - hidden on mobile (we have mobile header instead) */}
+            <div className="mb-4 md:mb-8 hidden md:block">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent">
                 {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
               </h1>
-              <p className="text-purple-300/80 mt-2">
+              <p className="text-purple-300/80 mt-1 md:mt-2 text-sm md:text-base">
                 {activeTab === 'internships' && 'Manage and monitor internship opportunities'}
                 {activeTab === 'applications' && 'Track and review student applications'}
                 {activeTab === 'stats' && 'Analyze performance metrics'}
@@ -341,31 +354,31 @@ const AdminDashboard = () => {
               </p>
             </div>
 
-            {/* Enhanced Content Rendering */}
-            <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-purple-500/20 shadow-xl p-6">
+            {/* Content Container */}
+            <div className="bg-black/40 backdrop-blur-xl rounded-xl md:rounded-2xl border border-purple-500/20 shadow-xl p-4 md:p-6">
               {loading ? (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex items-center justify-center h-48 md:h-64">
                   <div className="relative">
-                    <div className="w-12 h-12 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-10 h-10 md:w-12 md:h-12 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="min-h-[500px]">{renderContent()}</div>
+                <div className="min-h-[300px] md:min-h-[500px]">{renderContent()}</div>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Modals */}
+      {/* Modals */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900/90 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-purple-300">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 md:p-4 z-50">
+          <div className="bg-gray-900/90 rounded-xl md:rounded-2xl p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl">
+            <div className="flex justify-between items-center mb-4 md:mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-purple-300">
                 {selectedInternship ? 'Edit Internship' : 'Add New Internship'}
               </h2>
               <button 
