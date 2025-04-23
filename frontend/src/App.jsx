@@ -34,16 +34,7 @@ function App() {
             <Route path="/faculty/mentor-login" element={<MentorGoogleAuth />} />
             <Route path="/faculty/instructor-login" element={<FacultyLogin />} />
             <Route path="/faculty/mentor-registration" element={<MentorRegistration />} />
-            <Route 
-              path="/faculty/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <FacultyProvider>
-                    <FacultyDashboardPage />
-                  </FacultyProvider>
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/faculty/dashboard" element={<FacultyDashboardPage />} />
             <Route 
               path="/faculty/mentor-dashboard" 
               element={

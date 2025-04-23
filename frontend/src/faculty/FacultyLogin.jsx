@@ -6,9 +6,9 @@ const InstructorLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    instructorId: "123",
-    email: "adityadab27@gmail.com",
-    accessPin: "123"
+    instructorId: "",
+    email: "",
+    accessPin: ""
   });
   const [error, setError] = useState(null);
 
@@ -20,19 +20,30 @@ const InstructorLogin = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
     
-    // Verify hardcoded credentials
+    // Hardcoded credential check
     if (
       formData.instructorId === "123" &&
       formData.email === "adityadab27@gmail.com" &&
       formData.accessPin === "123"
     ) {
       try {
-        await login(formData);
-        navigate('/faculty/instructor-dashboard');
+        // Create a mock user object
+        const mockUserData = {
+          instructorId: formData.instructorId,
+          email: formData.email,
+          role: 'faculty',
+          isAuthenticated: true
+        };
+        
+        // Update auth context
+        login(mockUserData);
+        
+        // Navigate to faculty dashboard instead of mentor dashboard
+        navigate('/faculty/dashboard');
       } catch (error) {
         setError('Login failed. Please try again.');
         console.error('Login failed:', error);
@@ -71,7 +82,7 @@ const InstructorLogin = () => {
               value={formData.instructorId}
               onChange={handleChange}
               required
-              placeholder="Enter your instructor ID"
+              placeholder="Enter your instructor ID "
               className="w-full px-4 py-3 rounded-lg bg-black/30 border border-indigo-500 text-white focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -99,7 +110,7 @@ const InstructorLogin = () => {
               value={formData.accessPin}
               onChange={handleChange}
               required
-              placeholder="Enter your access PIN"
+              placeholder="Enter your access PIN "
               className="w-full px-4 py-3 rounded-lg bg-black/30 border border-indigo-500 text-white focus:ring-2 focus:ring-indigo-500"
             />
           </div>

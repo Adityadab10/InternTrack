@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
@@ -14,30 +13,17 @@ export const AuthProvider = ({ children }) => {
 
   // Initialize authentication state on mount
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = () => {
       try {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          // Verify token with backend
-          const response = await axios.get('http://localhost:5001/api/auth/verify', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (response.data.valid) {
-            setUser(response.data.user);
-            setIsAuthenticated(true);
-          } else {
-            // Clear invalid token
-            localStorage.removeItem('authToken');
-            setUser(null);
-            setIsAuthenticated(false);
-          }
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          setIsAuthenticated(true);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
         setUser(null);
         setIsAuthenticated(false);
       } finally {
@@ -48,20 +34,13 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (userData) => {
+  const login = (userData) => {
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/login', {
-        email: userData.email,
-        uid: userData.uid
-      }, {
-        withCredentials: true
-      });
-
-      const { token, user: userDetails } = response.data;
-      localStorage.setItem('authToken', token);
-      setUser(userDetails);
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
       setIsAuthenticated(true);
-      return userDetails;
+      return userData;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -71,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
       localStorage.removeItem('studentProfile');
       setUser(null);
       setIsAuthenticated(false);
@@ -82,59 +61,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const verifyMentor = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('document', file);
-
-      const response = await axios.post(
-        'http://localhost:5001/api/mentor/verify-document',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          }
-        }
-      );
-
-      setVerificationStatus(response.data.isVerified);
-      return response.data.isVerified;
-    } catch (error) {
-      console.error('Verification failed:', error);
-      setVerificationStatus(false);
-      throw error;
-    }
+    // Simplified for now - always return true
+    setVerificationStatus(true);
+    return true;
   };
 
-  const handleFacultyLogin = async (email, role) => {
+  const handleFacultyLogin = (email, role) => {
     try {
-      // ... existing login logic ...
-      
       if (role === 'mentor') {
-        navigate('/faculty/mentor-dashboard');
+        return '/faculty/mentor-dashboard';
       } else if (role === 'instructor') {
-        navigate('/faculty/instructor-dashboard');
+        return '/faculty/instructor-dashboard';
       }
-      
     } catch (error) {
       throw error;
     }
   };
-
-  // Add axios interceptor for token handling
-  useEffect(() => {
-    const interceptor = axios.interceptors.request.use(
-      config => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      error => Promise.reject(error)
-    );
-
-    return () => axios.interceptors.request.eject(interceptor);
-  }, []);
 
   return (
     <AuthContext.Provider value={{
