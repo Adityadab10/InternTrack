@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  FiRefreshCw, FiCheck, FiX, FiAlertTriangle, 
+  FiFileText, FiClock, FiUser, FiExternalLink,
+  FiChevronDown, FiChevronUp, FiShield, FiDownload
+} from "react-icons/fi";
 
 const AdminStats = () => {
   const [stats, setStats] = useState([]);
@@ -171,53 +176,51 @@ const AdminStats = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
-        <div className="bg-gray-900 text-purple-100 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-800">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-purple-300">Student Profile</h2>
+        <div className="bg-gray-900 text-purple-100 rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-800">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-purple-300">Student Profile</h2>
             <button 
               onClick={() => setShowProfileModal(false)}
               className="text-purple-400 hover:text-purple-200 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <FiX className="w-6 h-6" />
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Basic Information */}
-            <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
-              <h3 className="text-lg font-semibold text-purple-300 mb-4">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-900">
+              <h3 className="text-lg font-semibold text-purple-300 mb-3">Basic Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <p className="text-purple-400">Name</p>
+                  <p className="text-purple-400 text-sm">Name</p>
                   <p className="font-medium text-white">{profile.name}</p>
                 </div>
                 <div>
-                  <p className="text-purple-400">Email</p>
+                  <p className="text-purple-400 text-sm">Email</p>
                   <p className="font-medium text-white">{profile.email}</p>
                 </div>
                 <div>
-                  <p className="text-purple-400">Phone</p>
+                  <p className="text-purple-400 text-sm">Phone</p>
                   <p className="font-medium text-white">{profile.phone}</p>
                 </div>
               </div>
             </div>
 
             {/* Education */}
-            <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
-              <h3 className="text-lg font-semibold text-purple-300 mb-4">Education</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-900">
+              <h3 className="text-lg font-semibold text-purple-300 mb-3">Education</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <p className="text-purple-400">Degree</p>
+                  <p className="text-purple-400 text-sm">Degree</p>
                   <p className="font-medium text-white">{profile.degree}</p>
                 </div>
                 <div>
-                  <p className="text-purple-400">Field of Study</p>
+                  <p className="text-purple-400 text-sm">Field of Study</p>
                   <p className="font-medium text-white">{profile.fieldOfStudy}</p>
                 </div>
                 <div>
-                  <p className="text-purple-400">Year of Graduation</p>
+                  <p className="text-purple-400 text-sm">Year of Graduation</p>
                   <p className="font-medium text-white">{profile.yearOfGraduation}</p>
                 </div>
               </div>
@@ -225,13 +228,13 @@ const AdminStats = () => {
 
             {/* Skills */}
             {profile.skills && profile.skills.length > 0 && (
-              <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
-                <h3 className="text-lg font-semibold text-purple-300 mb-4">Skills</h3>
+              <div className="bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-900">
+                <h3 className="text-lg font-semibold text-purple-300 mb-3">Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {profile.skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-purple-900 text-purple-200 rounded-full text-sm"
+                      className="px-2 py-1 bg-purple-900 text-purple-200 rounded-full text-xs"
                     >
                       {skill}
                     </span>
@@ -241,19 +244,17 @@ const AdminStats = () => {
             )}
 
             {/* Professional Links */}
-            <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
-              <h3 className="text-lg font-semibold text-purple-300 mb-4">Professional Links</h3>
-              <div className="space-y-3">
+            <div className="bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-900">
+              <h3 className="text-lg font-semibold text-purple-300 mb-3">Professional Links</h3>
+              <div className="space-y-2">
                 {profile.linkedIn && (
                   <a
                     href={profile.linkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center text-purple-300 hover:text-purple-100 transition-colors"
+                    className="flex items-center text-purple-300 hover:text-purple-100 transition-colors text-sm"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                    </svg>
+                    <FiExternalLink className="w-4 h-4 mr-2" />
                     LinkedIn Profile
                   </a>
                 )}
@@ -262,11 +263,9 @@ const AdminStats = () => {
                     href={profile.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center text-purple-300 hover:text-purple-100 transition-colors"
+                    className="flex items-center text-purple-300 hover:text-purple-100 transition-colors text-sm"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
+                    <FiExternalLink className="w-4 h-4 mr-2" />
                     GitHub Profile
                   </a>
                 )}
@@ -275,17 +274,15 @@ const AdminStats = () => {
 
             {/* Resume */}
             {profile.resumeFile && (
-              <div className="bg-gray-800 p-4 rounded-lg border border-purple-900">
-                <h3 className="text-lg font-semibold text-purple-300 mb-4">Resume</h3>
+              <div className="bg-gray-800 p-3 sm:p-4 rounded-lg border border-purple-900">
+                <h3 className="text-lg font-semibold text-purple-300 mb-3">Resume</h3>
                 <a
                   href={`http://localhost:5001/uploads/resumes/${profile.resumeFile}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                  className="inline-flex items-center px-3 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                  <FiDownload className="w-4 h-4 mr-2" />
                   Download Resume
                 </a>
               </div>
@@ -301,221 +298,177 @@ const AdminStats = () => {
     
     return (
       <div key={stat._id} className="bg-gray-900/50 rounded-lg border border-purple-500/30 overflow-hidden">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-bold text-xl text-purple-300">
-              {stat.internshipTitle}
-            </h3>
-            <p className="text-purple-400">Company: {stat.company}</p>
+        <div className="p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-bold text-lg sm:text-xl text-purple-300">
+                {stat.internshipTitle}
+              </h3>
+              <p className="text-purple-400 text-sm">Company: {stat.company}</p>
+            </div>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              isApproved ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'
+            }`}>
+              {stat.status}
+            </span>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            isApproved ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'
-          }`}>
-            {stat.status}
-          </span>
-        </div>
-        
-        {/* Student Profile Information */}
-        <div className="mt-4 bg-gray-800 p-4 rounded-lg border border-purple-900">
-          <h4 className="font-medium text-purple-300 mb-3">Student Information</h4>
-          <div className="space-y-2">
-            <p className="text-purple-200">
-              <span className="font-medium text-purple-400">Name:</span> {stat.studentName || `Student ${stat.studentId}`}
-            </p>
-            <p className="text-purple-200">
-              <span className="font-medium text-purple-400">Email:</span> {stat.studentId}
-            </p>
-            {stat.studentProfile && (
-              <>
-                <p className="text-purple-200">
-                  <span className="font-medium text-purple-400">Phone:</span> {stat.studentProfile.phone}
-                </p>
-                <p className="text-purple-200">
-                  <span className="font-medium text-purple-400">Degree:</span> {stat.studentProfile.degree}
-                </p>
-                <p className="text-purple-200">
-                  <span className="font-medium text-purple-400">Field of Study:</span> {stat.studentProfile.fieldOfStudy}
-                </p>
-                <p className="text-purple-200">
-                  <span className="font-medium text-purple-400">Year of Graduation:</span> {stat.studentProfile.yearOfGraduation}
-                </p>
-                <div className="mt-2">
-                  <span className="font-medium text-purple-400">Skills:</span>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {stat.studentProfile.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-purple-900 text-purple-200 rounded-full text-xs"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {stat.studentProfile.linkedIn && (
-                    <a
-                      href={stat.studentProfile.linkedIn}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-purple-300 hover:text-purple-100 text-sm"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                      </svg>
-                      LinkedIn Profile
-                    </a>
-                  )}
-                  {stat.studentProfile.github && (
-                    <a
-                      href={stat.studentProfile.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-purple-300 hover:text-purple-100 text-sm"
-                    >
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                      </svg>
-                      GitHub Profile
-                    </a>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Resume Section */}
-        {stat.resumeUrl && (
-          <div className="mt-3">
-            <a 
-              href={`http://localhost:5001${stat.resumeUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-purple-800 text-purple-100 rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              View Resume
-            </a>
-          </div>
-        )}
-
-        {/* Resume Analysis Section */}
-        {hasStartedAnalysis && (
-          <div className="mt-4 bg-gray-800 p-4 rounded-lg border border-purple-900">
-            <h4 className="font-medium text-purple-300 mb-2">Resume Analysis for {stat.internshipTitle}</h4>
-            
-            {analyzingApplications.has(stat._id) ? (
-              <div className="flex items-center justify-center space-x-2 py-4">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500"></div>
-                <span className="text-sm text-purple-400">Analyzing resume...</span>
-              </div>
-            ) : stat.resumeRating ? (
-              <>
-                <div className="flex items-center">
-                  <div className="flex-1">
-                    <div className="h-2 bg-gray-700 rounded-full">
-                      <div 
-                        className="h-2 bg-purple-500 rounded-full" 
-                        style={{ width: `${(stat.resumeRating.rating || 0) * 10}%` }}
-                      ></div>
+          
+          {/* Student Profile Information */}
+          <div className="mt-3 bg-gray-800 p-3 rounded-lg border border-purple-900">
+            <h4 className="font-medium text-purple-300 mb-2">Student Information</h4>
+            <div className="space-y-2">
+              <p className="text-purple-200 text-sm">
+                <span className="font-medium text-purple-400">Name:</span> {stat.studentName || `Student ${stat.studentId}`}
+              </p>
+              <p className="text-purple-200 text-sm">
+                <span className="font-medium text-purple-400">Email:</span> {stat.studentId}
+              </p>
+              {stat.studentProfile && (
+                <>
+                  <p className="text-purple-200 text-sm">
+                    <span className="font-medium text-purple-400">Phone:</span> {stat.studentProfile.phone}
+                  </p>
+                  <p className="text-purple-200 text-sm">
+                    <span className="font-medium text-purple-400">Degree:</span> {stat.studentProfile.degree}
+                  </p>
+                  <div className="mt-2">
+                    <span className="font-medium text-purple-400 text-sm">Skills:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {stat.studentProfile.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-0.5 bg-purple-900 text-purple-200 rounded-full text-xs"
+                        >
+                          {skill}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                  <span className="ml-3 font-medium text-purple-300">
-                    {`${Number(stat.resumeRating.rating).toFixed(2)}/10`}
-                  </span>
-                </div>
-
-                {/* Collapsible Analysis Section */}
-                <div className="mt-3">
-                  <button
-                    onClick={() => toggleExplanation(stat._id)}
-                    className="flex items-center justify-between w-full text-left text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors"
-                  >
-                    <span>View Detailed Analysis</span>
-                    <svg
-                      className={`w-5 h-5 transform transition-transform ${
-                        expandedExplanations.has(stat._id) ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {expandedExplanations.has(stat._id) && (
-                    <div className="mt-3 space-y-3 text-sm text-purple-200">
-                      {/* Role Match Analysis */}
-                      {stat.resumeRating.roleMatch && (
-                        <div>
-                          <p className="font-medium mb-2 text-purple-300">Strengths:</p>
-                          <ul className="list-disc list-inside mb-2 space-y-1">
-                            {stat.resumeRating.roleMatch.strengthAreas.map((strength, idx) => (
-                              <li key={idx}>{strength}</li>
-                            ))}
-                          </ul>
-                          
-                          <p className="font-medium mb-2 text-purple-300">Areas for Improvement:</p>
-                          <ul className="list-disc list-inside space-y-1">
-                            {stat.resumeRating.roleMatch.improvementAreas.map((area, idx) => (
-                              <li key={idx}>{area}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {/* Explanation */}
-                      {stat.resumeRating.explanation && (
-                        <div>
-                          <p className="font-medium text-purple-300">Analysis:</p>
-                          <p className="whitespace-pre-wrap">{stat.resumeRating.explanation}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-purple-400 mt-2">No resume analysis available</p>
-            )}
+                </>
+              )}
+            </div>
           </div>
-        )}
 
-        {/* Actions */}
-        <div className="mt-4 flex flex-col space-y-3">
-          {!isApproved && (
-            <div className="flex justify-end space-x-3 mt-4">
-              <button
-                onClick={() => handleApprove(stat)}
-                className="px-4 py-2 bg-purple-600/20 text-purple-300 rounded-lg hover:bg-purple-600/30 transition-colors text-base font-medium flex items-center"
+          {/* Resume Section */}
+          {stat.resumeUrl && (
+            <div className="mt-3">
+              <a 
+                href={`http://localhost:5001${stat.resumeUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-3 py-1.5 bg-purple-800 text-purple-100 rounded-lg hover:bg-purple-700 transition-colors text-sm"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Shortlist
-              </button>
-              <button
-                onClick={() => handleReject(stat._id)}
-                className="px-4 py-2 bg-red-900/20 text-red-300 rounded-lg hover:bg-red-900/30 transition-colors text-base font-medium flex items-center"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Reject
-              </button>
+                <FiFileText className="w-4 h-4 mr-2" />
+                View Resume
+              </a>
             </div>
           )}
-          
-          <button
-            onClick={() => handleViewProfile(stat)}
-            className="w-full bg-gray-800 text-purple-300 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors border border-purple-900"
-          >
-            View Full Profile
-          </button>
+
+          {/* Resume Analysis Section */}
+          {hasStartedAnalysis && (
+            <div className="mt-3 bg-gray-800 p-3 rounded-lg border border-purple-900">
+              <h4 className="font-medium text-purple-300 mb-2 text-sm">Resume Analysis</h4>
+              
+              {analyzingApplications.has(stat._id) ? (
+                <div className="flex items-center justify-center space-x-2 py-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+                  <span className="text-xs text-purple-400">Analyzing...</span>
+                </div>
+              ) : stat.resumeRating ? (
+                <>
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <div className="h-2 bg-gray-700 rounded-full">
+                        <div 
+                          className="h-2 bg-purple-500 rounded-full" 
+                          style={{ width: `${(stat.resumeRating.rating || 0) * 10}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <span className="ml-2 font-medium text-purple-300 text-xs">
+                      {`${Number(stat.resumeRating.rating).toFixed(2)}/10`}
+                    </span>
+                  </div>
+
+                  {/* Collapsible Analysis Section */}
+                  <div className="mt-2">
+                    <button
+                      onClick={() => toggleExplanation(stat._id)}
+                      className="flex items-center justify-between w-full text-left text-xs font-medium text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      <span>View Analysis</span>
+                      {expandedExplanations.has(stat._id) ? (
+                        <FiChevronUp className="w-4 h-4" />
+                      ) : (
+                        <FiChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+
+                    {expandedExplanations.has(stat._id) && (
+                      <div className="mt-2 space-y-2 text-xs text-purple-200">
+                        {stat.resumeRating.roleMatch && (
+                          <div>
+                            <p className="font-medium mb-1 text-purple-300">Strengths:</p>
+                            <ul className="list-disc list-inside mb-1 space-y-0.5">
+                              {stat.resumeRating.roleMatch.strengthAreas.map((strength, idx) => (
+                                <li key={idx}>{strength}</li>
+                              ))}
+                            </ul>
+                            
+                            <p className="font-medium mb-1 text-purple-300">Improvements:</p>
+                            <ul className="list-disc list-inside space-y-0.5">
+                              {stat.resumeRating.roleMatch.improvementAreas.map((area, idx) => (
+                                <li key={idx}>{area}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {stat.resumeRating.explanation && (
+                          <div>
+                            <p className="font-medium text-purple-300">Analysis:</p>
+                            <p className="whitespace-pre-wrap">{stat.resumeRating.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-purple-400 mt-1">No analysis available</p>
+              )}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="mt-3 flex flex-col space-y-2">
+            {!isApproved && (
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => handleApprove(stat)}
+                  className="px-3 py-1.5 bg-purple-600/20 text-purple-300 rounded-lg hover:bg-purple-600/30 transition-colors text-sm font-medium flex items-center"
+                >
+                  <FiCheck className="w-4 h-4 mr-1" />
+                  Shortlist
+                </button>
+                <button
+                  onClick={() => handleReject(stat._id)}
+                  className="px-3 py-1.5 bg-red-900/20 text-red-300 rounded-lg hover:bg-red-900/30 transition-colors text-sm font-medium flex items-center"
+                >
+                  <FiX className="w-4 h-4 mr-1" />
+                  Reject
+                </button>
+              </div>
+            )}
+            
+            <button
+              onClick={() => handleViewProfile(stat)}
+              className="w-full bg-gray-800 text-purple-300 px-3 py-1.5 rounded-lg hover:bg-gray-700 transition-colors border border-purple-900 text-sm"
+            >
+              <FiUser className="inline w-4 h-4 mr-1" />
+              View Profile
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -591,7 +544,7 @@ const AdminStats = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950 text-purple-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950 text-purple-100 p-4 sm:p-6">
       <motion.div 
         className="max-w-7xl mx-auto"
         initial={{ opacity: 0 }}
@@ -599,35 +552,28 @@ const AdminStats = () => {
         transition={{ duration: 0.5 }}
       >
         <motion.div 
-          className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8"
+          className="flex flex-col justify-between items-start mb-6"
           variants={fadeIn}
           initial="initial"
           animate="animate"
         >
           <div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent mb-1 sm:mb-2">
               Application Dashboard
             </h2>
-            <p className="text-purple-400/80">Track and manage internship applications efficiently</p>
+            <p className="text-purple-400/80 text-sm">Track and manage internship applications</p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 w-full sm:w-auto">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={fetchStats}
               className="bg-gradient-to-r from-purple-800 to-indigo-800 hover:from-purple-700 hover:to-indigo-700 
-                text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/20 
-                flex items-center justify-center group"
+                text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/20 
+                flex items-center justify-center group text-sm sm:text-base"
             >
-              <svg 
-                className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <FiRefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-180 transition-transform duration-500" />
               Refresh Data
             </motion.button>
             
@@ -637,17 +583,10 @@ const AdminStats = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={startAnalysis}
                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 
-                  text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 
-                  flex items-center justify-center group"
+                  text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 
+                  flex items-center justify-center group text-sm sm:text-base"
               >
-                <svg 
-                  className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-500" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
+                <FiShield className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-90 transition-transform duration-500" />
                 Start Analysis
               </motion.button>
             )}
@@ -655,51 +594,35 @@ const AdminStats = () => {
         </motion.div>
 
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
           variants={fadeIn}
           initial="initial"
           animate="animate"
         >
           {[
             {
-              label: 'Total Applications',
+              label: 'Total',
               value: stats.filter(s => s.status !== "Rejected").length,
               color: 'purple',
-              icon: (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              )
+              icon: <FiFileText className="w-5 h-5" />
             },
             {
-              label: 'Pending Review',
+              label: 'Pending',
               value: stats.filter(s => s.status === "Pending").length,
               color: 'yellow',
-              icon: (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )
+              icon: <FiClock className="w-5 h-5" />
             },
             {
               label: 'Approved',
               value: stats.filter(s => s.status === "Accepted").length,
               color: 'green',
-              icon: (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )
+              icon: <FiCheck className="w-5 h-5" />
             },
             {
               label: 'Rejected',
               value: stats.filter(s => s.status === "Rejected").length,
               color: 'red',
-              icon: (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )
+              icon: <FiX className="w-5 h-5" />
             }
           ].map((stat, index) => (
             <motion.div
@@ -707,17 +630,17 @@ const AdminStats = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`bg-gray-900/50 backdrop-blur-sm p-6 rounded-xl border border-${stat.color}-500/20
+              className={`bg-gray-900/50 backdrop-blur-sm p-4 rounded-lg border border-${stat.color}-500/20
                 hover:border-${stat.color}-500/40 transition-all duration-300 group`}
             >
-              <div className="flex items-center gap-4">
-                <div className={`p-3 bg-${stat.color}-900/30 rounded-lg group-hover:bg-${stat.color}-900/50 
+              <div className="flex items-center gap-3">
+                <div className={`p-2 bg-${stat.color}-900/30 rounded-lg group-hover:bg-${stat.color}-900/50 
                   transition-colors duration-300`}>
                   <div className={`text-${stat.color}-400`}>{stat.icon}</div>
                 </div>
                 <div>
-                  <p className={`text-${stat.color}-400 text-sm`}>{stat.label}</p>
-                  <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                  <p className={`text-${stat.color}-400 text-xs`}>{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-white mt-0.5">{stat.value}</p>
                 </div>
               </div>
             </motion.div>
@@ -726,15 +649,15 @@ const AdminStats = () => {
 
         {loading && (
           <motion.div 
-            className="flex justify-center items-center py-20"
+            className="flex justify-center items-center py-12 sm:py-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+              <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
               </div>
             </div>
           </motion.div>
@@ -746,12 +669,10 @@ const AdminStats = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="p-4 bg-red-900/20 backdrop-blur-sm text-red-300 rounded-xl mb-6 border border-red-800"
+              className="p-3 sm:p-4 bg-red-900/20 backdrop-blur-sm text-red-300 rounded-lg mb-4 sm:mb-6 border border-red-800 text-sm"
             >
               <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <FiAlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 {error}
               </div>
             </motion.div>
@@ -763,23 +684,19 @@ const AdminStats = () => {
             variants={fadeIn}
             initial="initial"
             animate="animate"
-            className="space-y-8"
+            className="space-y-6"
           >
             {stats.length === 0 ? (
-              <div className="text-center py-12">
-                <svg className="mx-auto h-12 w-12 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 className="mt-2 text-lg font-medium text-purple-300">No applications found</h3>
-                <p className="mt-1 text-purple-400">There are currently no applications to display.</p>
-                <div className="mt-6">
+              <div className="text-center py-8 sm:py-12">
+                <FiAlertTriangle className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-purple-500" />
+                <h3 className="mt-2 text-lg sm:text-xl font-medium text-purple-300">No applications found</h3>
+                <p className="mt-1 text-purple-400 text-sm">There are currently no applications to display.</p>
+                <div className="mt-4">
                   <button
                     onClick={fetchStats}
-                    className="inline-flex items-center px-4 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
                   >
-                    <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
+                    <FiRefreshCw className="-ml-1 mr-2 w-4 h-4" />
                     Refresh
                   </button>
                 </div>
@@ -787,19 +704,19 @@ const AdminStats = () => {
             ) : (
               <>
                 {Object.entries(groupAndSortApplications(stats)).map(([key, applications]) => (
-                  <div key={key} className="mb-10">
-                    <div className="flex items-center mb-4 p-3 bg-gray-900 rounded-lg border border-purple-900/50">
-                      <h3 className="text-xl font-semibold text-purple-300">
+                  <div key={key} className="mb-6 sm:mb-10">
+                    <div className="flex items-center mb-3 sm:mb-4 p-2 sm:p-3 bg-gray-900 rounded-lg border border-purple-900/50">
+                      <h3 className="text-lg sm:text-xl font-semibold text-purple-300">
                         {key.split('-')[0]}
                       </h3>
-                      <span className="ml-2 px-2 py-1 bg-purple-900/50 text-purple-300 text-xs rounded-full">
+                      <span className="ml-2 px-2 py-0.5 bg-purple-900/50 text-purple-300 text-xs rounded-full">
                         {key.split('-')[1]}
                       </span>
-                      <span className="ml-auto text-sm text-purple-400">
+                      <span className="ml-auto text-xs sm:text-sm text-purple-400">
                         {applications.length} {applications.length === 1 ? 'application' : 'applications'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {applications.map(app => renderApplicationCard(app))}
                     </div>
                   </div>
