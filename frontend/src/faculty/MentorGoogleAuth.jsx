@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { auth, provider } from '../firebase';
-import { signInWithPopup } from 'firebase/auth';
-import { useAuth } from '../context/AuthContext'; // Add this import
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const MentorGoogleAuth = () => {
   const navigate = useNavigate();

@@ -6,40 +6,55 @@ import axios from 'axios';
 
 const MentorDashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
-  const [students, setStudents] = useState([]);
+  const { logout, user } = useAuth();
+  const [mentorResponse, setMentorResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  useEffect(() => {
-    fetchAssignedStudents();
-  }, []);
-
-  const fetchAssignedStudents = async () => {
+  // Function to get mentor details and their students
+  const fetchMentorAndStudents = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/mentor/assigned-students', {
-        withCredentials: true
-      });
-      setStudents(response.data);
+      if (!user?.email) {
+        setError('User not authenticated');
+        navigate('/faculty/login');
+        return;
+      }
+
+      // Get mentor details
+      const response = await axios.get(`http://localhost:5001/api/mentors/details/${user.email}`);
+      console.log('Mentor details:', response.data);
+
+      if (!response.data.mentor) {
+        setError('Mentor profile not found');
+        navigate('/faculty/mentor-registration');
+        return;
+      }
+
+      setMentorResponse(response);
       setLoading(false);
     } catch (err) {
-      setError('Failed to fetch assigned students');
+      console.error('Error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch mentor data');
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchMentorAndStudents();
+  }, [user]);
+
   const handleFeedbackSubmit = async (studentId) => {
     try {
-      await axios.post(`http://localhost:5000/api/mentor/feedback/${studentId}`, {
+      await axios.post(`http://localhost:5001/api/mentor/feedback/${studentId}`, {
         feedback,
       }, {
         withCredentials: true
       });
       setFeedback('');
       // Refresh student data
-      fetchAssignedStudents();
+      fetchMentorAndStudents();
     } catch (err) {
       setError('Failed to submit feedback');
     }
@@ -99,15 +114,47 @@ const MentorDashboard = () => {
           </div>
         )}
 
+        <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl mb-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Mentor Profile</h2>
+          {mentorResponse?.data?.mentor && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-purple-200 text-sm">Name</h3>
+                  <p className="text-white font-medium">{mentorResponse.data.mentor.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-purple-200 text-sm">Department</h3>
+                  <p className="text-white">{mentorResponse.data.mentor.department}</p>
+                </div>
+                <div>
+                  <h3 className="text-purple-200 text-sm">Expertise</h3>
+                  <p className="text-white">{mentorResponse.data.mentor.expertise}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-purple-200 text-sm">Email</h3>
+                  <p className="text-white">{user.email}</p>
+                </div>
+                <div>
+                  <h3 className="text-purple-200 text-sm">Students Assigned</h3>
+                  <p className="text-white">{mentorResponse.data.mentor.currentStudents?.length || 0}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Students List */}
           <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl">
             <h2 className="text-xl font-semibold text-white mb-4">Assigned Students</h2>
-            {students.length === 0 ? (
+            {mentorResponse?.data?.mentor?.currentStudents?.length === 0 ? (
               <p className="text-purple-200">No students assigned yet.</p>
             ) : (
               <div className="space-y-4">
-                {students.map((student) => (
+                {mentorResponse?.data?.mentor?.currentStudents.map((student) => (
                   <motion.div
                     key={student._id}
                     whileHover={{ scale: 1.02 }}
@@ -115,8 +162,15 @@ const MentorDashboard = () => {
                     onClick={() => setSelectedStudent(student)}
                   >
                     <h3 className="text-white font-medium">{student.name}</h3>
-                    <p className="text-purple-200 text-sm">{student.internshipTitle}</p>
+                    <p className="text-purple-200 text-sm">{student.fieldOfStudy}</p>
                     <p className="text-purple-300 text-xs mt-1">{student.email}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {student.degree && (
+                        <span className="px-2 py-1 bg-purple-500/20 rounded-full text-xs text-purple-200">
+                          {student.degree}
+                        </span>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
