@@ -7,8 +7,12 @@ const PrivateRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black px-4">
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent border-purple-500"
+          role="status"
+          aria-label="Loading"
+        ></div>
       </div>
     );
   }
