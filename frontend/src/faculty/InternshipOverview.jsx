@@ -120,9 +120,9 @@ const InternshipOverview = () => {
   }
 
   return (
-    <div>
+    <div >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Applications Overview</h2>
+        <h2 className="text-2xl font-bold  text-white ">Applications Overview</h2>
         <div className="flex space-x-4">
           <button 
             onClick={handleExport}
@@ -139,8 +139,8 @@ const InternshipOverview = () => {
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className=" from-gray-900 via-black to-purple-950 rounded-lg shadow p-6">
+        <div className="grid grid-cols-4 gap-4 mb-6 ">
           <div className="bg-blue-50 p-4 rounded-lg">
             <h3 className="text-gray-500">Total Applications</h3>
             <p className="text-2xl font-bold">{stats.totalApplications}</p>
