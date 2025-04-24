@@ -18,7 +18,7 @@ const StudentFeedback = () => {
 
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/student-profiles');
+        const response = await axios.get('http://localhost:5001/api/student-profiles');
         if (response.data && response.data.data) {
           const formattedStudents = response.data.data.map(student => ({
             ...student,

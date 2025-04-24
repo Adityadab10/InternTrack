@@ -70,7 +70,7 @@ try {
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -100,7 +100,7 @@ app.use("/api/application-status", applicationStatusRoutes);
 app.use('/api', analyzeRoutes);
 app.use('/api', internshipStatsRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/mentors', mentorRoutes);
+app.use('/api/mentors', require('./routes/mentor'));
 app.use('/api/management', managementRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/auth', authRoutes);

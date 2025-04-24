@@ -11,7 +11,7 @@ const MentorshipAssignment = () => {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/mentors");
+        const response = await axios.get("http://localhost:5001/api/mentors");
         console.log("Mentor API Response:", response.data);
         
         // Access the mentors array from response.data.data
@@ -33,7 +33,7 @@ const MentorshipAssignment = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/student-profiles');
+        const response = await axios.get('http://localhost:5001/api/student-profiles');
         if (response.data && response.data.data) {
           setStudents(response.data.data);
         }
@@ -98,17 +98,17 @@ const MentorshipAssignment = () => {
 
   const handleAssignMentor = async (mentorId) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/assign-mentor', {
+      const response = await axios.post('http://localhost:5001/api/assign-mentor', {
         studentId: selectedStudent._id,
         mentorId: mentorId
       });
 
       if (response.data.success) {
         // Refresh both students and mentors lists
-        const studentsResponse = await axios.get('http://localhost:5000/api/student-profiles');
+        const studentsResponse = await axios.get('http://localhost:5001/api/student-profiles');
         setStudents(studentsResponse.data.data);
         
-        const mentorsResponse = await axios.get('http://localhost:5000/api/mentors');
+        const mentorsResponse = await axios.get('http://localhost:5001/api/mentors');
         setMentorsData(Array.isArray(mentorsResponse.data) ? mentorsResponse.data : [mentorsResponse.data]);
         
         setShowModal(false);
