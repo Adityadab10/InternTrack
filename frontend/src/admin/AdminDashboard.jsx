@@ -7,6 +7,7 @@ import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
 import ReportGeneration from './reports/ReportGeneration';
 import { FiMenu, FiX, FiPlus, FiEdit2, FiTrash2, FiAlertCircle, FiLogOut } from "react-icons/fi";
+import InternshipFilters from './InternshipFilters';
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,15 @@ const AdminDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [filters, setFilters] = useState({
+    search: '',
+    minStipend: '',
+    minPositions: '',
+    deadlineBefore: '',
+    location: '',
+    duration: '',
+    status: ''
+  });
 
   // Fetch internships when component mounts
   useEffect(() => {
@@ -87,6 +97,75 @@ const AdminDashboard = () => {
     navigate('/login');
   };
 
+  const getInternshipStatus = (deadline) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const deadlineDate = new Date(deadline);
+    deadlineDate.setHours(0, 0, 0, 0);
+    return deadlineDate < today ? "Expired" : "Active";
+  };
+
+  const getFilteredInternships = () => {
+    return internships.filter(internship => {
+      // Search filter
+      if (filters.search && !(`${internship.title} ${internship.company}`)
+        .toLowerCase()
+        .includes(filters.search.toLowerCase())) {
+        return false;
+      }
+
+      // Stipend filter
+      if (filters.minStipend && internship.stipend < Number(filters.minStipend)) {
+        return false;
+      }
+
+      // Positions filter
+      if (filters.minPositions && internship.positions < Number(filters.minPositions)) {
+        return false;
+      }
+
+      // Deadline filter
+      if (filters.deadlineBefore && new Date(internship.deadline) > new Date(filters.deadlineBefore)) {
+        return false;
+      }
+
+      // Location filter
+      if (filters.location && !internship.location.toLowerCase().includes(filters.location.toLowerCase())) {
+        return false;
+      }
+
+      // Duration filter
+      if (filters.duration) {
+        const months = parseInt(internship.duration);
+        if (filters.duration === '1-3' && (months < 1 || months > 3)) return false;
+        if (filters.duration === '3-6' && (months < 3 || months > 6)) return false;
+        if (filters.duration === '6+' && months < 6) return false;
+      }
+
+      // Status filter - now based on deadline
+      if (filters.status) {
+        const currentStatus = getInternshipStatus(internship.deadline);
+        if (currentStatus !== filters.status) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      minStipend: '',
+      minPositions: '',
+      deadlineBefore: '',
+      location: '',
+      duration: '',
+      status: ''
+    });
+  };
+
   const renderContent = () => {
     switch(activeTab) {
       case 'internships':
@@ -112,6 +191,13 @@ const AdminDashboard = () => {
                 <span className="text-white text-sm md:text-base font-medium">Create New</span>
               </button>
             </div>
+
+            {/* Add Filters Component */}
+            <InternshipFilters 
+              filters={filters}
+              setFilters={setFilters}
+              clearFilters={clearFilters}
+            />
 
             {/* Loading State */}
             {loading && (
@@ -142,90 +228,92 @@ const AdminDashboard = () => {
             {/* Internship Grid - Responsive layout */}
             {!loading && !error && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {internships.map((internship) => (
-                  <div
-                    key={internship._id}
-                    className="group relative bg-gradient-to-br from-gray-900/90 to-purple-950/90 rounded-lg md:rounded-xl 
-                      border border-purple-500/20 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 
-                      backdrop-blur-xl overflow-hidden cursor-pointer"
-                    onClick={() => setSelectedInternship(internship)}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 
-                      opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
-                    <div className="relative p-4 md:p-6 space-y-3 md:space-y-4">
-                      {/* Status Badge - adjusted for mobile */}
-                      <div className="flex justify-between items-start mb-2 md:mb-4">
-                        <span className={`px-2 md:px-4 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-medium 
-                          ${internship.status === "Pending Approval"
-                            ? "bg-yellow-900/50 text-yellow-200 border border-yellow-500/30"
-                            : "bg-green-900/50 text-green-200 border border-green-500/30"}`}
-                        >
-                          {internship.status}
-                        </span>
-                        <span className="bg-purple-900/50 text-purple-200 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm border border-purple-500/30">
-                          {internship.positions} position{internship.positions !== 1 ? "s" : ""}
-                        </span>
-                      </div>
+                {getFilteredInternships().map((internship) => {
+                  const status = getInternshipStatus(internship.deadline);
+                  
+                  return (
+                    <div
+                      key={internship._id}
+                      className="group relative bg-gradient-to-br from-gray-900/90 via-purple-950/90 to-gray-900/90 rounded-lg md:rounded-xl 
+                        border border-purple-500/20 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 
+                        backdrop-blur-xl overflow-hidden cursor-pointer"
+                      onClick={() => setSelectedInternship(internship)}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 
+                        opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      <div className="relative p-4 md:p-6 space-y-3 md:space-y-4">
+                        {/* Status Badge - adjusted for new status */}
+                        <div className="flex justify-between items-start mb-2 md:mb-4">
+                          <span className={`px-2 md:px-4 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-medium ${status === "Expired" ? "bg-red-900/50 text-red-200 border border-red-500/30" : "bg-green-900/50 text-green-200 border border-green-500/30"}`}>
+                            {status}
+                          </span>
+                          <span className="bg-purple-900/50 text-purple-200 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm border border-purple-500/30">
+                            {internship.positions} position{internship.positions !== 1 ? "s" : ""}
+                          </span>
+                        </div>
 
-                      {/* Main Content */}
-                      <div>
-                        <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-purple-200 transition-colors">
-                          {internship.title}
-                        </h3>
-                        <p className="text-purple-300 mt-1 text-sm md:text-base">{internship.company}</p>
-                      </div>
+                        {/* Main Content */}
+                        <div>
+                          <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-purple-200 transition-colors">
+                            {internship.title}
+                          </h3>
+                          <p className="text-purple-300 mt-1 text-sm md:text-base">{internship.company}</p>
+                        </div>
 
-                      {/* Details Grid - adjusted spacing */}
-                      <div className="grid grid-cols-2 gap-2 md:gap-4 py-2 md:py-4">
-                        <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-xs md:text-sm text-purple-300">Location</p>
-                          <p className="text-white font-medium text-sm md:text-base">{internship.location}</p>
+                        {/* Details Grid - adjusted spacing */}
+                        <div className="grid grid-cols-2 gap-2 md:gap-4 py-2 md:py-4">
+                          <div className="space-y-0.5 md:space-y-1">
+                            <p className="text-xs md:text-sm text-purple-300">Location</p>
+                            <p className="text-white font-medium text-sm md:text-base">{internship.location}</p>
+                          </div>
+                          <div className="space-y-0.5 md:space-y-1">
+                            <p className="text-xs md:text-sm text-purple-300">Duration</p>
+                            <p className="text-white font-medium text-sm md:text-base">{internship.duration}</p>
+                          </div>
+                          <div className="space-y-0.5 md:space-y-1">
+                            <p className="text-xs md:text-sm text-purple-300">Stipend</p>
+                            <p className="text-white font-medium text-sm md:text-base">₹{internship.stipend}</p>
+                          </div>
+                          <div className="space-y-0.5 md:space-y-1">
+                            <p className="text-xs md:text-sm text-purple-300">Deadline</p>
+                            <p className={`font-medium text-sm md:text-base ${
+                              status === "Expired" ? "text-red-400" : "text-white"
+                            }`}>
+                              {new Date(internship.deadline).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-xs md:text-sm text-purple-300">Duration</p>
-                          <p className="text-white font-medium text-sm md:text-base">{internship.duration}</p>
-                        </div>
-                        <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-xs md:text-sm text-purple-300">Stipend</p>
-                          <p className="text-white font-medium text-sm md:text-base">₹{internship.stipend}</p>
-                        </div>
-                        <div className="space-y-0.5 md:space-y-1">
-                          <p className="text-xs md:text-sm text-purple-300">Deadline</p>
-                          <p className="text-white font-medium text-sm md:text-base">
-                            {new Date(internship.deadline).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
 
-                      {/* Action Buttons - adjusted size */}
-                      <div className="flex justify-between pt-2 md:pt-4 border-t border-purple-500/20">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditInternship(internship);
-                          }}
-                          className="px-2 md:px-4 py-1 md:py-2 bg-purple-600/80 hover:bg-purple-500 text-white rounded-md md:rounded-lg 
-                            transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
-                        >
-                          <FiEdit2 className="w-3 h-3 md:w-4 md:h-4" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteInternship(internship._id);
-                          }}
-                          className="px-2 md:px-4 py-1 md:py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-md md:rounded-lg 
-                            transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
-                        >
-                          <FiTrash2 className="w-3 h-3 md:w-4 md:h-4" />
-                          <span>Delete</span>
-                        </button>
+                        {/* Action Buttons - adjusted size */}
+                        <div className="flex justify-between pt-2 md:pt-4 border-t border-purple-500/20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditInternship(internship);
+                            }}
+                            className="px-2 md:px-4 py-1 md:py-2 bg-purple-600/80 hover:bg-purple-500 text-white rounded-md md:rounded-lg 
+                              transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
+                          >
+                            <FiEdit2 className="w-3 h-3 md:w-4 md:h-4" />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteInternship(internship._id);
+                            }}
+                            className="px-2 md:px-4 py-1 md:py-2 bg-red-600/80 hover:bg-red-500 text-white rounded-md md:rounded-lg 
+                              transition-all duration-300 flex items-center space-x-1 md:space-x-2 text-xs md:text-sm"
+                          >
+                            <FiTrash2 className="w-3 h-3 md:w-4 md:h-4" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
