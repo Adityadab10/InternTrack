@@ -195,29 +195,29 @@ const MentorDashboard = () => {
               Profile
             </motion.button>
             
-            <motion.button
+          <motion.button
               onClick={logout}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 
-                rounded-lg text-red-300 hover:text-red-200 transition-all duration-200 flex items-center"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 
+              rounded-lg text-red-300 hover:text-red-200 transition-all duration-200 flex items-center"
+          >
+            <svg 
+              className="w-5 h-5 mr-2" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
             >
-              <svg 
-                className="w-5 h-5 mr-2" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
-                />
-              </svg>
-              Logout
-            </motion.button>
-          </div>
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+              />
+            </svg>
+            Logout
+          </motion.button>
+        </div>
         </header>
         
         {error && (
@@ -237,13 +237,13 @@ const MentorDashboard = () => {
           {/* Left Column - Profile and Students */}
           <div className="lg:col-span-1 space-y-6">
             {/* Mentor Profile Card */}
-            {mentorResponse?.data?.mentor && (
+          {mentorResponse?.data?.mentor && (
               <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-purple-500/20 shadow-lg">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-16 h-16 rounded-full bg-purple-600/30 flex items-center justify-center text-white text-2xl font-bold border-2 border-purple-500/50">
                     {mentorResponse.data.mentor.name.charAt(0)}
-                  </div>
-                  <div>
+                </div>
+                <div>
                     <h2 className="text-xl font-semibold text-white">{mentorResponse.data.mentor.name}</h2>
                     <p className="text-purple-300 text-sm">{mentorResponse.data.mentor.department}</p>
                   </div>
@@ -253,18 +253,18 @@ const MentorDashboard = () => {
                   <div className="flex justify-between">
                     <span className="text-purple-300 text-sm">Email</span>
                     <span className="text-white text-sm font-medium">{user.email}</span>
-                  </div>
+                </div>
                   <div className="flex justify-between">
                     <span className="text-purple-300 text-sm">Expertise</span>
                     <span className="text-white text-sm font-medium">{mentorResponse.data.mentor.expertise}</span>
-                  </div>
+              </div>
                   <div className="flex justify-between">
                     <span className="text-purple-300 text-sm">Students</span>
                     <span className="text-white text-sm font-medium">{mentorResponse.data.mentor.currentStudents?.length || 0}</span>
-                  </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
             {/* Students List */}
             <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-purple-500/20 shadow-lg">
@@ -273,17 +273,17 @@ const MentorDashboard = () => {
                 <span className="bg-purple-600/30 text-purple-200 text-xs px-2 py-1 rounded-full">
                   {mentorResponse?.data?.mentor?.currentStudents?.length || 0} Total
                 </span>
-              </div>
-              
-              {mentorResponse?.data?.mentor?.currentStudents?.length === 0 ? (
+        </div>
+
+            {mentorResponse?.data?.mentor?.currentStudents?.length === 0 ? (
                 <div className="bg-purple-900/20 p-4 rounded-lg border border-purple-500/20 text-center">
-                  <p className="text-purple-200">No students assigned yet.</p>
+              <p className="text-purple-200">No students assigned yet.</p>
                 </div>
-              ) : (
+            ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-500/30 scrollbar-track-transparent">
-                  {mentorResponse?.data?.mentor?.currentStudents.map((student) => (
-                    <motion.div
-                      key={student._id}
+                {mentorResponse?.data?.mentor?.currentStudents.map((student) => (
+                  <motion.div
+                    key={student._id}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
@@ -291,8 +291,8 @@ const MentorDashboard = () => {
                           ? 'bg-purple-600/30 border-purple-500/50'
                           : 'bg-purple-900/20 border-purple-500/20 hover:bg-purple-800/30'
                       }`}
-                      onClick={() => setSelectedStudent(student)}
-                    >
+                    onClick={() => setSelectedStudent(student)}
+                  >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center text-white text-sm font-bold border border-purple-500/30">
                           {student.name.charAt(0)}
@@ -302,22 +302,22 @@ const MentorDashboard = () => {
                           <p className="text-purple-300 text-xs truncate">{student.email}</p>
                         </div>
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {student.degree && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {student.degree && (
                           <span className="px-2 py-0.5 bg-purple-500/20 rounded-full text-xs text-purple-200">
-                            {student.degree}
-                          </span>
-                        )}
+                          {student.degree}
+                        </span>
+                      )}
                         {student.fieldOfStudy && (
                           <span className="px-2 py-0.5 bg-indigo-500/20 rounded-full text-xs text-indigo-200">
                             {student.fieldOfStudy}
-                          </span>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
             </div>
           </div>
 
@@ -345,8 +345,8 @@ const MentorDashboard = () => {
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center text-white font-bold border border-purple-500/30">
                         {selectedStudent.name.charAt(0)}
-                      </div>
-                      <div>
+                </div>
+                <div>
                         <h3 className="text-white font-medium">{selectedStudent.name}</h3>
                         <p className="text-purple-300 text-xs">{selectedStudent.email}</p>
                       </div>
@@ -537,10 +537,10 @@ const MentorDashboard = () => {
                               <p className="text-white">
                                 {studentStats.interviewSuccessRate || 'N/A'}%
                               </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                </div>
+              </div>
+            </div>
+          )}
                     </div>
                   )}
                 </div>

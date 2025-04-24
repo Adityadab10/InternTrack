@@ -8,6 +8,7 @@ import StudentMentor from "./StudentMentor";
 import StudentReport from "./StudentReport";
 import StudentInternshipFilters from './StudentInternshipFilters';
 import { FiFilter } from 'react-icons/fi';
+import Feedback from './Feedback';
 
 const StudentDashboard = () => {
   const location = useLocation();
@@ -574,6 +575,8 @@ const StudentDashboard = () => {
         return <StudentReport/>;
       case 'profile':
         return <UserProfile />;
+      case 'feedback':
+        return <Feedback />;
       default:
         return <div className="text-gray-300">Select an option</div>;
     }
@@ -623,6 +626,7 @@ const StudentDashboard = () => {
               { name: 'your-internships', icon: '💼', label: 'Your Internships', desc: 'Track progress' },
               { name: 'Mentor', icon: '👥', label: 'Mentor', desc: 'Get guidance' },
               { name: 'Report', icon: '📊', label: 'Report', desc: 'View analytics' },
+              { name: 'feedback', icon: '💭', label: 'Feedback', desc: 'Share your thoughts' },
               { name: 'profile', icon: '👤', label: 'Profile', desc: 'Manage account' }
             ].map(item => (
               <button
