@@ -6,7 +6,7 @@ import AdminStats from "./AdminStats";
 import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
 import ReportGeneration from './reports/ReportGeneration';
-
+import { FiMenu, FiX, FiPlus, FiEdit2, FiTrash2, FiAlertCircle, FiLogOut } from "react-icons/fi";
 
 const AdminDashboard = () => {
   const [showForm, setShowForm] = useState(false);
