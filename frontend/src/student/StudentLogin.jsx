@@ -22,7 +22,10 @@ const StudentLogin = () => {
       // Update the auth context
       await login(result.user);
 
-      // Check if profile exists
+      // Navigate directly to dashboard first
+      navigate('/student/StudentDashboard');
+
+      // Check if profile exists in the background
       try {
         const response = await fetch(`http://localhost:5001/api/student-profile/${result.user.email}`, {
           credentials: 'include',
@@ -34,15 +37,10 @@ const StudentLogin = () => {
         if (response.ok) {
           const profile = await response.json();
           localStorage.setItem('studentProfile', JSON.stringify(profile));
-          // Directly navigate to dashboard
-          navigate('/student/StudentDashboard');
-        } else {
-          // Only navigate to profile form if profile doesn't exist
-          navigate('/student/StudentProfileForm');
         }
       } catch (error) {
         console.error("Profile check error:", error);
-        navigate('/student/StudentProfileForm');
+        // Don't redirect here, let the dashboard handle profile checks
       }
     } catch (error) {
       console.error("Sign in error:", error);

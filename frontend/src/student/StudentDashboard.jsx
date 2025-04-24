@@ -30,6 +30,27 @@ const StudentDashboard = () => {
     }
   }, [location.state?.studentId]);
 
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/student-profile/${user.email}`, {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          // Only redirect if profile definitely doesn't exist
+          navigate('/student/StudentProfileForm');
+        }
+      } catch (error) {
+        console.error('Error checking profile:', error);
+      }
+    };
+
+    if (user?.email) {
+      checkProfile();
+    }
+  }, [user, navigate]);
+
   const fetchAllData = async () => {
     setLoading(true);
     try {
