@@ -6,6 +6,7 @@ import AdminStats from "./AdminStats";
 import InternshipStats from './reports/InternshipStats';
 import { useAuth } from '../context/AuthContext';
 import ReportGeneration from './reports/ReportGeneration';
+import MappingOversight from './reports/MappingOversight';
 import { FiMenu, FiX, FiPlus, FiEdit2, FiTrash2, FiAlertCircle, FiLogOut } from "react-icons/fi";
 import InternshipFilters from './InternshipFilters';
 
@@ -332,6 +333,8 @@ const AdminDashboard = () => {
         return <AdminStats />;
       case 'stats':
         return <InternshipStats />;
+      case 'mapping':
+        return <MappingOversight />;
       case 'reports':
         return <ReportGeneration />;
       default:
@@ -386,6 +389,7 @@ const AdminDashboard = () => {
             { id: 'internships', icon: '📑', label: 'Internships', desc: 'Manage listings' },
             { id: 'applications', icon: '👥', label: 'Applications', desc: 'Review & track' },
             { id: 'stats', icon: '📊', label: 'Statistics', desc: 'Analytics data' },
+            { id: 'mapping', icon: '🎯', label: 'SDG Mapping', desc: 'Track compliance' },
             { id: 'reports', icon: '📋', label: 'Reports', desc: 'Generate insights' }
           ].map(item => (
             <button
@@ -448,6 +452,7 @@ const AdminDashboard = () => {
                 {activeTab === 'internships' && 'Manage and monitor internship opportunities'}
                 {activeTab === 'applications' && 'Track and review student applications'}
                 {activeTab === 'stats' && 'Analyze performance metrics'}
+                {activeTab === 'mapping' && 'Monitor SDG, PO, and PEO mapping compliance'}
                 {activeTab === 'reports' && 'Generate comprehensive reports'}
               </p>
             </div>
