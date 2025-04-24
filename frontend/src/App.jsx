@@ -21,6 +21,7 @@ import MentorRegistration from './faculty/MentorRegistration';
 import MentorDashboard from './faculty/MentorDashboard';
 import CourseInstructorDashboard from './faculty/CourseInstructorDashboard';
 import PrivateRoute from './context/PrivateRoute';
+import MentorProfile from './faculty/MentorProfile';
 
 function App() {
   return (
@@ -73,6 +74,7 @@ function App() {
                 </PrivateRoute>
               } 
             />
+            <Route path="/faculty/profile" element={<MentorProfile />} />
           </Routes>
         </Router>
       </WebSocketProvider>
