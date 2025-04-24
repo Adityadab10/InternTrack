@@ -10,8 +10,9 @@ const connectDB = require('./config/db');
 const cors = require("cors");
 const multer = require('multer');
 const http = require('http');
-const { setupChatServer } = require("./websocket/chatServer");
 const authRoutes = require('./routes/authRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const setupSocket = require('./websocket/chatServer');
 
 // Resolve the absolute path to .env file
 const envPath = path.resolve(__dirname, '.env');
@@ -45,7 +46,6 @@ try {
 
 const app = express();
 const server = http.createServer(app);
-setupChatServer(server); // 
 
 // Create uploads and resumes directories if they don't exist
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -105,6 +105,7 @@ app.use('/api/management', managementRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/applications', applicationsRouter);
+app.use('/api/messages', messageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -124,9 +125,9 @@ app.use((err, req, res, next) => {
 });
 
 // Initialize WebSocket server
+const io = setupSocket(server);
 
-
-const PORT = process.env.PORT || 5001; // Changed from 5000 to 5001
+const PORT = process.env.PORT || 5001;
 
 // Connect to database and start server
 const startServer = async () => {

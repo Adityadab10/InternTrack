@@ -1,66 +1,82 @@
 // context/WebSocketContext.jsx
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
 const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
-  const socketRef = useRef();
+  const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [userId, setUserId] = useState(null);
-  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:5001');
-
-    socketRef.current.on('connect', () => {
-      console.log('🟢 Connected to WebSocket');
+    // Initialize socket connection
+    const newSocket = io('http://localhost:5001', {
+      withCredentials: true,
+      transports: ['websocket']
     });
 
-    socketRef.current.on('receive_message', (data) => {
-      console.log('📨 Message received:', data);
-      setMessages((prev) => [...prev, data]);
+    // Set up socket event listeners
+    newSocket.on('connect', () => {
+      console.log('WebSocket connected');
     });
 
+    newSocket.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+
+    newSocket.on('receive_message', (message) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    setSocket(newSocket);
+
+    // Cleanup on unmount
     return () => {
-      if (socketRef.current) socketRef.current.disconnect();
+      if (newSocket) {
+        newSocket.close();
+      }
     };
   }, []);
 
-  const registerUser = (id, role) => {
-    setUserId(id);
-    setUserRole(role);
-    socketRef.current.emit('register_user', { 
-      userId: id, 
-      role,
-      isFaculty: role === 'faculty'
-    });
+  const registerUser = (userId, userType) => {
+    if (socket) {
+      socket.emit('register', { userId, userType });
+      console.log('Registered user:', userId, userType);
+    } else {
+      console.warn('Socket not initialized yet');
+    }
   };
 
-  const sendMessage = (recipientId, message, metadata = {}) => {
-    const messageData = {
-      senderId: userId,
-      recipientId,
-      message,
-      ...metadata,
-      timestamp: new Date(),
-    };
-    console.log('Sending message:', messageData);
-    socketRef.current.emit('send_message', messageData);
-    setMessages((prev) => [...prev, messageData]);
+  const sendMessage = (recipientId, message, metadata) => {
+    if (socket) {
+      socket.emit('send_message', {
+        recipientId,
+        message,
+        metadata
+      });
+    } else {
+      console.warn('Socket not initialized yet');
+    }
   };
 
   return (
-    <WebSocketContext.Provider value={{
+    <WebSocketContext.Provider value={{ 
+      socket,
       messages,
       sendMessage,
-      registerUser,
-      userRole,
-      userId
+      registerUser 
     }}>
       {children}
     </WebSocketContext.Provider>
   );
 };
 
-export const useWebSocket = () => useContext(WebSocketContext);
+export const useWebSocket = () => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocket must be used within a WebSocketProvider');
+  }
+  return context;
+};
+
+export default WebSocketProvider;

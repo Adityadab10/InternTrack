@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import { useWebSocket } from '../context/WebSocketContext';
 
 const MentorDashboard = () => {
   const navigate = useNavigate();
@@ -10,8 +11,10 @@ const MentorDashboard = () => {
   const [mentorResponse, setMentorResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [feedback, setFeedback] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const { sendMessage, registerUser } = useWebSocket();
 
   // Function to get mentor details and their students
   const fetchMentorAndStudents = async () => {
@@ -45,27 +48,65 @@ const MentorDashboard = () => {
     fetchMentorAndStudents();
   }, [user]);
 
-  const handleFeedbackSubmit = async (studentId) => {
-    try {
-      await axios.post(`http://localhost:5001/api/mentor/feedback/${studentId}`, {
-        feedback,
-      }, {
-        withCredentials: true
-      });
-      setFeedback('');
-      // Refresh student data
-      fetchMentorAndStudents();
-    } catch (err) {
-      setError('Failed to submit feedback');
-    }
-  };
+  useEffect(() => {
+    const registerMentor = async () => {
+      if (user?.email && registerUser) {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Give socket time to connect
+          registerUser(user.email, 'mentor');
+        } catch (error) {
+          console.error('Error registering mentor:', error);
+        }
+      }
+    };
 
-  const handleLogout = async () => {
+    registerMentor();
+  }, [user?.email, registerUser]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedStudent || !user?.email) return;
+
+      try {
+        const response = await axios.get(
+          `http://localhost:5001/api/messages/${user.email}/${selectedStudent.email}`,
+          { withCredentials: true }
+        );
+        setMessages(response.data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedStudent, user?.email]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedStudent) return;
+
     try {
-      await logout();
-      navigate('/');
+      // Send message through WebSocket
+      sendMessage(selectedStudent.email, newMessage, {
+        type: 'message',
+        senderRole: 'mentor',
+        senderName: mentorResponse?.data?.mentor?.name || 'Mentor',
+        senderEmail: user.email,
+        timestamp: new Date()
+      });
+
+      // Store message in database
+      await axios.post('http://localhost:5001/api/messages', {
+        senderId: user.email,
+        recipientId: selectedStudent.email,
+        content: newMessage,
+        messageType: 'message'
+      }, { withCredentials: true });
+
+      setNewMessage('');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Error sending message:', error);
+      setError('Failed to send message');
     }
   };
 
@@ -85,7 +126,7 @@ const MentorDashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">Mentor Dashboard</h1>
           <motion.button
-            onClick={handleLogout}
+            onClick={logout}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 
@@ -177,49 +218,80 @@ const MentorDashboard = () => {
             )}
           </div>
 
-          {/* Student Details & Feedback */}
+          {/* Student Details & Chat */}
           {selectedStudent && (
             <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl">
-              <h2 className="text-xl font-semibold text-white mb-4">Student Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-purple-200 text-sm">Name</h3>
-                  <p className="text-white">{selectedStudent.name}</p>
-                </div>
-                <div>
-                  <h3 className="text-purple-200 text-sm">Internship</h3>
-                  <p className="text-white">{selectedStudent.internshipTitle}</p>
-                </div>
-                <div>
-                  <h3 className="text-purple-200 text-sm">Progress</h3>
-                  <div className="w-full bg-purple-900/30 rounded-full h-2 mt-2">
-                    <div 
-                      className="bg-purple-500 h-2 rounded-full" 
-                      style={{ width: `${selectedStudent.progress}%` }}
-                    ></div>
-                  </div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white">Chat with {selectedStudent.name}</h2>
+                <span className="px-3 py-1 bg-purple-500/20 rounded-full text-xs text-purple-200">
+                  {selectedStudent.email}
+                </span>
+              </div>
+
+              {/* Chat Section */}
+              <div className="h-[500px] flex flex-col">
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto bg-black/20 rounded-lg p-4 mb-4 space-y-4">
+                  {messages.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${msg.senderId === user.email ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[70%] p-3 rounded-lg ${
+                          msg.senderId === user.email
+                            ? 'bg-purple-600/90 text-white'
+                            : 'bg-purple-200/90 text-black'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-xs">
+                            {msg.senderId === user.email ? 'You' : selectedStudent.name}
+                          </span>
+                        </div>
+                        <p className="text-sm break-words">{msg.content}</p>
+                        <p className="text-[10px] opacity-70 text-right mt-1">
+                          {new Date(msg.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Feedback Form */}
-                <div className="mt-6">
-                  <h3 className="text-purple-200 text-sm mb-2">Provide Feedback</h3>
-                  <textarea
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    className="w-full bg-black/30 border border-purple-500/30 rounded-lg p-3 text-white 
-                      focus:outline-none focus:border-purple-500/60 resize-none h-32"
-                    placeholder="Enter your feedback here..."
-                  ></textarea>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleFeedbackSubmit(selectedStudent._id)}
-                    className="mt-3 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg 
-                      transition-colors duration-200"
+                {/* Message Input */}
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-black/30 border border-purple-400/50 
+                             text-white placeholder:text-purple-300/50 focus:outline-none focus:border-purple-400"
+                    placeholder="Type a message..."
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim()}
+                    className={`px-6 py-2 rounded-lg transition-all duration-200 flex items-center gap-2
+                      ${newMessage.trim() 
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                        : 'bg-purple-600/50 cursor-not-allowed text-white/50'}`}
                   >
-                    Submit Feedback
-                  </motion.button>
-                </div>
+                    <span>Send</span>
+                    <svg 
+                      className="w-4 h-4" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" 
+                      />
+                    </svg>
+                  </button>
+                </form>
               </div>
             </div>
           )}
