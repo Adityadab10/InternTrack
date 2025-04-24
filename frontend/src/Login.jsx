@@ -82,7 +82,7 @@ export default function Login() {
           <option value="Faculty">Faculty</option>
           <option value="Admin">Admin</option>
           <option value="Management">Management</option>
-          <option value="Viewer">Viewer</option>
+         
         </select>
       </div>
 
