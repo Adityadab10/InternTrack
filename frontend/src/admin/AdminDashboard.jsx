@@ -105,6 +105,13 @@ const AdminDashboard = () => {
     return deadlineDate < today ? "Expired" : "Active";
   };
 
+  const extractStipendAmount = (stipendString) => {
+    if (!stipendString) return 0;
+    // Extract the first number from the string
+    const match = stipendString.match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
+  };
+
   const getFilteredInternships = () => {
     return internships.filter(internship => {
       // Search filter
@@ -114,9 +121,12 @@ const AdminDashboard = () => {
         return false;
       }
 
-      // Stipend filter
-      if (filters.minStipend && internship.stipend < Number(filters.minStipend)) {
-        return false;
+      // Stipend filter - Updated logic
+      if (filters.minStipend) {
+        const internshipStipend = extractStipendAmount(internship.stipend);
+        if (internshipStipend < Number(filters.minStipend)) {
+          return false;
+        }
       }
 
       // Positions filter
@@ -142,7 +152,7 @@ const AdminDashboard = () => {
         if (filters.duration === '6+' && months < 6) return false;
       }
 
-      // Status filter - now based on deadline
+      // Status filter
       if (filters.status) {
         const currentStatus = getInternshipStatus(internship.deadline);
         if (currentStatus !== filters.status) {
