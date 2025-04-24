@@ -39,7 +39,7 @@ const ManagementDashboard = () => {
             { id: 'overview', label: 'Overview' },
             { id: 'sdg', label: 'SDG Tracking' },
             { id: 'metrics', label: 'Success Metrics' },
-            { id: 'analytics', label: 'Analytics' },
+            // { id: 'analytics', label: 'Analytics' }
             { id: 'reports', label: 'Reports' }
           ].map(tab => (
             <button
