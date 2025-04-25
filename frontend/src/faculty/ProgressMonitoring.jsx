@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import StatusBadge from './StatusBadge';
 import axios from 'axios';
+import { FiChevronDown, FiChevronUp, FiCheck, FiClock, FiMessageSquare, FiSend } from 'react-icons/fi';
 
 const ProgressMonitoring = () => {
   const [expandedStudent, setExpandedStudent] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState('');
 
   // Static internship data pool to randomly assign
   const internshipPool = [
@@ -76,7 +78,6 @@ const ProgressMonitoring = () => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        // Updated endpoint to the correct one
         const response = await axios.get('http://localhost:5001/api/student-profiles');
         
         if (!response.data.success) {
@@ -115,7 +116,6 @@ const ProgressMonitoring = () => {
           };
         });
 
-        console.log('Enhanced students:', enhancedStudents); // For debugging
         setStudents(enhancedStudents);
         setLoading(false);
       } catch (error) {
@@ -151,71 +151,119 @@ const ProgressMonitoring = () => {
     setExpandedStudent(expandedStudent === studentId ? null : studentId);
   };
 
+  const handleSendFeedback = (studentId) => {
+    if (!feedback.trim()) return;
+    
+    setStudents(prevStudents => 
+      prevStudents.map(student => {
+        if (student.id === studentId) {
+          return {
+            ...student,
+            mentorFeedback: [
+              {
+                date: new Date().toLocaleDateString(),
+                comment: feedback
+              },
+              ...student.mentorFeedback
+            ]
+          };
+        }
+        return student;
+      })
+    );
+    
+    setFeedback('');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Internship Progress Monitoring</h2>
-      
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-purple-200 to-indigo-200 bg-clip-text text-transparent">
+            Progress Monitoring
+          </h1>
+          <p className="text-purple-300/80 mt-2">Track and manage student internship progress</p>
+        </div>
+      </div>
+
+      <div className="bg-black/40 backdrop-blur-xl rounded-2xl border border-purple-500/20 shadow-xl overflow-hidden">
         {students.map(student => (
-          <div key={student.id} className="border-b border-gray-200 last:border-b-0">
+          <div key={student.id} className="border-b border-purple-500/20 last:border-b-0">
             <div 
-              className="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+              className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer hover:bg-purple-900/10 transition-colors"
               onClick={() => toggleExpand(student.id)}
             >
               <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                  <span className="text-white font-medium">{student.name.charAt(0)}</span>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white">
+                  <span className="font-medium">{student.name.charAt(0)}</span>
                 </div>
                 <div>
-                  <h3 className="font-medium">{student.name}</h3>
-                  <p className="text-sm text-gray-500">{student.company} - {student.role}</p>
+                  <h3 className="font-medium text-white">{student.name}</h3>
+                  <p className="text-sm text-purple-300">{student.company} - {student.role}</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-6">
-                <div className="w-32">
-                  <div className="text-sm text-gray-600 mb-1">Progress</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                <div className="w-full sm:w-40">
+                  <div className="text-sm text-purple-400 mb-1">Progress</div>
+                  <div className="w-full bg-gray-700 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 rounded-full h-2" 
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full h-2" 
                       style={{ width: `${student.progress}%` }}
                     ></div>
                   </div>
+                  <div className="text-xs text-purple-300 mt-1">{student.progress}% complete</div>
                 </div>
-                <StatusBadge status={student.status} />
-                <span className="text-sm text-gray-500">Updated: {student.lastUpdate}</span>
-                <span className="text-gray-400">
-                  {expandedStudent === student.id ? '▲' : '▼'}
-                </span>
+                <div className="min-w-[120px]">
+                  <StatusBadge status={student.status} />
+                </div>
+                <div className="text-sm text-purple-400">Updated: {student.lastUpdate}</div>
+                <div className="text-purple-400 ml-auto">
+                  {expandedStudent === student.id ? (
+                    <FiChevronUp className="w-5 h-5" />
+                  ) : (
+                    <FiChevronDown className="w-5 h-5" />
+                  )}
+                </div>
               </div>
             </div>
             
             {expandedStudent === student.id && (
-              <div className="p-4 bg-gray-50">
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-medium mb-2">Current Projects</h4>
-                    <ul className="list-disc list-inside space-y-1">
+              <div className="p-6 bg-gray-900/50">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-gray-800 p-5 rounded-xl border border-purple-500/20">
+                    <h4 className="text-lg font-semibold text-purple-300 mb-4">Current Projects</h4>
+                    <ul className="space-y-3">
                       {student.projects.map((project, idx) => (
-                        <li key={idx} className="text-gray-600">{project}</li>
+                        <li key={idx} className="flex items-start">
+                          <div className="flex-shrink-0 h-5 w-5 text-purple-500 mt-0.5">
+                            <FiCheck />
+                          </div>
+                          <p className="ml-3 text-purple-100">{project}</p>
+                        </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-medium mb-2">Technologies Used</h4>
+                  <div className="bg-gray-800 p-5 rounded-xl border border-purple-500/20">
+                    <h4 className="text-lg font-semibold text-purple-300 mb-4">Technologies Used</h4>
                     <div className="flex flex-wrap gap-2">
                       {student.technologies.map((tech, idx) => (
                         <span 
                           key={idx}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                          className="px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full text-sm border border-purple-500/30"
                         >
                           {tech}
                         </span>
@@ -224,24 +272,23 @@ const ProgressMonitoring = () => {
                   </div>
                 </div>
 
-                <h4 className="font-medium mb-3">Milestones</h4>
-                <div className="space-y-3">
+                <h4 className="text-lg font-semibold text-purple-300 mb-4">Milestones</h4>
+                <div className="space-y-3 mb-6">
                   {student.milestones.map(milestone => (
-                    <div key={milestone.id} className="flex items-center justify-between p-3 bg-white rounded shadow-sm">
+                    <div key={milestone.id} className="bg-gray-800 p-4 rounded-lg border border-purple-500/20 flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{milestone.name}</p>
-                        <p className="text-sm text-gray-500">Due: {milestone.dueDate}</p>
+                        <p className="font-medium text-white">{milestone.name}</p>
+                        <p className="text-sm text-purple-400">Due: {milestone.dueDate}</p>
                       </div>
                       <div>
                         {milestone.completed ? (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-900/50 text-green-300 border border-green-500/30 text-sm">
+                            <FiCheck className="mr-1" />
                             Completed on {milestone.completionDate}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-900/50 text-yellow-300 border border-yellow-500/30 text-sm">
+                            <FiClock className="mr-1" />
                             Pending
                           </span>
                         )}
@@ -250,27 +297,33 @@ const ProgressMonitoring = () => {
                   ))}
                 </div>
 
-                <div className="mt-4">
-                  <h4 className="font-medium mb-3">Mentor Feedback</h4>
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-purple-300 mb-4">Mentor Feedback</h4>
                   <div className="space-y-3">
                     {student.mentorFeedback.map((feedback, idx) => (
-                      <div key={idx} className="bg-white p-3 rounded shadow-sm">
-                        <p className="text-sm text-gray-500 mb-1">{feedback.date}</p>
-                        <p className="text-gray-700">{feedback.comment}</p>
+                      <div key={idx} className="bg-gray-800 p-4 rounded-lg border border-purple-500/20">
+                        <p className="text-sm text-purple-400 mb-2">{feedback.date}</p>
+                        <p className="text-purple-100">{feedback.comment}</p>
                       </div>
                     ))}
                   </div>
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-medium mb-2">Add Feedback</h4>
-                  <div className="flex space-x-2">
+                <div className="pt-4 border-t border-purple-500/20">
+                  <h4 className="text-lg font-semibold text-purple-300 mb-4">Add Feedback</h4>
+                  <div className="flex space-x-3">
                     <input 
                       type="text" 
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
                       placeholder="Type your feedback..." 
-                      className="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 bg-gray-800 border border-purple-500/30 text-white placeholder-purple-400 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
                     />
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    <button 
+                      onClick={() => handleSendFeedback(student.id)}
+                      className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-500 hover:to-indigo-500 transition-colors flex items-center"
+                    >
+                      <FiSend className="mr-2" />
                       Send
                     </button>
                   </div>

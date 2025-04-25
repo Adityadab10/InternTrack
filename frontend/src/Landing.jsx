@@ -24,7 +24,9 @@ import {
   Bookmark,
   CheckCircle,
   ChevronDown,
+  PieChart,
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartPieChart, Pie, Cell } from 'recharts';
 import SplineModel from './SplineModel';
 
 export default function Landing() {
@@ -44,6 +46,9 @@ export default function Landing() {
     po: "",
     industry: "",
   });
+  
+  // Stats Dashboard - New state
+  const [activeStatsTab, setActiveStatsTab] = useState("Industry Distribution");
 
   // Sample data
   const departments = [
@@ -99,6 +104,44 @@ export default function Landing() {
     },
   ];
 
+  // Statistics Dashboard Data
+  const statsTabs = ["Industry Distribution", "Monthly Applications", "Internship Types", "Location Analysis"];
+  
+  // Industry Distribution Data
+  const industryData = [
+    { name: 'Tech', value: 35 },
+    { name: 'Finance', value: 20 },
+    { name: 'Healthcare', value: 15 },
+    { name: 'Marketing', value: 12 },
+    { name: 'Engineering', value: 18 },
+  ];
+
+  // Monthly Applications Data
+  const monthlyData = [
+    { month: 'Jan', applications: 120 },
+    { month: 'Feb', applications: 150 },
+    { month: 'Mar', applications: 200 },
+    { month: 'April', applications: 100 },
+  ];
+
+  // Internship Types Data
+  const typeData = [
+    { type: 'Remote', count: 450 },
+    { type: 'On-site', count: 320 },
+    { type: 'Hybrid', count: 230 },
+    { type: 'International', count: 120 },
+    { type: 'Part-time', count: 80 },
+  ];
+
+  // Location Analysis Data
+  const locationData = [
+    { name: 'Mumbai', value: 80 },
+    { name: 'Pune', value: 20 },
+    
+  ];
+
+  const COLORS = ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95', '#7e22ce'];
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -149,6 +192,89 @@ export default function Landing() {
       po: "",
       industry: "",
     });
+  };
+  const renderActiveChart = () => {
+    switch (activeStatsTab) {
+      case "Industry Distribution":
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartPieChart>
+              <Pie
+                data={industryData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {industryData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => `${value}%`} />
+              <Legend />
+            </RechartPieChart>
+          </ResponsiveContainer>
+        );
+      case "Monthly Applications":
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="applications" fill="#7C3AED" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      case "Internship Types":
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={typeData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="type" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#6D28D9" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      case "Location Analysis":
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartPieChart>
+              <Pie
+                data={locationData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {locationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => `${value}%`} />
+              <Legend />
+            </RechartPieChart>
+          </ResponsiveContainer>
+        );
+      default:
+        return (
+          <div className="text-center">
+            <PieChart className="h-16 w-16 text-purple-500 mx-auto mb-3" />
+            <p className="text-sm text-gray-300">Select a tab to view statistics</p>
+          </div>
+        );
+    }
   };
 
   {
@@ -425,80 +551,74 @@ export default function Landing() {
   </div>
 </section>
 
-<section className="py-12 sm:py-14 md:py-16 bg-gray-900">
-  <div className="container mx-auto px-4 sm:px-5 md:px-6">
-    <div className="text-center mb-10 sm:mb-12">
-      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-        Internship Statistics Overview
-      </h2>
-      <p className="text-sm sm:text-base text-gray-300 max-w-3xl mx-auto">
-        Real-time insights into internship opportunities, placements, and industry collaborations.
-      </p>
-    </div>
+<section id="statistics" className="py-12 sm:py-14 md:py-16 bg-gray-900">
+        <div className="container mx-auto px-4 sm:px-5 md:px-6">
+          <div className="text-center mb-10 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
+              Internship Statistics Overview
+            </h2>
+            <p className="text-sm sm:text-base text-gray-300 max-w-3xl mx-auto">
+              Real-time insights into internship opportunities, placements, and industry collaborations.
+            </p>
+          </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
-      <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-600 hover:shadow-xl transition transform hover:-translate-y-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
-          <BriefcaseBusiness className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+            <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-600 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
+                <BriefcaseBusiness className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">1,200+</h3>
+              <p className="text-sm text-gray-300">Total Internships Available</p>
+            </div>
+
+            <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-500 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">850</h3>
+              <p className="text-sm text-gray-300">Active Internships</p>
+            </div>
+
+            <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-400 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
+                <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">350+</h3>
+              <p className="text-sm text-gray-300">Industry Collaborations</p>
+            </div>
+
+            <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-300 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
+                <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">92%</h3>
+              <p className="text-sm text-gray-300">Placement Success Rate</p>
+            </div>
+          </div>
+
+          <div className="bg-black p-4 sm:p-6 rounded-lg shadow-inner border border-gray-800">
+            <div className="flex flex-wrap gap-2 justify-center mb-4 sm:mb-6 overflow-x-auto">
+              {statsTabs.map((tab) => (
+                <button
+                  key={tab}
+                  className={`whitespace-nowrap text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded-md transition-colors ${
+                    activeStatsTab === tab
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "bg-gray-800 text-white hover:bg-gray-700"
+                  }`}
+                  onClick={() => setActiveStatsTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-56 sm:h-64 bg-gray-800 rounded-lg shadow-inner p-4">
+              {renderActiveChart()}
+            </div>
+          </div>
         </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">1,200+</h3>
-        <p className="text-sm text-gray-300">Total Internships Available</p>
-      </div>
-
-      <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-500 hover:shadow-xl transition transform hover:-translate-y-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
-          <Users className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-        </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">850</h3>
-        <p className="text-sm text-gray-300">Active Internships</p>
-      </div>
-
-      <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-400 hover:shadow-xl transition transform hover:-translate-y-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
-          <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-        </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">350+</h3>
-        <p className="text-sm text-gray-300">Industry Collaborations</p>
-      </div>
-
-      <div className="bg-black p-4 sm:p-6 rounded-lg shadow-md border-t-4 border-purple-300 hover:shadow-xl transition transform hover:-translate-y-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-purple-900 rounded-full mb-3">
-          <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-        </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">92%</h3>
-        <p className="text-sm text-gray-300">Placement Success Rate</p>
-      </div>
-    </div>
-
-    <div className="bg-black p-4 sm:p-6 rounded-lg shadow-inner border border-gray-800">
-      <div className="flex flex-wrap gap-2 justify-center mb-4 sm:mb-6 overflow-x-auto scrollbar-thin scrollbar-thumb-purple-600">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            className={`whitespace-nowrap text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded-md transition-colors ${
-              activeTab === tab
-                ? "bg-purple-600 text-white shadow-md"
-                : "bg-gray-800 text-white hover:bg-gray-700"
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      <div className="h-56 sm:h-64 bg-gray-800 rounded-lg shadow-inner p-4 flex items-center justify-center">
-        <div className="text-center">
-          <BarChart3 className="h-12 sm:h-16 w-12 sm:w-16 text-purple-500 mx-auto mb-3" />
-          <p className="text-sm text-gray-300">
-            Interactive statistics chart will be displayed here
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+      </section>
 {/* Internship Showcase Section */}
 <section className="py-12 sm:py-14 md:py-16 bg-black">
   <div className="container mx-auto px-4 md:px-6">
