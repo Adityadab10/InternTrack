@@ -120,80 +120,96 @@ const SDGPOEMapping = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+      <div className="flex justify-center items-center h-64 bg-gradient-to-b from-[#0f0c29] to-[#302b63]">
+        <div className="animate-spin h-8 w-8 border-4 border-[#6a11cb] rounded-full border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">SDG/PO/PEO Mapping</h2>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+    <div className="bg-gradient-to-b from-[#0f0c29] to-[#302b63] min-h-screen p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-white">SDG/PO/PEO Mapping</h2>
+        
+        {error && (
+          <div className="bg-[#1f1b3a] border border-[#3a295d] text-gray-300 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        
+        <div className="bg-[#1f1b3a] rounded-lg shadow-lg p-4 md:p-6 overflow-x-auto">
+          <div className="min-w-full inline-block align-middle">
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-[#3a295d]">
+                <thead className="bg-[#2e1a47]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Student</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell">Degree</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell">Field of Study</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">SDGs</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell">POs</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell">PEOs</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#3a295d]">
+                  {mappings.map(mapping => (
+                    <tr key={mapping.id} className="hover:bg-[#2e1a47] transition-colors">
+                      <td className="px-4 py-4 whitespace-nowrap text-white">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{mapping.student}</span>
+                          <span className="text-xs text-gray-300 sm:hidden">{mapping.degree}</span>
+                          <span className="text-xs text-gray-300 md:hidden">{mapping.fieldOfStudy}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-300 hidden sm:table-cell">
+                        {mapping.degree}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-300 hidden md:table-cell">
+                        {mapping.fieldOfStudy}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {mapping.sdgs.map(sdgId => {
+                            const sdg = allSdgs.find(s => s.id === sdgId);
+                            return (
+                              <span key={sdgId} className="inline-block bg-gradient-to-r from-[#6a11cb] to-[#2575fc] text-white text-xs px-2 py-1 rounded-full">
+                                SDG {sdgId}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 hidden sm:table-cell">
+                        <div className="flex flex-wrap gap-1">
+                          {mapping.pos.map(poId => {
+                            const po = allPos.find(p => p.id === poId);
+                            return (
+                              <span key={poId} className="inline-block bg-[#8e2de2] text-white text-xs px-2 py-1 rounded-full">
+                                PO {poId}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 hidden md:table-cell">
+                        <div className="flex flex-wrap gap-1">
+                          {mapping.peos.map(peoId => {
+                            const peo = allPeos.find(p => p.id === peoId);
+                            return (
+                              <span key={peoId} className="inline-block bg-[#3a295d] text-white text-xs px-2 py-1 rounded-full">
+                                PEO {peoId}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      )}
-      
-      <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Degree</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field of Study</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SDGs</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">POs</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PEOs</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {mappings.map(mapping => (
-              <tr key={mapping.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">{mapping.student}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{mapping.degree}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{mapping.fieldOfStudy}</td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {mapping.sdgs.map(sdgId => {
-                      const sdg = allSdgs.find(s => s.id === sdgId);
-                      return (
-                        <span key={sdgId} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                          SDG {sdgId}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {mapping.pos.map(poId => {
-                      const po = allPos.find(p => p.id === poId);
-                      return (
-                        <span key={poId} className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                          PO {poId}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {mapping.peos.map(peoId => {
-                      const peo = allPeos.find(p => p.id === peoId);
-                      return (
-                        <span key={peoId} className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-                          PEO {peoId}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
