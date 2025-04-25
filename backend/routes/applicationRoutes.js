@@ -71,10 +71,11 @@ router.get('/applications/student/:studentId', async (req, res) => {
 // POST new application
 router.post('/applications', async (req, res) => {
   try {
-    const { studentId, internshipId, internshipTitle, company } = req.body;
+    const { studentId, internshipId,studentEmail, internshipTitle, company } = req.body;
     
     // Find the student profile
-    const studentProfile = await StudentProfile.findOne({ email: studentId });
+    const studentProfile = await StudentProfile.findOne({ email: studentEmail });
+    console.log(studentProfile);
     
     if (!studentProfile) {
       return res.status(404).json({ message: 'Student profile not found' });
@@ -83,6 +84,7 @@ router.post('/applications', async (req, res) => {
     const application = new Application({
       studentId,
       internshipId,
+      studentEmail,
       internshipTitle,
       company,
       studentProfile: studentProfile._id, // Link the student profile
