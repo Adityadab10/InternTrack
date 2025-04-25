@@ -9,7 +9,7 @@ const studentProfileSchema = new mongoose.Schema({
   fieldOfStudy: { type: String, required: true },
   yearOfGraduation: { type: Number, required: true },
   skills: [{ type: String }],
-  resumeFile: { type: String },
+  resumeFile: { default:null, type: String },
   linkedIn: { type: String },
   github: { type: String },
   mentor: {

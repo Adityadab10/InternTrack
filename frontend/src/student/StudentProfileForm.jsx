@@ -268,7 +268,6 @@ const StudentProfileForm = () => {
             name="resume"
             onChange={handleChange}
             accept=".pdf,.doc,.docx"
-            required
             className="mt-1 block w-full text-purple-100"
           />
         </div>
