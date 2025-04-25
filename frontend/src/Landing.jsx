@@ -315,13 +315,11 @@ export default function Landing() {
             <div className="hidden md:flex items-center space-x-4">
               <button
                 onClick={handleLoginClick}
-                className="px-4 py-2 text-white hover:text-purple-400 font-medium transition-colors"
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 Login
               </button>
-              <button className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                Register
-              </button>
+              
             </div>
 
             {/* Mobile Toggle Button */}
@@ -358,9 +356,7 @@ export default function Landing() {
                 >
                   Login
                 </button>
-                <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-                  Register
-                </button>
+                
               </div>
             </div>
           )}
@@ -440,42 +436,7 @@ export default function Landing() {
               sustainability goals.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-              <button className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white rounded-lg hover:from-purple-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-purple-600/30 transform hover:-translate-y-1 flex items-center justify-center group text-sm sm:text-base">
-                <svg
-                  className="mr-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:animate-pulse"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
-                Find Internships
-              </button>
-              <button className="px-6 py-3 sm:px-8 sm:py-4 bg-transparent border border-purple-400/50 md:border-2 text-white rounded-lg hover:bg-purple-900/30 transition-all shadow-lg hover:shadow-white/10 transform hover:-translate-y-1 flex items-center justify-center group text-sm sm:text-base">
-                <svg
-                  className="mr-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:animate-pulse"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  ></path>
-                </svg>
-                Showcase Statistics
-              </button>
-            </div>
+  
           </div>
         </div>
       </div>
