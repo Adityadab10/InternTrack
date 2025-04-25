@@ -182,12 +182,14 @@ const StudentDashboard = () => {
         credentials: "include",
         body: JSON.stringify({ 
           studentId,
+          studentEmail: user.email,
           internshipId,
           internshipTitle: internship.title,
           company: internship.company
         }),
       });
-
+      console.log(response);
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to apply for internship");
