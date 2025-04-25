@@ -256,6 +256,7 @@ router.get('/status/:email', async (req, res) => {
       } : null
     });
   } catch (error) {
+    console.error('Error checking mentor status:', error);
     res.status(500).json({
       message: 'Error checking mentor status',
       error: error.message

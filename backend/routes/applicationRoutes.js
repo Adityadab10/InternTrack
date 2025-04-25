@@ -14,8 +14,6 @@ router.get('/applications', async (req, res) => {
       .populate('internshipId')
       .sort({ appliedAt: -1 });
 
-    console.log('Found applications:', applications);
-
     const applicationStats = applications.map(app => ({
       _id: app._id,
       internshipId: app.internshipId?._id,
@@ -28,7 +26,6 @@ router.get('/applications', async (req, res) => {
       tasks: app.tasks || []
     }));
 
-    console.log('Processed stats:', applicationStats);
     res.json(applicationStats);
   } catch (error) {
     console.error('Error fetching applications:', error);
@@ -40,13 +37,10 @@ router.get('/applications', async (req, res) => {
 router.get('/applications/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
-    console.log("Fetching applications for student:", studentId);
 
     const applications = await Application.find({ studentId })
       .populate('internshipId')
       .sort({ appliedAt: -1 });
-
-    console.log("Found applications:", applications);
 
     if (!applications.length) {
       return res.status(200).json([]); // Return empty array instead of 404
@@ -75,7 +69,6 @@ router.post('/applications', async (req, res) => {
     
     // Find the student profile
     const studentProfile = await StudentProfile.findOne({ email: studentEmail });
-    console.log(studentProfile);
     
     if (!studentProfile) {
       return res.status(404).json({ message: 'Student profile not found' });
