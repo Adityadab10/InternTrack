@@ -12,11 +12,8 @@ const setupSocket = (server) => {
   const connectedUsers = new Map();
 
   io.on('connection', (socket) => {
-    console.log('New client connected');
-
     socket.on('register', ({ userId, userType }) => {
       connectedUsers.set(userId, socket.id);
-      console.log(`${userType} registered:`, userId);
     });
 
     socket.on('send_message', async ({ recipientId, message, metadata }) => {
@@ -35,7 +32,6 @@ const setupSocket = (server) => {
       for (const [userId, socketId] of connectedUsers.entries()) {
         if (socketId === socket.id) {
           connectedUsers.delete(userId);
-          console.log('User disconnected:', userId);
           break;
         }
       }
