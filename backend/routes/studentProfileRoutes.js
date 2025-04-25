@@ -188,4 +188,36 @@ router.get('/mentors/:id', async (req, res) => {
   }
 });
 
+// PUT route to update student profile
+router.put('/student-profile/:email', async (req, res) => {
+  try {
+    let profile = await StudentProfile.findOne({ email: req.params.email });
+    
+    if (!profile) {
+      // If profile doesn't exist, create a new one
+      profile = new StudentProfile({
+        email: req.params.email,
+        name: req.body.name || '',
+        phone: req.body.phone || '',
+        dob: req.body.dob || null,
+        degree: req.body.degree || '',
+        fieldOfStudy: req.body.fieldOfStudy || '',
+        yearOfGraduation: req.body.yearOfGraduation || null,
+        skills: req.body.skills || [],
+        linkedIn: req.body.linkedIn || '',
+        github: req.body.github || ''
+      });
+    } else {
+      // If profile exists, update it
+      Object.assign(profile, req.body);
+    }
+
+    const updatedProfile = await profile.save();
+    res.json(updatedProfile);
+  } catch (error) {
+    console.error('Error updating/creating profile:', error);
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+
 module.exports = router;
