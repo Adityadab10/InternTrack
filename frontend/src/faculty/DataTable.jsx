@@ -7,28 +7,28 @@ const DataTable = ({ columns, data }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-[#1f1b3a] rounded-xl border border-[#3a295d] overflow-hidden shadow-lg">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[#3a295d]">
+          <thead className="bg-[#2e1a47]">
             <tr>
               {columns.map((col, i) => (
                 <th 
                   key={col.Header || i}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider"
                 >
                   {col.Header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[#1f1b3a] divide-y divide-[#3a295d]">
             {data.map((row, rowIndex) => (
-              <tr key={row.id || rowIndex} className="hover:bg-gray-50">
+              <tr key={row.id || rowIndex} className="hover:bg-[#2e1a47] transition-colors duration-200">
                 {columns.map((col, colIndex) => (
                   <td 
                     key={colIndex}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-200"
                   >
                     {col.Cell ? col.Cell({ value: row[col.accessor], row }) : row[col.accessor]}
                   </td>

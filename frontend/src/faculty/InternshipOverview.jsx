@@ -168,7 +168,7 @@ const InternshipOverview = () => {
             </button>
           </div>
         </div>
-
+  
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Total Applications */}
@@ -183,7 +183,7 @@ const InternshipOverview = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Pending Applications */}
           <div className="bg-[#1f1b3a] p-4 rounded-xl border border-[#3a295d] hover:border-yellow-500 transition-all duration-300 group">
             <div className="flex items-center gap-4">
@@ -198,7 +198,7 @@ const InternshipOverview = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Approved Applications */}
           <div className="bg-[#1f1b3a] p-4 rounded-xl border border-[#3a295d] hover:border-green-500 transition-all duration-300 group">
             <div className="flex items-center gap-4">
@@ -213,7 +213,7 @@ const InternshipOverview = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Rejected Applications */}
           <div className="bg-[#1f1b3a] p-4 rounded-xl border border-[#3a295d] hover:border-red-500 transition-all duration-300 group">
             <div className="flex items-center gap-4">
@@ -229,45 +229,30 @@ const InternshipOverview = () => {
             </div>
           </div>
         </div>
-
+  
         {/* Data Table */}
         <div className="bg-[#1f1b3a] rounded-xl border border-[#3a295d] shadow-lg p-4 md:p-6">
           {internships.length > 0 ? (
             <div className="overflow-x-auto">
               <DataTable 
                 columns={columns} 
-                data={internships} 
-                pagination 
-                searchable 
+                data={internships}
                 className="min-w-full divide-y divide-[#3a295d]"
                 theadClassName="bg-[#2e1a47]"
-                thClassName="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider"
+                thClassName="px-4 py-3 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider"
                 tdClassName="px-4 py-3 whitespace-nowrap text-sm text-gray-200 border-b border-[#3a295d]"
-                trClassName="hover:bg-[#2e1a47]/50 transition-colors duration-200"
-                paginationClassName="bg-[#2e1a47] px-4 py-3 flex items-center justify-between border-t border-[#3a295d]"
-                searchClassName="bg-[#0f0c29] border border-[#3a295d] text-white placeholder-gray-500 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6a11cb] focus:border-[#6a11cb] transition-all duration-200 mb-4 w-full max-w-md"
-                paginationButtonClassName="px-3 py-1 rounded-md bg-[#3a295d] text-gray-300 hover:bg-[#6a11cb] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                paginationActiveButtonClassName="bg-[#6a11cb] text-white"
-                searchPlaceholder="Search applications..."
-                noDataComponent={
-                  <div className="text-center py-8 bg-[#0f0c29] rounded-lg border border-dashed border-[#3a295d]">
-                    <FiFileText className="mx-auto h-12 w-12 text-[#6a11cb]/50" />
-                    <p className="mt-2 text-black-400">No matching applications found</p>
-                  </div>
-                }
+                trClassName="hover:bg-[#2e1a47] transition-colors duration-200"
               />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 bg-[#0f0c29] rounded-lg border border-dashed border-[#3a295d]">
-              <FiFileText className="w-12 h-12 text-[#6a11cb]/50 mb-4" />
-              <p className="text-black text-lg font-medium mb-2">No Applications Available</p>
-              <p className="text-black-500 text-sm">Applications will appear here once students start applying</p>
+              <FiFileText className="w-12 h-12 text-purple-400/50 mb-4" />
+              <p className="text-purple-200 text-lg font-medium mb-2">No Applications Available</p>
+              <p className="text-purple-300 text-sm">Applications will appear here once students start applying</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  );
-};
-
-export default InternshipOverview;
+  )};
+  export default InternshipOverview; 
