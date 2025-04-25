@@ -6,10 +6,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 const InternshipOverview = () => {
   const [stats, setStats] = useState({
     totalInternships: 0,
-    studentParticipation: 0,
-    industryPartners: [],
-    departmentData: [],
-    sdgAlignment: [],
+    activeInternships: 0,
+    totalApplications: 0,
+    acceptedApplications: 0,
+    rejectedApplications: 0,
+    shortlistedApplications: 0,
+    pendingApplications: 0,
+    companyStats: {},
     isLoading: true,
     error: null
   });
@@ -17,22 +20,90 @@ const InternshipOverview = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [managementStats, internshipStats] = await Promise.all([
-          axios.get('http://localhost:5001/api/management/stats'),
-          axios.get('http://localhost:5001/api/internship-stats')
-        ]);
+        // Only fetch applications data since we'll get company info directly from there
+        const applicationsRes = await axios.get('http://localhost:5001/api/applications');
+        const applications = applicationsRes.data;
+
+        // Log the first application to see its structure
+        console.log('Sample application:', applications[0]);
+
+        // Process company-wise statistics directly from applications
+        const companyStats = applications.reduce((acc, app) => {
+          // Use company directly from the application data
+          const company = app.company || 'Unspecified';
+          
+          if (!acc[company]) {
+            acc[company] = {
+              total: 0,
+              accepted: 0,
+              rejected: 0,
+              shortlisted: 0,
+              pending: 0
+            };
+          }
+
+          acc[company].total++;
+
+          // Count by status
+          switch(app.status?.toLowerCase()) {
+            case 'accepted':
+            case 'approve':
+              acc[company].accepted++;
+              break;
+            case 'rejected':
+            case 'reject':
+              acc[company].rejected++;
+              break;
+            case 'shortlisted':
+            case 'shortlist':
+              acc[company].shortlisted++;
+              break;
+            default:
+              acc[company].pending++;
+          }
+
+          return acc;
+        }, {});
+
+        // Calculate overall statistics
+        const acceptedApplications = applications.filter(app => 
+          app.status?.toLowerCase() === 'accepted' || 
+          app.status?.toLowerCase() === 'approve'
+        ).length;
+
+        const rejectedApplications = applications.filter(app => 
+          app.status?.toLowerCase() === 'rejected' ||
+          app.status?.toLowerCase() === 'reject'
+        ).length;
+
+        const shortlistedApplications = applications.filter(app => 
+          app.status?.toLowerCase() === 'shortlisted' ||
+          app.status?.toLowerCase() === 'shortlist'
+        ).length;
+
+        const pendingApplications = applications.filter(app => 
+          !app.status || 
+          app.status?.toLowerCase() === 'pending' ||
+          app.status?.toLowerCase() === 'new'
+        ).length;
 
         setStats({
-          ...managementStats.data,
-          ...internshipStats.data,
+          companyStats,
+          totalApplications: applications.length,
+          acceptedApplications,
+          rejectedApplications,
+          shortlistedApplications,
+          pendingApplications,
           isLoading: false,
           error: null
         });
+
       } catch (error) {
+        console.error('Error fetching overview stats:', error);
         setStats(prev => ({
           ...prev,
           isLoading: false,
-          error: error.message
+          error: 'Failed to load overview statistics'
         }));
       }
     };
@@ -40,34 +111,26 @@ const InternshipOverview = () => {
     fetchStats();
   }, []);
 
-  // Calculate dynamic details for stats cards
-  const getIndustryBreakdown = () => {
-    return stats.industryPartners
-      .sort((a, b) => b.internshipsOffered - a.internshipsOffered)
-      .slice(0, 3)
-      .map(partner => ({
-        label: partner.company,
-        value: partner.internshipsOffered
-      }));
+  // Update the success rate calculation to handle zero cases
+  const calculateSuccessRate = () => {
+    const successfulApps = stats.acceptedApplications + stats.shortlistedApplications;
+    const totalProcessed = successfulApps + stats.rejectedApplications;
+    
+    if (totalProcessed === 0) return '0.0';
+    return ((successfulApps / totalProcessed) * 100).toFixed(1);
   };
 
-  const getDepartmentBreakdown = () => {
-    return stats.departmentData
-      .sort((a, b) => b.participationRate - a.participationRate)
-      .slice(0, 3)
-      .map(dept => ({
-        label: dept.department,
-        value: `${dept.participationRate}%`
-      }));
-  };
-
-  const getSdgBreakdown = () => {
-    return stats.sdgAlignment
-      .sort((a, b) => b.projects - a.projects)
-      .slice(0, 3)
-      .map(sdg => ({
-        label: `SDG ${sdg.sdg}`,
-        value: sdg.projects
+  // Update chart data preparation for companies
+  const getCompanyChartData = () => {
+    return Object.entries(stats.companyStats)
+      .sort((a, b) => b[1].total - a[1].total) // Sort by total applications
+      .map(([company, data]) => ({
+        company,
+        'Total Applications': data.total,
+        'Accepted': data.accepted,
+        'Shortlisted': data.shortlisted,
+        'Rejected': data.rejected,
+        'Pending': data.pending
       }));
   };
 
@@ -75,11 +138,10 @@ const InternshipOverview = () => {
     {
       title: 'Total Internships',
       value: stats.totalInternships,
-      subText: 'Active opportunities',
+      subText: 'Available opportunities',
       details: stats.isLoading ? [] : [
-        { label: 'Open Positions', value: stats.industryPartners.reduce((acc, curr) => acc + curr.internshipsOffered, 0) },
-        { label: 'Applications', value: stats.industryPartners.reduce((acc, curr) => acc + curr.totalApplications, 0) },
-        { label: 'Departments', value: new Set(stats.departmentData.map(d => d.department)).size }
+        { label: 'Active Positions', value: stats.activeInternships },
+        { label: 'Total Applications', value: stats.totalApplications }
       ],
       icon: (
         <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,202 +150,131 @@ const InternshipOverview = () => {
       )
     },
     {
-      title: 'Student Participation',
-      value: `${stats.studentParticipation}%`,
-      subText: 'Overall engagement',
-      details: stats.isLoading ? [] : getDepartmentBreakdown(),
+      title: 'Application Status',
+      value: stats.totalApplications,
+      subText: 'Application breakdown',
+      details: stats.isLoading ? [] : [
+        { 
+          label: 'Accepted', 
+          value: stats.acceptedApplications,
+          className: 'text-green-400'
+        },
+        { 
+          label: 'Shortlisted', 
+          value: stats.shortlistedApplications,
+          className: 'text-blue-400'
+        },
+        { 
+          label: 'Rejected', 
+          value: stats.rejectedApplications,
+          className: 'text-red-400'
+        },
+        { 
+          label: 'Pending Review', 
+          value: stats.pendingApplications,
+          className: 'text-yellow-400'
+        }
+      ],
       icon: (
         <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
     },
     {
-      title: 'Industry Partners',
-      value: stats.industryPartners.length,
-      subText: 'Collaborating companies',
-      details: stats.isLoading ? [] : getIndustryBreakdown(),
+      title: 'Success Metrics',
+      value: `${calculateSuccessRate()}%`,
+      subText: 'Positive response rate',
+      details: stats.isLoading ? [] : [
+        { 
+          label: 'Successful', 
+          value: stats.acceptedApplications + stats.shortlistedApplications,
+          className: 'text-green-400'
+        },
+        { 
+          label: 'Rejected', 
+          value: stats.rejectedApplications,
+          className: 'text-red-400'
+        },
+        { 
+          label: 'Success Rate', 
+          value: `${calculateSuccessRate()}%`,
+          className: 'text-purple-400'
+        }
+      ],
       icon: (
         <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       )
     }
   ];
 
-  // Add this new section after the existing stats cards
-  const renderDepartmentStats = () => {
-    if (!stats.departmentData?.length) return null;
-
-    const COLORS = [
-      '#8B5CF6', '#6366F1', '#EC4899', '#F43F5E', '#10B981',
-      '#6EE7B7', '#3B82F6', '#60A5FA', '#F59E0B', '#FBBF24'
-    ];
-
-    return (
-      <div className="mt-8 space-y-6">
-        <h3 className="text-xl font-semibold text-purple-200">Department-wise Statistics</h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Participation Rate Chart */}
-          <div className="bg-black/30 p-6 rounded-lg border border-purple-500/20">
-            <h4 className="text-lg font-medium text-purple-300 mb-4">Participation Rates</h4>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={stats.departmentData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis 
-                    dataKey="department" 
-                    stroke="#E9D5FF"
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis stroke="#E9D5FF" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      border: '1px solid rgba(139, 92, 246, 0.2)',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend />
-                  <Bar 
-                    name="Participation Rate (%)" 
-                    dataKey="participationRate" 
-                    fill="#8B5CF6" 
-                  />
-                  <Bar 
-                    name="Placement Rate (%)" 
-                    dataKey="placementRate" 
-                    fill="#10B981" 
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Average Stipend Distribution */}
-          <div className="bg-black/30 p-6 rounded-lg border border-purple-500/20">
-            <h4 className="text-lg font-medium text-purple-300 mb-4">Average Stipend Distribution</h4>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={stats.departmentData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="averageStipend"
-                    nameKey="department"
-                    label={({ department, averageStipend }) => 
-                      `${department}: ₹${averageStipend.toLocaleString()}`
-                    }
-                  >
-                    {stats.departmentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => `₹${value.toLocaleString()}`}
-                    contentStyle={{
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      border: '1px solid rgba(139, 92, 246, 0.2)',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Detailed Department Statistics Table */}
-        <div className="bg-black/30 p-6 rounded-lg border border-purple-500/20">
-          <h4 className="text-lg font-medium text-purple-300 mb-4">Detailed Department Statistics</h4>
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-purple-900/30">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Total Students
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Participating Students
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Participation Rate
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Placement Rate
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-purple-200 uppercase tracking-wider">
-                    Avg. Stipend
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-purple-900/30">
-                {stats.departmentData.map((dept, index) => (
-                  <tr 
-                    key={dept.department}
-                    className={index % 2 === 0 ? 'bg-purple-900/10' : 'bg-purple-900/20'}
-                  >
-                    <td className="px-4 py-3 text-sm text-purple-200">
-                      {dept.department}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-purple-200">
-                      {dept.totalStudents}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-purple-200">
-                      {dept.participatingStudents}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center">
-                        <div className="w-16 bg-purple-900/30 rounded-full h-2 mr-2">
-                          <div
-                            className="bg-purple-500 h-2 rounded-full"
-                            style={{ width: `${dept.participationRate}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-purple-200">
-                          {dept.participationRate}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center">
-                        <div className="w-16 bg-green-900/30 rounded-full h-2 mr-2">
-                          <div
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${dept.placementRate}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-green-200">
-                          {dept.placementRate}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-purple-200">
-                      ₹{dept.averageStipend.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+  // Update the rendering function for company stats
+  const renderCompanyStats = () => (
+    <div className="mt-8">
+      <h3 className="text-xl font-bold text-purple-300 mb-4">Company-wise Application Statistics</h3>
+      
+      {/* Chart */}
+      <div className="bg-black/30 p-4 rounded-lg mb-6" style={{ height: '400px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={getCompanyChartData()} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis 
+              dataKey="company" 
+              angle={-45} 
+              textAnchor="end" 
+              height={80} 
+              stroke="#9ca3af"
+            />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1f2937', 
+                border: '1px solid #374151',
+                borderRadius: '0.375rem'
+              }}
+            />
+            <Legend />
+            <Bar dataKey="Accepted" fill="#4ade80" />
+            <Bar dataKey="Shortlisted" fill="#60a5fa" />
+            <Bar dataKey="Rejected" fill="#f87171" />
+            <Bar dataKey="Pending" fill="#fbbf24" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
-    );
-  };
+
+      {/* Detailed Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-black/30 rounded-lg">
+          <thead>
+            <tr className="border-b border-purple-500/20">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-purple-300">Company</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-purple-300">Total Applications</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-green-400">Accepted</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">Shortlisted</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-red-400">Rejected</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-yellow-400">Pending</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(stats.companyStats)
+              .sort((a, b) => b[1].total - a[1].total) // Sort by total applications
+              .map(([company, data]) => (
+                <tr key={company} className="border-b border-purple-500/10 hover:bg-purple-500/5">
+                  <td className="px-4 py-3 text-sm text-purple-200">{company}</td>
+                  <td className="px-4 py-3 text-sm text-white">{data.total}</td>
+                  <td className="px-4 py-3 text-sm text-green-400">{data.accepted}</td>
+                  <td className="px-4 py-3 text-sm text-blue-400">{data.shortlisted}</td>
+                  <td className="px-4 py-3 text-sm text-red-400">{data.rejected}</td>
+                  <td className="px-4 py-3 text-sm text-yellow-400">{data.pending}</td>
+                </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   if (stats.error) {
     return (
@@ -330,7 +321,9 @@ const InternshipOverview = () => {
                   {card.details.map((detail, i) => (
                     <div key={detail.label} className="flex justify-between items-center">
                       <span className="text-sm text-purple-300/80">{detail.label}</span>
-                      <span className="text-sm font-medium text-white">{detail.value}</span>
+                      <span className={`text-sm font-medium ${detail.className || 'text-white'}`}>
+                        {detail.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -340,8 +333,8 @@ const InternshipOverview = () => {
         ))}
       </div>
 
-      {/* New department statistics section */}
-      {!stats.isLoading && renderDepartmentStats()}
+      {/* Updated company statistics section */}
+      {!stats.isLoading && !stats.error && renderCompanyStats()}
     </div>
   );
 };
