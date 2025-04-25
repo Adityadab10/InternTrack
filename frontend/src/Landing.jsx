@@ -94,7 +94,7 @@ export default function Landing() {
     {
       id: 3,
       company: "Global Finance Corp",
-      department: "Business",
+      department: "Marketing",
       description:
         "Analyze market trends and assist in financial planning strategies.",
       sdgs: [8, 10],
@@ -109,11 +109,9 @@ export default function Landing() {
   
   // Industry Distribution Data
   const industryData = [
-    { name: 'Tech', value: 35 },
-    { name: 'Finance', value: 20 },
-    { name: 'Healthcare', value: 15 },
-    { name: 'Marketing', value: 12 },
-    { name: 'Engineering', value: 18 },
+    { name: 'Tech', value: 70 },
+    { name: 'Marketing', value: 30 },
+
   ];
 
   // Monthly Applications Data
@@ -593,7 +591,7 @@ export default function Landing() {
       </p>
     </div>
 
-    {/* Filters Section */}
+  
     
 
     {/* Internship Cards */}
